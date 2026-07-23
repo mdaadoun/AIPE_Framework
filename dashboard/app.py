@@ -226,17 +226,57 @@ def get_roadmap():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-@app.route("/api/glossaire", methods=["GET"])
-def get_glossaire():
-    """Renvoie le contenu HTML du glossaire."""
+def parse_glossary_concepts():
+    """Parse le fichier glossaire.md et extrait les concepts et leurs définitions."""
     glossaire_file = DOCS_DIR / "glossaire.md"
     if not glossaire_file.exists():
-        return jsonify({"status": "error", "message": "Fichier glossaire.md introuvable"}), 404
+        return []
 
+    content = glossaire_file.read_text(encoding="utf-8")
+    concepts = []
+    
+    parts = re.split(r'### ', content)
+    for part in parts[1:]:
+        lines = part.strip().split('\n')
+        if not lines:
+            continue
+        concept_name = lines[0].strip()
+        definition = '\n'.join(lines[1:]).strip()
+        concepts.append({
+            "id": len(concepts),
+            "concept": concept_name,
+            "definition_markdown": definition,
+            "definition_html": markdown_to_html(definition)
+        })
+    return concepts
+
+
+@app.route("/api/glossaire", methods=["GET"])
+def get_glossaire():
+    """Renvoie la liste des concepts du glossaire."""
     try:
-        content = glossaire_file.read_text(encoding="utf-8")
-        html_content = markdown_to_html(content)
-        return jsonify({"status": "success", "html": html_content}), 200
+        concepts = parse_glossary_concepts()
+        clean_concepts = [
+            {"id": c["id"], "concept": c["concept"]} for c in concepts
+        ]
+        return jsonify({"status": "success", "concepts": clean_concepts}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/glossaire/<int:concept_id>", methods=["GET"])
+def get_glossaire_concept(concept_id: int):
+    """Renvoie la définition d'un concept spécifique."""
+    try:
+        concepts = parse_glossary_concepts()
+        if concept_id < 0 or concept_id >= len(concepts):
+            return jsonify({"status": "error", "message": "Concept introuvable"}), 404
+            
+        return jsonify({
+            "status": "success",
+            "concept": concepts[concept_id]["concept"],
+            "html": concepts[concept_id]["definition_html"]
+        }), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
