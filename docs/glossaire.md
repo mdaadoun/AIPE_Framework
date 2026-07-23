@@ -15,6 +15,12 @@ Dossier isolé contenant l'exécutable Python et les bibliothèques installées 
 ### Makefile
 Fichier de configuration de l'utilitaire système `make` (standard POSIX). Il permet de définir des alias de commandes standardisées (`make install`, `make test`, `make lint`) afin d'offrir une interface unifiée aux développeurs, facilitant l'onboarding et l'intégration continue.
 
+### Cibles Phony (`.PHONY`)
+Directive dans un Makefile spécifiant que les cibles listées ne correspondent pas à des fichiers physiques sur le disque. Cela évite les conflits de noms si un dossier ou un fichier portant le même nom venait à être créé (par exemple, un dossier `test/`).
+
+### Zero-Setup Friction
+Indicateur de performance (KPI) mesurant l'effort nécessaire à l'installation d'un environnement de développement complet. L'objectif est de permettre à un nouveau venu d'être pleinement opérationnel en une seule commande standard (`make install`) en moins de 5 minutes.
+
 ---
 
 ## 🔍 Qualité & Analyse Statique

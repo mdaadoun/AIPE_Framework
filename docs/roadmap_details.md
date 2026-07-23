@@ -8,7 +8,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : Interface CLI ──> Phase 4 : API FastAPI ──> Phase 5 : Docker & Sécurité ──> Phase 6 : IDE & Onboarding
-     (✅ Validé)                 (✅ Validé)                 (⏳ En cours)               (🔲 À venir)               (🔲 À venir)               (🔲 À venir)
+     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (⏳ En cours)               (🔲 À venir)               (🔲 À venir)
 ```
 
 ---
@@ -48,15 +48,15 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 
 ---
 
-## Phase 3 : Interface de Commande Unifiée (Makefile) — 🔲 À venir
+## Phase 3 : Interface de Commande Unifiée (Makefile) — ✅ Validé
 *Objectif : Fournir une interface de commande standardisée éliminant le besoin de retenir des scripts complexes.*
 
-### Étape 3.1 : Automatisation de l'onboarding et du nettoyage — 🔲 À venir
+### Étape 3.1 : Automatisation de l'onboarding et du nettoyage — ✅ Validé
 *   **Description :** Rédaction des commandes cibles `make install` (pour initialiser Poetry et installer pre-commit) et `make clean` (pour purger tous les fichiers de cache Python, pytest et mypy) dans le [Makefile](file:///home/michael/Code/job/projets/AIPE_Framework/Makefile).
 *   **Concept clé :** standardisation de l'onboarding développeur.
 *   **Critère de validation :** La commande `make clean` supprime intégralement les caches sans erreur et `make install` configure tout l'environnement de zéro.
 
-### Étape 3.2 : Intégration des validateurs de test et d'exécution — 🔲 À venir
+### Étape 3.2 : Intégration des validateurs de test et d'exécution — ✅ Validé
 *   **Description :** Ajout des raccourcis de commande `make lint` (ruff + mypy), `make test` (pytest) et `make dev` (démarrage du serveur web local).
 *   **Concept clé :** Abstraction des outils sous-jacents derrière des interfaces stables.
 *   **Critère de validation :** Saisir `make lint` ou `make test` exécute les outils internes sans nécessiter d'activer manuellement l'environnement virtuel.

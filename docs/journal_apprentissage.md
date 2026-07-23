@@ -69,3 +69,33 @@ Automatiser la validation du fonctionnement des outils de gatekeeping (detect-se
 
 ### Décisions Clés (ADRs)
 *   Ajout automatique de `tests/test_gatekeeping.py` à la liste des tests du dashboard pour permettre son lancement à la demande par les développeurs.
+
+---
+
+## 📅 Séance 7 : Automatisation de l'Onboarding et du Nettoyage (23 Juillet 2026)
+
+### Objectif de la séance
+Mettre en œuvre les cibles de base `install` et `clean` dans le Makefile pour garantir une initialisation en un clic et un nettoyage optimal des fichiers de cache.
+
+### Sujets abordés & Dilemmes techniques
+1.  **Orchestration de l'initialisation (make install)**
+    *   * Constat :* Installer séparément Poetry, les dépendances puis activer pre-commit est propice aux oublis.
+    *   * Décision :* Regrouper `poetry install` et `poetry run pre-commit install` sous une cible unique.
+2.  **Nettoyage POSIX (make clean)**
+    *   * Constat :* Les fichiers `.pyc` et dossiers `__pycache__` polluent le répertoire local et peuvent causer des anomalies d'exécution.
+    *   * Décision :* Utiliser les utilitaires système standard POSIX (`find`, `rm`) pour une purge instantanée.
+
+---
+
+## 📅 Séance 8 : Intégration des Validateurs et Commandes d'Exécution (23 Juillet 2026)
+
+### Objectif de la séance
+Unifier les lanceurs de qualité (`make lint` combinant Ruff Linter/Formatter et Mypy) et les commandes d'exécution dans le Makefile.
+
+### Sujets abordés & Dilemmes techniques
+1.  **Encapsulation d'exécution (poetry run)**
+    *   * Constat :* Obliger les développeurs à activer manuellement le virtualenv nuit à la fluidité du travail.
+    *   * Décision :* Préfixer systématiquement les commandes internes du Makefile par `poetry run`.
+2.  **Tests automatisés du Makefile**
+    *   * Constat :* Les commandes Make peuvent casser lors de modifications de fichiers de configuration ou de structure.
+    *   * Décision :* Écriture de `tests/test_makefile.py` validant que `make help`, `make clean` et `make lint` s'exécutent avec succès.

@@ -68,3 +68,18 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 ### Q9. Pourquoi ignorez-vous la règle Ruff E501 (longueur de ligne) dans ce projet ?
 *   **Réponse :** Bien que la longueur de ligne standard de 88 caractères ( PEP 8 / style Black) soit idéale pour la lisibilité générale du code Python, ce framework intègre un dashboard interactif local écrit avec des templates et des chaînes de caractères HTML volumineuses incorporées.
 *   **Justification :** Limiter de manière rigide ces fichiers à 88 caractères par ligne obligerait à découper artificiellement les blocs HTML ou les requêtes SQL complexes, ce qui nuirait grandement à leur lisibilité et à leur maintenance. Nous avons donc choisi de désactiver la règle `E501` tout en maintenant le niveau maximal de rigueur sur le style (E), la correction logique (F), le tri des imports (I) et les bonnes pratiques (B).
+
+---
+
+### Q10. Qu'est-ce que la directive `.PHONY` dans un Makefile et pourquoi est-elle cruciale dans ce projet ?
+*   **Réponse :** Par défaut, `make` cherche à faire correspondre chaque cible (comme `install` ou `test`) à un fichier physique sur le disque. Si un fichier ou dossier du même nom existe et est à jour, Make considère qu'il n'a rien à faire.
+*   **Justification :** Dans notre projet, nous possédons un dossier physique nommé `tests/`. Sans la directive `.PHONY: test`, exécuter `make test` renverrait l'avertissement `make: 'test' is up to date` et n'exécuterait jamais nos tests unitaires. Utiliser `.PHONY` force Make à ignorer la présence de fichiers ou dossiers homonymes et à toujours exécuter la commande.
+
+---
+
+### Q11. Comment validez-vous la robustesse et la stabilité de votre interface de commande (Makefile) ?
+*   **Réponse :** Nous traitons notre outillage d'infrastructure avec la même rigueur que le code de production. Nous avons écrit une suite de tests unitaires dédiée dans `tests/test_makefile.py` pour valider l'interface.
+*   **Justification :** Ces tests automatisent l'exécution de `make help`, `make clean` et `make lint` via des sous-processus et s'assurent que :
+    1. L'aide récapitulative affiche toutes les cibles attendues.
+    2. La cible `clean` supprime physiquement les caches locaux et fichiers de compilation temporaires.
+    3. Les linters (`lint`) s'exécutent correctement sans lever de régression de configuration.
