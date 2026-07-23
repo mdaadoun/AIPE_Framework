@@ -61,4 +61,4 @@ AIPE_Framework/
 ```bash
 python dashboard/app.py
 ```
-Le tableau de bord de suivi interactif sera accessible sur [http://localhost:5000](http://localhost:5000).
+Le tableau de bord de suivi interactif sera accessible sur [http://localhost:5001](http://localhost:5001).

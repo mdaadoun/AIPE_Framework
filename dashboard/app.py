@@ -1,22 +1,29 @@
 """Application Flask principale pour le Dashboard interactif d'AIPE_Framework.
 
-Permet de suivre la feuille de route du projet, d'étudier le glossaire,
-de s'entraîner aux entretiens avec un simulateur interactif basé sur la FAQ,
-et de consulter le journal d'apprentissage.
+Permet de :
+- Suivre la feuille de route du projet (Roadmap)
+- Étudier le Glossaire Technique
+- Consulter le Journal d'Apprentissage
+- S'entraîner aux entretiens avec un simulateur interactif (FAQ)
+- Exécuter la suite de tests unitaires locaux (QA Terminal)
+- Rediriger vers la documentation Swagger du microservice FastAPI
 """
 
 import os
 import re
 import html
+import subprocess
+import sys
 from pathlib import Path
 from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
-# Configuration du chemin d'accès aux fichiers Markdown
+# Configuration des chemins
 DASHBOARD_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = DASHBOARD_DIR.parent
 DOCS_DIR = PROJECT_DIR / "docs"
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000")
 
 
 def markdown_to_html(md_text: str) -> str:
@@ -40,13 +47,13 @@ def markdown_to_html(md_text: str) -> str:
         if line_str.startswith("```"):
             if in_code_block:
                 code_text = html.escape("\n".join(code_lines))
-                lang_badge = f"<div style='font-size: 0.68rem; font-family: monospace; color: var(--secondary); background: rgba(96,165,250,0.12); padding: 2px 10px; border-radius: 4px 4px 0 0; display: inline-block; font-weight: bold; border: 1px solid rgba(96,165,250,0.2); border-bottom: none;'>{code_lang}</div>" if code_lang else ""
+                lang_badge = f"<div style='font-size: 0.68rem; font-family: monospace; color: var(--secondary); background: rgba(139, 92, 246, 0.15); padding: 2px 10px; border-radius: 4px 4px 0 0; display: inline-block; font-weight: bold; border: 1px solid rgba(139, 92, 246, 0.2); border-bottom: none;'>{code_lang}</div>" if code_lang else ""
                 border_radius = "0 6px 6px 6px" if code_lang else "6px"
 
                 html_lines.append(
                     f"<div style='margin: 14px 0;'>"
                     f"{lang_badge}"
-                    f"<pre style='background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); padding: 12px 14px; border-radius: {border_radius}; overflow-x: auto; color: #93c5fd; font-family: monospace; font-size: 0.8rem; margin: 0; line-height: 1.45;'><code>{code_text}</code></pre>"
+                    f"<pre style='background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); padding: 12px 14px; border-radius: {border_radius}; overflow-x: auto; color: #d8b4fe; font-family: monospace; font-size: 0.8rem; margin: 0; line-height: 1.45;'><code>{code_text}</code></pre>"
                     f"</div>"
                 )
                 in_code_block = False
@@ -96,7 +103,7 @@ def markdown_to_html(md_text: str) -> str:
             if in_quote:
                 html_lines.append("</blockquote>")
                 in_quote = False
-            html_lines.append(f"<h2 style='color: var(--secondary); margin-top: 22px; margin-bottom: 10px; font-family: var(--font-outfit); font-size: 1.2rem; border-bottom: 1px solid rgba(96,165,250,0.2); padding-bottom: 4px;'>{html.escape(line_str[3:])}</h2>")
+            html_lines.append(f"<h2 style='color: var(--secondary); margin-top: 22px; margin-bottom: 10px; font-family: var(--font-outfit); font-size: 1.2rem; border-bottom: 1px solid rgba(139, 92, 246, 0.2); padding-bottom: 4px;'>{html.escape(line_str[3:])}</h2>")
             continue
         elif line_str.startswith("# "):
             if in_list:
@@ -114,7 +121,7 @@ def markdown_to_html(md_text: str) -> str:
                 html_lines.append("</ul>")
                 in_list = False
             if not in_quote:
-                html_lines.append("<blockquote style='background: rgba(96, 165, 250, 0.08); border-left: 3px solid var(--secondary); padding: 10px 14px; margin: 10px 0; border-radius: 4px; font-size: 0.85rem;'>")
+                html_lines.append("<blockquote style='background: rgba(139, 92, 246, 0.08); border-left: 3px solid var(--secondary); padding: 10px 14px; margin: 10px 0; border-radius: 4px; font-size: 0.85rem;'>")
                 in_quote = True
             quote_text = html.escape(line_str[2:])
             html_lines.append(f"<p style='margin: 4px 0; color: #e2e8f0;'>{quote_text}</p>")
@@ -141,7 +148,7 @@ def markdown_to_html(md_text: str) -> str:
 
     if in_code_block:
         code_text = html.escape("\n".join(code_lines))
-        html_lines.append(f"<pre style='background: rgba(10, 15, 30, 0.75); padding: 12px; border-radius: 6px; color: #93c5fd; font-family: monospace;'><code>{code_text}</code></pre>")
+        html_lines.append(f"<pre style='background: rgba(10, 15, 30, 0.75); padding: 12px; border-radius: 6px; color: #d8b4fe; font-family: monospace;'><code>{code_text}</code></pre>")
     if in_list:
         html_lines.append("</ul>")
     if in_quote:
@@ -151,7 +158,7 @@ def markdown_to_html(md_text: str) -> str:
     # Remplacement du formatage inline (bold, italic, code inline)
     html_content = re.sub(r"\*\*(.*?)\*\*", r'<strong style="color: #ffffff;">\1</strong>', html_content)
     html_content = re.sub(r"\*(.*?)\*", r"<em>\1</em>", html_content)
-    html_content = re.sub(r"`(.*?)`", r'<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #93c5fd; font-family: monospace;">\1</code>', html_content)
+    html_content = re.sub(r"`(.*?)`", r'<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #d8b4fe; font-family: monospace;">\1</code>', html_content)
 
     return html_content
 
@@ -165,7 +172,6 @@ def parse_faq_questions():
     content = faq_file.read_text(encoding="utf-8")
     questions = []
     
-    # Découper par les titres de question "### Q"
     parts = re.split(r'### Q\d+\.\s*', content)
     for part in parts[1:]:
         lines = part.strip().split('\n')
@@ -197,8 +203,8 @@ def get_roadmap():
     try:
         content = roadmap_file.read_text(encoding="utf-8")
         # Remplacer les raccourcis d'affichage pour les icônes
-        content = content.replace("✅", "<span style='color: #34d399;'>✅</span>")
-        content = content.replace("🔲", "<span style='color: #94a3b8;'>🔲</span>")
+        content = content.replace("✅", "<span style='color: #10b981; font-weight: bold;'>✅</span>")
+        content = content.replace("🔲", "<span style='color: #6b7280; font-weight: bold;'>🔲</span>")
         html_content = markdown_to_html(content)
         return jsonify({"status": "success", "html": html_content}), 200
     except Exception as e:
@@ -240,7 +246,6 @@ def get_entretien_questions():
     """Renvoie la liste des questions d'entretien disponibles pour le simulateur."""
     try:
         questions = parse_faq_questions()
-        # Renvoyer uniquement les questions sans les réponses pour le jeu
         clean_questions = [
             {"id": idx, "question": q["question"]} for idx, q in enumerate(questions)
         ]
@@ -265,5 +270,63 @@ def get_entretien_answer(question_id: int):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/run-tests", methods=["POST"])
+def run_tests():
+    """Lancement de la suite de tests unitaires via subprocess (pytest)."""
+    # Puisque nous n'avons pas démarré le framework de code en dur, nous cherchons
+    # s'il y a des fichiers de test sous /tests
+    cmd = [sys.executable, "-m", "pytest", "tests/"]
+    
+    # Si le dossier /tests n'existe pas, on peut exécuter une simple vérification ou pytest globale
+    tests_dir = PROJECT_DIR / "tests"
+    if not tests_dir.exists():
+        return jsonify({
+            "status": "failed",
+            "message": "Le dossier 'tests/' n'existe pas encore dans le framework AIPE.",
+            "stdout": "",
+            "stderr": "Erreur: Aucun test n'est défini. Créez d'abord le dossier 'tests/'."
+        }), 200
+
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=str(PROJECT_DIR),
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        stdout = process.stdout
+        stderr = process.stderr
+        
+        if process.returncode == 0:
+            return jsonify({
+                "status": "success",
+                "message": "Tous les tests sont passés avec succès !",
+                "stdout": stdout,
+                "stderr": stderr,
+                "exit_code": process.returncode
+            }), 200
+        else:
+            return jsonify({
+                "status": "failed",
+                "message": f"Certains tests ont échoué (code de sortie: {process.returncode}).",
+                "stdout": stdout,
+                "stderr": stderr,
+                "exit_code": process.returncode
+            }), 200
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            "status": "error",
+            "message": "L'exécution des tests a expiré après 30 secondes."
+        }), 504
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Erreur de lancement de la suite de tests : {str(e)}"
+        }), 500
+
+
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5001, debug=True)
