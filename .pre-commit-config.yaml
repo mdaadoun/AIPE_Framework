@@ -1,0 +1,23 @@
+# Configuration pre-commit pour AIPE_Framework
+# Ces scripts s'exécutent automatiquement à chaque commit Git local pour assurer la qualité et la sécurité.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Nettoyage des espaces de fin de ligne
+      - id: end-of-file-fixer
+        name: Correction de fin de fichier (nouvelle ligne)
+      - id: check-yaml
+        name: Validation de la syntaxe des fichiers YAML
+      - id: check-added-large-files
+        name: Blocage des fichiers volumineux (> 500 Ko)
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        name: Détection passive des secrets et clés d'API
+        args: ['--baseline', '.secrets.baseline']
+        exclude: poetry.lock
