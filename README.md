@@ -27,26 +27,17 @@ AIPE_Framework (Blueprint AI Product Engineering) est un socle technique et indu
 AIPE_Framework/
 │
 ├── README.md                   # Présentation du blueprint et guide de démarrage rapide
-├── Makefile                    # Interface de commande unique (install, lint, test, dev, clean)
-├── pyproject.toml              # Manifeste de dépendances centralisé (Poetry, Ruff, Mypy)
-├── poetry.lock                 # Fichier de verrouillage des dépendances
-├── .pre-commit-config.yaml     # Configuration des hooks de contrôle qualité Git
-├── Dockerfile                  # Recette de conteneurisation multi-stage optimisée
-├── .dockerignore               # Fichiers à exclure du contexte de build Docker
 │
-├── src/                        # Code source destiné à la production
-│   ├── __init__.py
-│   └── main.py                 # Serveur de développement FastAPI & Healthcheck
+├── dashboard/                  # Tableau de bord Flask de suivi et simulation d'entretien
+│   ├── app.py                  # Serveur Flask principal
+│   └── templates/              # SPA HTML UI (index.html)
 │
-├── tests/                      # Suite de tests unitaires et d'intégration
-│   ├── __init__.py
-│   └── test_main.py            # Tests de l'API FastAPI (/health)
-│
-├── notebooks/                  # Espace d'exploration IA et prototypage Jupyter
-│
-└── docs/                       # Spécifications et documentation d'architecture
+├── docs/                       # Spécifications et documentation d'architecture
     ├── cahier_charges.md       # Cahier des charges fonctionnel et technique (CDCFT)
-    └── roadmap_details.md      # Feuille de route chronologique par étapes
+    ├── roadmap_details.md      # Feuille de route chronologique par étapes
+    ├── glossaire.md            # Glossaire des concepts techniques clés du framework
+    ├── faq_entretien.md        # FAQ interactive pour la simulation d'entretien oral
+    └── journal_apprentissage.md # Journal de bord d'apprentissage et choix d'architecture
 ```
 
 ---
@@ -55,34 +46,19 @@ AIPE_Framework/
 
 | Composant | Fichier | Rôle & Règle métier |
 | :--- | :--- | :--- |
-| **Gestionnaire de dépendances** | [`pyproject.toml`](file:///home/michael/Code/job/projets/AIPE_Framework/pyproject.toml) | Utilisation exclusive de Poetry. Dépendances de développement séparées du runtime principal. |
-| **Pipeline CI Local** | [`.pre-commit-config.yaml`](file:///home/michael/Code/job/projets/AIPE_Framework/.pre-commit-config.yaml) | Intercepte les commits Git pour valider : secret leak, ruff format/lint, et types statiques mypy. |
-| **Automation CLI** | [`Makefile`](file:///home/michael/Code/job/projets/AIPE_Framework/Makefile) | Abstraction des scripts Python/Poetry pour standardiser l'onboarding et l'exécution locale. |
-| **Endpoint /health** | [`src/main.py`](file:///home/michael/Code/job/projets/AIPE_Framework/src/main.py) | API FastAPI avec route `/health` standardisée renvoyant la version et l'état du microservice. |
-| **Conteneurisation** | [`Dockerfile`](file:///home/michael/Code/job/projets/AIPE_Framework/Dockerfile) | Séparation de la phase d'installation (stage builder) et d'exécution (stage runtime) non-root. |
+| **Tableau de Bord** | [`dashboard/app.py`](file:///home/michael/Code/job/projets/AIPE_Framework/dashboard/app.py) | Serveur Flask local de suivi et d'apprentissage. |
+| **Interface Utilisateur** | [`dashboard/templates/index.html`](file:///home/michael/Code/job/projets/AIPE_Framework/dashboard/templates/index.html) | Single Page Application (SPA) avec design moderne glassmorphism. |
+| **Feuille de Route** | [`docs/roadmap_details.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/roadmap_details.md) | Feuille de route chronologique et linéaire de la Baseline AIPE. |
+| **Glossaire Technique** | [`docs/glossaire.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/glossaire.md) | Définitions approfondies des concepts clés (Ruff, Mypy, Poetry). |
+| **FAQ d'Entretien** | [`docs/faq_entretien.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/faq_entretien.md) | Questions/réponses ciblées pour la simulation d'entretien technique. |
+| **Journal d'Apprentissage** | [`docs/journal_apprentissage.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/journal_apprentissage.md) | Suivi de bord et analyses de décisions techniques. |
 
 ---
 
 ## 🚀 Démarrage Rapide
 
-### 1. Installation de l'environnement de développement
-Pour installer l'environnement virtuel, les dépendances Poetry et configurer automatiquement les hooks pre-commit localement :
+### 1. Démarrage du Dashboard de suivi
 ```bash
-make install
+python dashboard/app.py
 ```
-
-### 2. Lancement des validations qualité (Ruff + Mypy)
-```bash
-make lint
-```
-
-### 3. Exécution de la suite de tests
-```bash
-make test
-```
-
-### 4. Démarrage du serveur de développement FastAPI
-```bash
-make dev
-```
-Le serveur sera disponible sur [http://localhost:8000](http://localhost:8000), avec la documentation interactive Swagger accessible sur [http://localhost:8000/docs](http://localhost:8000/docs).
+Le tableau de bord de suivi interactif sera accessible sur [http://localhost:5000](http://localhost:5000).

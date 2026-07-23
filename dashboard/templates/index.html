@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 AIPE_Framework — Dashboard Pédagogique & Suivi</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #030712;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --primary: #3b82f6;
+            --secondary: #60a5fa;
+            --accent: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(255, 255, 255, 0.08);
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-inter);
+            min-height: 100vh;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            background: rgba(3, 7, 18, 0.6);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 16px 40px;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-outfit);
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #ffffff 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: var(--font-outfit);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            background: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 32px auto;
+            padding: 0 40px;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            min-height: 500px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Documentation views styling */
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            font-family: var(--font-outfit);
+            font-weight: 700;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        /* Interview Simulator Styles */
+        .interview-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 32px;
+            height: 600px;
+        }
+
+        .question-list-panel {
+            border-right: 1px solid var(--border);
+            padding-right: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .question-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-outfit);
+            font-weight: 500;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            text-align: left;
+        }
+
+        .question-item:hover {
+            border-color: rgba(96, 165, 250, 0.4);
+            background: rgba(255, 255, 255, 0.04);
+            color: #ffffff;
+        }
+
+        .question-item.active {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--secondary);
+            box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.05);
+        }
+
+        .workspace-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+
+        .workspace-welcome {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 16px;
+        }
+
+        .workspace-welcome svg {
+            opacity: 0.3;
+        }
+
+        .question-title {
+            font-family: var(--font-outfit);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            border-left: 4px solid var(--primary);
+            padding-left: 14px;
+        }
+
+        .answer-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .answer-input {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #ffffff;
+            font-family: var(--font-inter);
+            font-size: 0.95rem;
+            padding: 14px;
+            resize: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .btn {
+            background: var(--primary);
+            border: none;
+            color: #ffffff;
+            font-family: var(--font-outfit);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            align-self: flex-start;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-reveal {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        .results-box {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .results-header {
+            font-family: var(--font-outfit);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 20px 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            background: rgba(3, 7, 18, 0.4);
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <span>AIPE_Framework</span>
+            </div>
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('roadmap')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    Roadmap
+                </button>
+                <button class="tab-btn" onclick="switchTab('glossaire')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20F4 3.5A2.5 2.5 0 0 1 6.5 1H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/></svg>
+                    Glossaire
+                </button>
+                <button class="tab-btn" onclick="switchTab('journal')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Journal
+                </button>
+                <button class="tab-btn" onclick="switchTab('entretien')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    Simulateur Entretien
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-card" id="main-content">
+            <!-- Dynamic Content -->
+            <div class="spinner"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 AIPE_Framework — Conçu pour l'excellence opérationnelle des produits d'IA</p>
+    </footer>
+
+    <script>
+        let currentTab = 'roadmap';
+        let faqQuestions = [];
+        let activeQuestionId = null;
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTabContent('roadmap');
+        });
+
+        function switchTab(tabName) {
+            if (currentTab === tabName) return;
+            
+            // Set buttons active
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            currentTab = tabName;
+            loadTabContent(tabName);
+        }
+
+        async function loadTabContent(tabName) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = '<div class="spinner"></div>';
+            
+            try {
+                if (tabName === 'entretien') {
+                    renderInterviewSimulator(container);
+                    return;
+                }
+                
+                const response = await fetch(`/api/${tabName}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    container.innerHTML = `<div class="markdown-body">${data.html}</div>`;
+                } else {
+                    container.innerHTML = `<div style="color: #ef4444; padding: 20px;">Erreur : ${data.message}</div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div style="color: #ef4444; padding: 20px;">Erreur de chargement : ${err.message}</div>`;
+            }
+        }
+
+        async function renderInterviewSimulator(container) {
+            container.innerHTML = `
+                <div class="interview-grid">
+                    <div class="question-list-panel" id="questions-list">
+                        <div class="spinner"></div>
+                    </div>
+                    <div class="workspace-panel" id="workspace-panel">
+                        <div class="workspace-welcome">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <div>
+                                <h3 style="font-family: var(--font-outfit); font-size: 1.2rem; font-weight: 600; color: #ffffff; margin-bottom: 6px;">Simulateur d'Entretien Oral</h3>
+                                <p style="font-size: 0.9rem;">Sélectionnez une question technique dans le panneau de gauche pour vous entraîner.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/entretien');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    faqQuestions = data.questions;
+                    const listPanel = document.getElementById('questions-list');
+                    listPanel.innerHTML = '';
+                    
+                    faqQuestions.forEach(q => {
+                        const btn = document.createElement('button');
+                        btn.className = 'question-item';
+                        btn.innerHTML = q.question;
+                        btn.onclick = () => selectQuestion(q.id, btn);
+                        listPanel.appendChild(btn);
+                    });
+                }
+            } catch (err) {
+                document.getElementById('questions-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem;">Erreur : ${err.message}</div>`;
+            }
+        }
+
+        async function selectQuestion(id, btnElement) {
+            // Highlight active button
+            document.querySelectorAll('.question-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            btnElement.classList.add('active');
+            
+            activeQuestionId = id;
+            const q = faqQuestions.find(item => item.id === id);
+            
+            const workspace = document.getElementById('workspace-panel');
+            workspace.innerHTML = `
+                <div class="question-title">${q.question}</div>
+                <div class="answer-box">
+                    <label style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Formulez votre réponse à l'oral ou tapez-la ici pour comparer :</label>
+                    <textarea class="answer-input" id="user-answer-input" placeholder="Écrivez votre réponse ici..."></textarea>
+                    <button class="btn btn-reveal" onclick="revealAnswer(${id})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Révéler la Réponse Officielle
+                    </button>
+                </div>
+                <div id="results-container"></div>
+            `;
+        }
+
+        async function revealAnswer(id) {
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '<div class="spinner"></div>';
+            
+            try {
+                const response = await fetch(`/api/entretien/${id}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultsContainer.innerHTML = `
+                        <div class="results-box">
+                            <div class="results-header">Réponse Officielle du Correcteur</div>
+                            <div class="markdown-body">${data.answer_html}</div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                resultsContainer.innerHTML = `<div style="color: #ef4444; font-size: 0.9rem;">Erreur : ${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
