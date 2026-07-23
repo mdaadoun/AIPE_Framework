@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg-base: #090514;
@@ -37,7 +37,7 @@
 
         body {
             background-color: var(--bg-base);
-            background-image: 
+            background-image:
                 radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 55%),
                 radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.12) 0px, transparent 55%);
             background-attachment: fixed;
@@ -429,6 +429,220 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Roadmap CSS */
+        .roadmap-container {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .roadmap-header-section {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 8px;
+        }
+
+        .roadmap-main-title {
+            font-family: var(--font-outfit);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .roadmap-main-subtitle {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        .phase-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .phase-section:hover {
+            border-color: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .phase-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .phase-banner.completed {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .phase-banner.active {
+            background: rgba(139, 92, 246, 0.06);
+            border-color: rgba(139, 92, 246, 0.18);
+        }
+
+        .phase-banner.pending {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: var(--border);
+        }
+
+        .phase-banner-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .phase-index {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .phase-banner.completed .phase-index { color: var(--success); }
+        .phase-banner.active .phase-index { color: var(--secondary); }
+
+        .phase-title {
+            font-family: var(--font-outfit);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .phase-status-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .phase-status-badge.completed { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success); }
+        .phase-status-badge.active { background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: var(--secondary); }
+        .phase-status-badge.pending { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: var(--text-muted); }
+
+        .phase-objective {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            padding: 0 4px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .step-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .step-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .step-card.completed { border-color: rgba(16, 185, 129, 0.15); }
+        .step-card.active { border-color: rgba(139, 92, 246, 0.25); box-shadow: 0 0 15px rgba(139, 92, 246, 0.05); }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .step-number {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .step-card.completed .step-number { color: var(--success); }
+        .step-card.active .step-number { color: var(--secondary); }
+
+        .step-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .badge-completed { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.15); color: var(--success); }
+        .badge-active { background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15); color: var(--secondary); }
+        .badge-pending { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--text-muted); }
+
+        .step-title {
+            font-family: var(--font-outfit);
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.35;
+        }
+
+        .step-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .detail-item strong {
+            color: #e2e8f0;
+        }
+
+        .detail-item a {
+            color: var(--secondary);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--secondary);
+        }
+
+        .detail-item a:hover {
+            color: #ffffff;
+            border-bottom-color: #ffffff;
+        }
+
+        .detail-item code {
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--secondary);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: var(--font-fira);
+            font-size: 0.78rem;
+        }
+
+        .validation-item {
+            background: rgba(255,255,255,0.01);
+            border-left: 2px solid var(--border);
+            padding-left: 8px;
+            margin-top: 4px;
+        }
+
+        .step-card.completed .validation-item { border-left-color: var(--success); }
+        .step-card.active .validation-item { border-left-color: var(--secondary); }
     </style>
 </head>
 <body>
@@ -494,13 +708,13 @@
 
         function switchTab(tabName) {
             if (currentTab === tabName) return;
-            
+
             // Set buttons active
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.currentTarget.classList.add('active');
-            
+
             currentTab = tabName;
             loadTabContent(tabName);
         }
@@ -508,13 +722,13 @@
         async function loadTabContent(tabName) {
             const container = document.getElementById('main-content');
             container.innerHTML = '<div class="spinner"></div>';
-            
+
             try {
                 if (tabName === 'entretien') {
                     renderInterviewSimulator(container);
                     return;
                 }
-                
+
                 if (tabName === 'tests') {
                     renderTestLauncher(container);
                     return;
@@ -524,7 +738,7 @@
                     renderApiDocsPanel(container);
                     return;
                 }
-                
+
                 if (tabName === 'journal') {
                     renderJournalNavigator(container);
                     return;
@@ -534,10 +748,10 @@
                     renderGlossaryNavigator(container);
                     return;
                 }
-                
+
                 const response = await fetch(`/api/${tabName}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     container.innerHTML = `<div class="markdown-body">${data.html}</div>`;
                 } else {
@@ -565,16 +779,16 @@
                     </div>
                 </div>
             `;
-            
+
             try {
                 const response = await fetch('/api/entretien');
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     faqQuestions = data.questions;
                     const listPanel = document.getElementById('questions-list');
                     listPanel.innerHTML = '';
-                    
+
                     faqQuestions.forEach((q, idx) => {
                         const btn = document.createElement('button');
                         btn.className = 'question-item';
@@ -598,17 +812,17 @@
                 item.classList.remove('active');
             });
             btnElement.classList.add('active');
-            
+
             activeQuestionId = id;
             const q = faqQuestions.find(item => item.id === id);
-            
+
             const workspace = document.getElementById('workspace-panel');
             workspace.innerHTML = '<div class="spinner"></div>';
-            
+
             try {
                 const response = await fetch(`/api/entretien/${id}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     workspace.innerHTML = `
                         <div class="question-title" style="margin-bottom: 20px;">${q.question}</div>
@@ -789,7 +1003,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="terminal" id="terminal-window">
                         <div class="terminal-header">
                             <div class="terminal-dots">
@@ -828,23 +1042,23 @@
             const terminalWindow = document.getElementById('terminal-window');
             const selector = document.getElementById('test-selector');
             const selectedTest = selector ? selector.value : 'all';
-            
+
             btn.disabled = true;
             btn.innerHTML = `<div class="spinner" style="width:16px; height:16px; margin:0;"></div> Exécution...`;
             terminalWindow.style.borderColor = 'var(--warning)';
-            
+
             const cmdDisplay = selectedTest === 'all' ? 'pytest tests/' : `pytest ${selectedTest}`;
             terminal.innerHTML = `<span class="terminal-prompt">user@aipe-framework:~$</span> ${cmdDisplay}\n\n`;
             terminal.innerHTML += `⏳ Lancement de l'exécution... \n`;
-            
+
             try {
-                const response = await fetch('/api/run-tests', { 
+                const response = await fetch('/api/run-tests', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ test_name: selectedTest })
                 });
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     terminalWindow.style.borderColor = 'var(--success)';
                     terminal.innerHTML += `<span class="terminal-output-success">[PASS] ${data.message}</span>\n\n`;

@@ -181,7 +181,7 @@ def parse_faq_questions():
 
     content = faq_file.read_text(encoding="utf-8")
     questions = []
-    
+
     parts = re.split(r'### Q\d+\.\s*', content)
     for part in parts[1:]:
         lines = part.strip().split('\n')
@@ -218,19 +218,200 @@ def get_presentation():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+def parse_roadmap_to_html() -> str:
+    """Parse le fichier roadmap_details.md et le convertit en grille de cartes de phases et d'étapes."""
+    roadmap_file = DOCS_DIR / "roadmap_details.md"
+    if not roadmap_file.exists():
+        return "<div style='color: var(--danger); padding: 20px;'>Fichier roadmap_details.md introuvable.</div>"
+
+    try:
+        content = roadmap_file.read_text(encoding="utf-8")
+    except Exception as e:
+        return f"<div style='color: var(--danger); padding: 20px;'>Erreur de lecture : {html.escape(str(e))}</div>"
+
+    def clean_text(txt):
+        txt = html.escape(txt.strip())
+        txt = re.sub(r"\*\*(.*?)\*\*", r'<strong style="color: #ffffff;">\1</strong>', txt)
+        txt = re.sub(r"`(.*?)`", r'<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #d8b4fe; font-family: monospace;">\1</code>', txt)
+        txt = re.sub(r"\[(.*?)\]\((.*?)\)", r'<a href="\2" style="color: var(--secondary); text-decoration: none; border-bottom: 1px dashed var(--secondary);" target="_blank">\1</a>', txt)
+        return txt
+
+    html_out = []
+    html_out.append('<div class="roadmap-container">')
+    html_out.append('  <div class="roadmap-header-section">')
+    html_out.append('    <h2 class="roadmap-main-title">🗺️ Feuille de Route & Suivi</h2>')
+    html_out.append('    <p class="roadmap-main-subtitle">Suivi chronologique de la construction d\'AIPE_Framework (AI Product Engineering)</p>')
+    html_out.append('  </div>')
+
+    lines = content.split("\n")
+
+    in_steps_grid = False
+    in_phase = False
+    in_pre_block = False
+    pre_lines = []
+
+    current_step_lines = []
+
+    def flush_step():
+        if not current_step_lines:
+            return ""
+
+        step_header_line = current_step_lines[0]
+        parts = step_header_line.split("—")
+        title_part = parts[0].replace("###", "").strip()
+        status_part = parts[1].strip() if len(parts) > 1 else "🔲 À venir"
+
+        title_subparts = title_part.split(":")
+        step_num = title_subparts[0].strip()
+        step_title = ":".join(title_subparts[1:]).strip() if len(title_subparts) > 1 else title_part
+
+        status_class = "pending"
+        badge_text = "À venir"
+        badge_class = "badge-pending"
+
+        if "✅" in status_part or "Validé" in status_part:
+            status_class = "completed"
+            badge_text = "Validé"
+            badge_class = "badge-completed"
+        elif "En cours" in status_part or "⏳" in status_part:
+            status_class = "active"
+            badge_text = "En cours"
+            badge_class = "badge-active"
+
+        step_html = []
+        step_html.append(f'<div class="step-card {status_class}">')
+        step_html.append('  <div class="step-header">')
+        step_html.append(f'    <span class="step-number">{step_num}</span>')
+        step_html.append(f'    <span class="step-badge {badge_class}">{badge_text}</span>')
+        step_html.append('  </div>')
+        step_html.append(f'  <h4 class="step-title">{step_title}</h4>')
+        step_html.append('  <div class="step-details">')
+
+        for line in current_step_lines[1:]:
+            line_str = line.strip()
+            if not line_str:
+                continue
+            if line_str.startswith("* ") or line_str.startswith("- "):
+                line_str = line_str[2:].strip()
+
+            if line_str.startswith("**Description :**") or line_str.startswith("**Description:**"):
+                desc_text = line_str.replace("**Description :**", "").replace("**Description:**", "").strip()
+                step_html.append(f'    <div class="detail-item"><strong>Description :</strong> {clean_text(desc_text)}</div>')
+            elif line_str.startswith("**Concept clé :**") or line_str.startswith("**Concept clé:**") or line_str.startswith("**Concept clef :**"):
+                concept_text = line_str.replace("**Concept clé :**", "").replace("**Concept clé:**", "").replace("**Concept clef :**", "").strip()
+                step_html.append(f'    <div class="detail-item"><strong>Concept clé :</strong> {clean_text(concept_text)}</div>')
+            elif line_str.startswith("**Critère de validation :**") or line_str.startswith("**Critère de validation:**"):
+                validation_text = line_str.replace("**Critère de validation :**", "").replace("**Critère de validation:**", "").strip()
+                step_html.append(f'    <div class="detail-item validation-item"><strong>Critère de validation :</strong> {clean_text(validation_text)}</div>')
+            else:
+                step_html.append(f'    <div class="detail-item">{clean_text(line_str)}</div>')
+
+        step_html.append('  </div>')
+        step_html.append('</div>')
+        return "\n".join(step_html)
+
+    for line in lines:
+        line_raw = line
+        line_str = line.strip()
+
+        # Handle code blocks
+        if line_str.startswith("```"):
+            if in_pre_block:
+                in_pre_block = False
+                code_text = html.escape("\n".join(pre_lines))
+                html_out.append(
+                    f"<pre style='background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); padding: 12px 14px; border-radius: 6px; overflow-x: auto; color: #d8b4fe; font-family: monospace; font-size: 0.8rem; margin: 14px 0; line-height: 1.45;'><code>{code_text}</code></pre>"
+                )
+                pre_lines = []
+            else:
+                in_pre_block = True
+                pre_lines = []
+            continue
+
+        if in_pre_block:
+            pre_lines.append(line_raw)
+            continue
+
+        if line_str.startswith("## Phase"):
+            if current_step_lines:
+                html_out.append(flush_step())
+                current_step_lines = []
+            if in_steps_grid:
+                html_out.append('    </div>') # Close steps-grid
+                in_steps_grid = False
+            if in_phase:
+                html_out.append('  </div>') # Close phase-section
+
+            in_phase = True
+
+            parts = line_str.split("—")
+            phase_part = parts[0].replace("##", "").strip()
+            status_part = parts[1].strip() if len(parts) > 1 else "🔲 À venir"
+
+            phase_subparts = phase_part.split(":")
+            phase_idx = phase_subparts[0].strip()
+            phase_title = ":".join(phase_subparts[1:]).strip() if len(phase_subparts) > 1 else phase_part
+
+            status_class = "pending"
+            status_text = "À venir"
+            if "✅" in status_part or "Validé" in status_part:
+                status_class = "completed"
+                status_text = "Validé"
+            elif "En cours" in status_part or "⏳" in status_part:
+                status_class = "active"
+                status_text = "En cours"
+
+            html_out.append(f'  <div class="phase-section {status_class}">')
+            html_out.append(f'    <div class="phase-banner {status_class}">')
+            html_out.append('      <div class="phase-banner-info">')
+            html_out.append(f'        <span class="phase-index">{phase_idx}</span>')
+            html_out.append(f'        <h3 class="phase-title">{phase_title}</h3>')
+            html_out.append('      </div>')
+            html_out.append(f'      <span class="phase-status-badge {status_class}">{status_text}</span>')
+            html_out.append('    </div>')
+
+        elif line_str.startswith("*Objectif"):
+            obj_text = line_str.replace("*", "").strip()
+            html_out.append(f'    <p class="phase-objective"><em>{obj_text}</em></p>')
+            html_out.append('    <div class="steps-grid">')
+            in_steps_grid = True
+
+        elif line_str.startswith("### Étape"):
+            if current_step_lines:
+                html_out.append(flush_step())
+                current_step_lines = []
+            current_step_lines.append(line_str)
+
+        elif current_step_lines:
+            current_step_lines.append(line)
+
+        else:
+            if not line_str:
+                continue
+            if line_str.startswith("# "):
+                html_out.append(f'<h1 style="color: #ffffff; font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; font-family: var(--font-outfit);">{clean_text(line_str[2:])}</h1>')
+            elif line_str.startswith("## "):
+                html_out.append(f'<h2 style="color: var(--secondary); font-size: 1.3rem; margin-top: 24px; border-bottom: 1px solid rgba(139, 92, 246, 0.15); padding-bottom: 6px; font-family: var(--font-outfit);">{clean_text(line_str[3:])}</h2>')
+            else:
+                html_out.append(f'<p style="margin: 10px 0; color: #e2e8f0; font-size: 0.95rem;">{clean_text(line_str)}</p>')
+
+    # Flush remaining
+    if current_step_lines:
+        html_out.append(flush_step())
+    if in_steps_grid:
+        html_out.append('    </div>')
+    if in_phase:
+        html_out.append('  </div>')
+
+    html_out.append('</div>')
+    return "\n".join(html_out)
+
+
 @app.route("/api/roadmap", methods=["GET"])
 def get_roadmap():
     """Renvoie le contenu HTML de la feuille de route."""
-    roadmap_file = DOCS_DIR / "roadmap_details.md"
-    if not roadmap_file.exists():
-        return jsonify({"status": "error", "message": "Fichier roadmap_details.md introuvable"}), 404
-    
     try:
-        content = roadmap_file.read_text(encoding="utf-8")
-        # Remplacer les raccourcis d'affichage pour les icônes
-        content = content.replace("✅", "<span style='color: #10b981; font-weight: bold;'>✅</span>")
-        content = content.replace("🔲", "<span style='color: #6b7280; font-weight: bold;'>🔲</span>")
-        html_content = markdown_to_html(content)
+        html_content = parse_roadmap_to_html()
         return jsonify({"status": "success", "html": html_content}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -244,7 +425,7 @@ def parse_glossary_concepts():
 
     content = glossaire_file.read_text(encoding="utf-8")
     concepts = []
-    
+
     parts = re.split(r'### ', content)
     for part in parts[1:]:
         lines = part.strip().split('\n')
@@ -281,7 +462,7 @@ def get_glossaire_concept(concept_id: int):
         concepts = parse_glossary_concepts()
         if concept_id < 0 or concept_id >= len(concepts):
             return jsonify({"status": "error", "message": "Concept introuvable"}), 404
-            
+
         return jsonify({
             "status": "success",
             "concept": concepts[concept_id]["concept"],
@@ -297,7 +478,7 @@ def parse_journal_file_info(file_path, file_id):
         content = file_path.read_text(encoding="utf-8")
         title = "Sans titre"
         date = "Date inconnue"
-        
+
         for line in content.splitlines():
             line_str = line.strip()
             if line_str.startswith("# "):
@@ -310,7 +491,7 @@ def parse_journal_file_info(file_path, file_id):
                     date = date_match.group(1).strip()
                 else:
                     date = line_str.replace("Date :", "").replace("**", "").strip()
-        
+
         return {
             "id": file_id,
             "title": title,
@@ -328,19 +509,19 @@ def parse_journal_file_info(file_path, file_id):
 def get_journal():
     """Renvoie la liste des articles de journal disponibles avec leurs métadonnées."""
     entries = []
-    
+
     # 1. Ajouter l'introduction
     journal_file = DOCS_DIR / "journal_apprentissage.md"
     if journal_file.exists():
         entries.append(parse_journal_file_info(journal_file, "intro"))
-        
+
     # 2. Ajouter les séances individuelles triées par nom de fichier
     journal_dir = DOCS_DIR / "journal"
     if journal_dir.exists() and journal_dir.is_dir():
         seances = sorted([f for f in journal_dir.glob("*.md") if f.name != "journal_template.md"])
         for seance in seances:
             entries.append(parse_journal_file_info(seance, seance.stem))
-            
+
     return jsonify({"status": "success", "entries": entries}), 200
 
 
@@ -353,10 +534,10 @@ def get_journal_content(article_id: str):
         # Assainir l'identifiant pour empêcher toute traversée de chemin (path traversal)
         clean_id = re.sub(r'[^a-zA-Z0-9_.-]', '', article_id)
         file_path = DOCS_DIR / "journal" / f"{clean_id}.md"
-        
+
     if not file_path.exists():
         return jsonify({"status": "error", "message": f"Article '{article_id}' introuvable"}), 404
-        
+
     try:
         content = file_path.read_text(encoding="utf-8")
         html_content = markdown_to_html(content)
@@ -386,7 +567,7 @@ def get_entretien_answer(question_id: int):
         if question_id < 0 or question_id >= len(questions):
             return jsonify({"status": "error", "message": "Question introuvable"}), 404
         return jsonify({
-            "status": "success", 
+            "status": "success",
             "question": questions[question_id]["question"],
             "answer_html": questions[question_id]["answer_html"]
         }), 200
@@ -400,7 +581,7 @@ def list_tests():
     tests_dir = PROJECT_DIR / "tests"
     if not tests_dir.exists() or not tests_dir.is_dir():
         return jsonify({"status": "success", "tests": []}), 200
-        
+
     try:
         test_files = [f"tests/{f.name}" for f in tests_dir.glob("test_*.py")]
         return jsonify({"status": "success", "tests": sorted(test_files)}), 200
@@ -427,13 +608,13 @@ def run_tests():
         clean_name = re.sub(r'[^a-zA-Z0-9_.-/]', '', test_name)
         if not (clean_name.startswith("tests/test_") and clean_name.endswith(".py")):
             return jsonify({"status": "error", "message": "Nom de test invalide ou non sécurisé."}), 400
-            
+
         file_path = PROJECT_DIR / clean_name
         if not file_path.exists():
             return jsonify({"status": "error", "message": f"Fichier de test '{clean_name}' introuvable."}), 404
-            
+
         cmd = [python_exec, "-m", "pytest", clean_name]
-    
+
     tests_dir = PROJECT_DIR / "tests"
     if not tests_dir.exists():
         return jsonify({
@@ -451,10 +632,10 @@ def run_tests():
             text=True,
             timeout=30
         )
-        
+
         stdout = process.stdout
         stderr = process.stderr
-        
+
         if process.returncode == 0:
             return jsonify({
                 "status": "success",
@@ -471,7 +652,7 @@ def run_tests():
                 "stderr": stderr,
                 "exit_code": process.returncode
             }), 200
-            
+
     except subprocess.TimeoutExpired:
         return jsonify({
             "status": "error",
