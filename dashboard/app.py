@@ -87,7 +87,16 @@ def markdown_to_html(md_text: str) -> str:
             continue
 
         # Titres
-        if line_str.startswith("### "):
+        if line_str.startswith("#### "):
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            if in_quote:
+                html_lines.append("</blockquote>")
+                in_quote = False
+            html_lines.append(f"<h4 style='color: var(--secondary); margin-top: 14px; margin-bottom: 6px; font-family: var(--font-outfit); font-size: 0.95rem; font-weight: 600;'>{html.escape(line_str[5:])}</h4>")
+            continue
+        elif line_str.startswith("### "):
             if in_list:
                 html_lines.append("</ul>")
                 in_list = False
@@ -155,10 +164,11 @@ def markdown_to_html(md_text: str) -> str:
         html_lines.append("</blockquote>")
 
     html_content = "\n".join(html_lines)
-    # Remplacement du formatage inline (bold, italic, code inline)
+    # Remplacement du formatage inline (bold, italic, code inline, liens)
     html_content = re.sub(r"\*\*(.*?)\*\*", r'<strong style="color: #ffffff;">\1</strong>', html_content)
     html_content = re.sub(r"\*(.*?)\*", r"<em>\1</em>", html_content)
     html_content = re.sub(r"`(.*?)`", r'<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #d8b4fe; font-family: monospace;">\1</code>', html_content)
+    html_content = re.sub(r"\[(.*?)\]\((.*?)\)", r'<a href="\2" style="color: var(--secondary); text-decoration: none; border-bottom: 1px dashed var(--secondary);" target="_blank">\1</a>', html_content)
 
     return html_content
 
