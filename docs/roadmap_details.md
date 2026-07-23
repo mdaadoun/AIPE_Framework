@@ -8,20 +8,20 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : Interface CLI ──> Phase 4 : API FastAPI ──> Phase 5 : Docker & Sécurité ──> Phase 6 : IDE & Onboarding
-     (🔲 À venir)                 (🔲 À venir)                (🔲 À venir)             (🔲 À venir)               (🔲 À venir)               (🔲 À venir)
+     (✅ Validé)                 (🔲 À venir)                (🔲 À venir)             (🔲 À venir)               (🔲 À venir)               (🔲 À venir)
 ```
 
 ---
 
-## Phase 1 : Isolation & Dépendances (Poetry & Setup) — 🔲 À venir
+## Phase 1 : Isolation & Dépendances (Poetry & Setup) — ✅ Validé
 *Objectif : Mettre en place un environnement virtuel Python étanche et déterministe.*
 
-### Étape 1.1 : Initialisation Poetry & pyproject.toml — 🔲 À venir
+### Étape 1.1 : Initialisation Poetry & pyproject.toml — ✅ Validé
 *   **Description :** Création du fichier de configuration centralisé [`pyproject.toml`](file:///home/michael/Code/job/projets/AIPE_Framework/pyproject.toml) déclarant les dépendances de production (FastAPI, Uvicorn, Pydantic) et séparant les dépendances de développement (pytest, ruff, mypy, pre-commit).
 *   **Concept clé :** Gestion déterministe des dépendances et déclaration sémantique des versions.
 *   **Critère de validation :** Le fichier `pyproject.toml` est valide et la commande `poetry install` génère le fichier `poetry.lock`.
 
-### Étape 1.2 : Configuration locale de l'environnement virtuel — 🔲 À venir
+### Étape 1.2 : Configuration locale de l'environnement virtuel — ✅ Validé
 *   **Description :** Configurer Poetry pour forcer la création de l'environnement virtuel directement à la racine du projet dans un dossier `.venv`. Exclure ce dossier du suivi de version via `.gitignore`.
 *   **Concept clé :** Isolation hermétique locale et intégration IDE simplifiée.
 *   **Critère de validation :** Un dossier `.venv` local est physiquement créé à la racine du projet et le fichier `.gitignore` l'ignore.

@@ -45,3 +45,22 @@ def test_dev_dependencies_are_importable() -> None:
         assert pytest.__version__ is not None
     except ImportError as e:
         assert False, f"Impossible d'importer une dépendance de développement : {e}"
+
+
+def test_venv_directory_exists() -> None:
+    """Vérifie que le répertoire d'environnement virtuel local .venv est bien créé à la racine."""
+    root_dir = Path(__file__).parent.parent
+    venv_dir = root_dir / ".venv"
+    assert venv_dir.exists(), "Le répertoire .venv est introuvable à la racine."
+    assert venv_dir.is_dir(), "Le chemin .venv n'est pas un répertoire."
+
+
+def test_gitignore_ignores_venv() -> None:
+    """Vérifie que le fichier .gitignore exclut explicitement le répertoire .venv/."""
+    root_dir = Path(__file__).parent.parent
+    gitignore_file = root_dir / ".gitignore"
+    
+    assert gitignore_file.exists(), "Le fichier .gitignore est absent."
+    content = gitignore_file.read_text(encoding="utf-8")
+    
+    assert ".venv" in content, "La règle d'exclusion de .venv/ est absente du fichier .gitignore."
