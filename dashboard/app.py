@@ -241,36 +241,75 @@ def get_glossaire():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+def parse_journal_file_info(file_path, file_id):
+    """Extrait le titre et la date d'un fichier journal Markdown pour les boutons d'indexation."""
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        title = "Sans titre"
+        date = "Date inconnue"
+        
+        for line in content.splitlines():
+            line_str = line.strip()
+            if line_str.startswith("# "):
+                title = line_str[2:].strip()
+                # Nettoyer les emojis de début de titre pour l'affichage du bouton
+                title = re.sub(r'^[^\w\s\d]+', '', title).strip()
+            elif "Date :" in line_str:
+                date_match = re.search(r'\*\*Date\s*:\s*\*\*(.*)', line_str)
+                if date_match:
+                    date = date_match.group(1).strip()
+                else:
+                    date = line_str.replace("Date :", "").replace("**", "").strip()
+        
+        return {
+            "id": file_id,
+            "title": title,
+            "date": date
+        }
+    except Exception:
+        return {
+            "id": file_id,
+            "title": file_path.stem.replace("_", " ").capitalize(),
+            "date": "Date inconnue"
+        }
+
+
 @app.route("/api/journal", methods=["GET"])
 def get_journal():
-    """Renvoie le contenu HTML du journal d'apprentissage et des séances individuelles."""
+    """Renvoie la liste des articles de journal disponibles avec leurs métadonnées."""
+    entries = []
+    
+    # 1. Ajouter l'introduction
     journal_file = DOCS_DIR / "journal_apprentissage.md"
-    parts = []
-
-    # 1. Charger l'introduction globale si elle existe
     if journal_file.exists():
-        try:
-            parts.append(journal_file.read_text(encoding="utf-8"))
-        except Exception as e:
-            return jsonify({"status": "error", "message": f"Erreur lecture intro: {str(e)}"}), 500
-
-    # 2. Découvrir et charger toutes les séances individuelles triées par ordre alphabétique
+        entries.append(parse_journal_file_info(journal_file, "intro"))
+        
+    # 2. Ajouter les séances individuelles triées par nom de fichier
     journal_dir = DOCS_DIR / "journal"
     if journal_dir.exists() and journal_dir.is_dir():
         seances = sorted([f for f in journal_dir.glob("*.md") if f.name != "journal_template.md"])
         for seance in seances:
-            try:
-                seance_content = seance.read_text(encoding="utf-8")
-                parts.append(f"\n\n---\n\n{seance_content}")
-            except Exception as e:
-                pass
+            entries.append(parse_journal_file_info(seance, seance.stem))
+            
+    return jsonify({"status": "success", "entries": entries}), 200
 
-    if not parts:
-        return jsonify({"status": "error", "message": "Aucun article de journal trouvé"}), 404
 
+@app.route("/api/journal/<article_id>", methods=["GET"])
+def get_journal_content(article_id: str):
+    """Renvoie le contenu HTML rendu d'un article de journal spécifique."""
+    if article_id == "intro":
+        file_path = DOCS_DIR / "journal_apprentissage.md"
+    else:
+        # Assainir l'identifiant pour empêcher toute traversée de chemin (path traversal)
+        clean_id = re.sub(r'[^a-zA-Z0-9_.-]', '', article_id)
+        file_path = DOCS_DIR / "journal" / f"{clean_id}.md"
+        
+    if not file_path.exists():
+        return jsonify({"status": "error", "message": f"Article '{article_id}' introuvable"}), 404
+        
     try:
-        full_content = "\n".join(parts)
-        html_content = markdown_to_html(full_content)
+        content = file_path.read_text(encoding="utf-8")
+        html_content = markdown_to_html(content)
         return jsonify({"status": "success", "html": html_content}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
