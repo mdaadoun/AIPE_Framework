@@ -1,5 +1,8 @@
-import yaml
 from pathlib import Path
+
+import pytest
+import yaml
+
 
 def test_pre_commit_config_exists() -> None:
     """Vérifie que le fichier de configuration .pre-commit-config.yaml existe et est valide."""
@@ -7,15 +10,21 @@ def test_pre_commit_config_exists() -> None:
     config_file = root_dir / ".pre-commit-config.yaml"
 
     assert config_file.exists(), "Le fichier .pre-commit-config.yaml est manquant."
-    assert config_file.stat().st_size > 0, "Le fichier .pre-commit-config.yaml est vide."
+    assert (
+        config_file.stat().st_size > 0
+    ), "Le fichier .pre-commit-config.yaml est vide."
 
     # Vérification de la syntaxe YAML
     try:
         content = config_file.read_text(encoding="utf-8")
         data = yaml.safe_load(content)
-        assert "repos" in data, "La clé 'repos' est manquante dans .pre-commit-config.yaml."
+        assert (
+            "repos" in data
+        ), "La clé 'repos' est manquante dans .pre-commit-config.yaml."
     except Exception as e:
-        assert False, f"Le fichier .pre-commit-config.yaml n'est pas un YAML valide : {e}"
+        pytest.fail(
+            f"Le fichier .pre-commit-config.yaml n'est pas un YAML valide : {e}"
+        )
 
 
 def test_secrets_baseline_exists() -> None:

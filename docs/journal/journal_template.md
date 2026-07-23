@@ -27,15 +27,15 @@
 *Cette section documente le processus de réflexion (Architecture Decision Records - ADR) ayant mené aux choix technologiques.*
 
 #### [Dilemme A : Titre du dilemme (ex. Choix du linter de code)]
-*   **Option A.1 : [Nom de l'option 1]**  
+*   **Option A.1 : [Nom de l'option 1]**
     *   *Avantage/Inconvénient :* [Brève analyse critique de cette option.]
-*   **Option A.2 : [Nom de l'option 2 (Retenue)]**  
+*   **Option A.2 : [Nom de l'option 2 (Retenue)]**
     *   *Pourquoi ce choix ?* [Expliquer précisément le raisonnement technique et métier de cette décision (gain de vitesse, sécurité, maintenabilité).]
 
 #### [Dilemme B : Autre dilemme (ex. Configuration de pre-commit)]
-*   **Option B.1 : [Option 1 (Retenue)]**  
+*   **Option B.1 : [Option 1 (Retenue)]**
     *   *Pourquoi ce choix ?* [Justification.]
-*   **Option B.2 : [Option 2 (Écartée)]**  
+*   **Option B.2 : [Option 2 (Écartée)]**
     *   *Pourquoi ce choix ?* [Justification.]
 
 ---

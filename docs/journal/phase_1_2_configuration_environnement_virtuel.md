@@ -16,15 +16,15 @@ L'objectif de cette séance est d'ancrer l'environnement virtuel au sein même d
 ### 2. 🧠 Prises de Décisions & Choix Techniques
 
 #### Dilemme A : Localisation physique de l'environnement virtuel
-*   **Option A.1 : Dossier de cache global de l'utilisateur (`~/.cache/pypoetry/virtualenvs`)**  
+*   **Option A.1 : Dossier de cache global de l'utilisateur (`~/.cache/pypoetry/virtualenvs`)**
     *   *Inconvénient :* Difficile d'accès pour les scripts locaux et les outils d'IHM de tests. Les IDE peinent à l'associer automatiquement au projet sans configuration globale.
-*   **Option A.2 : Dossier local à la racine (`.venv/`) (Retenue)**  
+*   **Option A.2 : Dossier local à la racine (`.venv/`) (Retenue)**
     *   *Pourquoi ce choix ?* Offre un chemin d'accès prédictible (`.venv/bin/python`), simplifie la recherche de dépendances et assure la détection automatique de l'environnement de développement par VSCode dès l'ouverture du projet.
 
 #### Dilemme B : Exclusion Git
-*   **Option B.1 : Ajout de la commande de configuration globale de Poetry dans le README**  
+*   **Option B.1 : Ajout de la commande de configuration globale de Poetry dans le README**
     *   *Pourquoi ce choix ?* Permet d'assurer que tout développeur clonant le projet configure son Poetry local de la même façon.
-*   **Option B.2 : Fichier `.gitignore` rigoureux (Retenue)**  
+*   **Option B.2 : Fichier `.gitignore` rigoureux (Retenue)**
     *   *Pourquoi ce choix ?* Obligatoire pour éviter toute pollution accidentelle du dépôt avec des gigaoctets de binaires système.
 
 ---

@@ -21,3 +21,21 @@ repos:
         name: Détection passive des secrets et clés d'API
         args: ['--baseline', '.secrets.baseline']
         exclude: poetry.lock
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.3
+    hooks:
+      - id: ruff
+        name: Ruff Linter (analyse statique & correction)
+        args: [--fix]
+      - id: ruff-format
+        name: Ruff Formatter (formatage de code)
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+      - id: mypy
+        name: Mypy (vérification statique des types strict)
+        additional_dependencies: [fastapi, pydantic, uvicorn]
+        args: [--strict]
+        files: ^src/

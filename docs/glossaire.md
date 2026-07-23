@@ -25,6 +25,9 @@ Linter et formateur de code Python ultra-rapide écrit en Rust. Il remplace avan
 ### Mypy
 Vérificateur de typage statique pour Python. Bien que Python soit un langage à typage dynamique, l'utilisation d'annotations de type validées par Mypy (en mode strict) élimine toute une classe d'erreurs en production avant même que le code ne soit exécuté (ex. passage de types invalides, manipulation d'éléments `None`).
 
+### Analyse Statique de Type (Type Hinting - PEP 484)
+Annotation explicite des types de données pour les arguments de fonctions, variables et valeurs de retour. Validée en phase de build (par Mypy), elle sert de documentation vivante et prévient les bugs d'exécution sans imposer de surcharge de performances à l'exécution.
+
 ### Pre-commit Hooks
 Mécanisme Git permettant d'exécuter des scripts automatiquement au moment de la commande `git commit`. Si l'un des scripts échoue (code mal formaté, erreurs de typage ou faille de sécurité), le commit est bloqué localement, protégeant ainsi l'intégrité du dépôt partagé.
 
@@ -34,6 +37,9 @@ Mécanisme Git permettant d'exécuter des scripts automatiquement au moment de l
 
 ### detect-secrets
 Outil d'analyse statique conçu pour détecter les clés d'API (OpenAI, Gemini), les mots de passe et les jetons d'accès codés en dur dans le code source. Configuré en hook pre-commit, il intercepte instantanément les tentatives de commit de clés privées.
+
+### Baseline de secrets (`.secrets.baseline`)
+Fichier JSON généré à la racine du dépôt contenant les empreintes (hashes) des secrets ou des faux secrets de test identifiés et approuvés. Ce fichier sert de référence à `detect-secrets` pour ne signaler que les *nouveaux* secrets accidentellement ajoutés, évitant de bloquer le pipeline à cause de mocks existants.
 
 ### Docker Multi-Stage Build
 Technique de build Docker permettant d'utiliser plusieurs instructions `FROM` temporaires dans un même `Dockerfile`. Elle permet d'installer les compilateurs et les dépendances lourdes dans un premier conteneur (stage `builder`), puis de copier uniquement le résultat compilé dans le conteneur final (stage `runtime`), réduisant ainsi le poids de l'image de 80% et limitant la surface d'attaque.

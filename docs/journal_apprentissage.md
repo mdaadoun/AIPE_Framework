@@ -51,3 +51,21 @@ Concevoir l'image Docker de production pour qu'elle soit la plus légère et sé
 2.  **Hardening de Sécurité**
     *   * Constat :* Par défaut, les conteneurs Docker s'exécutent sous l'utilisateur root, ce qui représente un risque majeur d'élévation de privilèges en cas d'intrusion.
     *   * Décision :* Création d'un utilisateur non-privilégié `appuser` (UID 1000) et transfert des droits sur les répertoires applicatifs. L'application s'exécute ainsi avec le niveau de privilèges minimal.
+
+---
+
+## 📅 Séance 4 : Validation du Gatekeeping & Intégration Dashboard (23 Juillet 2026)
+
+### Objectif de la séance
+Automatiser la validation du fonctionnement des outils de gatekeeping (detect-secrets, Ruff, Mypy) et les intégrer de façon transparente dans l'interface de test du dashboard.
+
+### Sujets abordés & Dilemmes techniques
+1.  **Tests unitaires de l'outillage de qualité (Tooling Testing)**
+    *   * Constat :* Les modifications manuelles de configuration peuvent dégrader silencieusement les barrières de qualité.
+    *   * Décision :* Écriture d'une suite de tests pytest (`tests/test_gatekeeping.py`) qui injecte volontairement des erreurs (secrets exposés, mauvais formatage, absence de types) pour s'assurer que les validateurs réagissent et échouent comme prévu.
+2.  **Gestion des environnements de test de detect-secrets**
+    *   * Constat :* L'utilisation du dossier `/tmp` système provoquait des faux négatifs (non-détection du secret) car `detect-secrets` filtre les répertoires en dehors du dépôt Git.
+    *   * Décision :* Écriture temporaire du fichier secret directement dans le sous-dossier `tests/` et nettoyage automatique par une clause `finally` pour garantir la détection par rapport au dépôt actif.
+
+### Décisions Clés (ADRs)
+*   Ajout automatique de `tests/test_gatekeeping.py` à la liste des tests du dashboard pour permettre son lancement à la demande par les développeurs.

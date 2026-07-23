@@ -16,15 +16,15 @@ Cette première séance pose les bases du blueprint industriel d'AIPE_Framework.
 ### 2. 🧠 Prises de Décisions & Choix Techniques
 
 #### Dilemme A : Choix du gestionnaire de dépendances
-*   **Option A.1 : requirements.txt / pip**  
+*   **Option A.1 : requirements.txt / pip**
     *   *Inconvénient :* Manque de locking rigide des dépendances transitives. Pas de séparation native des paquets de dev/prod sans multiplier les fichiers.
-*   **Option A.2 : Poetry (Retenue)**  
+*   **Option A.2 : Poetry (Retenue)**
     *   *Pourquoi ce choix ?* Offre un verrouillage de versioning rigide, isole automatiquement le projet dans un sous-dossier virtuel `.venv` local et permet de configurer tous les outils annexes (Ruff, Mypy) dans un unique fichier `pyproject.toml`.
 
 #### Dilemme B : Choix de la version de Python cible
-*   **Option B.1 : Python 3.11**  
+*   **Option B.1 : Python 3.11**
     *   *Inconvénient :* Python 3.11 n'est pas disponible par défaut sur la machine physique de l'hôte (qui tourne sous Python 3.10), ce qui empêcherait le bon déroulement de l'onboarding local en moins de 5 minutes.
-*   **Option B.2 : Python 3.10 (Retenue)**  
+*   **Option B.2 : Python 3.10 (Retenue)**
     *   *Pourquoi ce choix ?* Alignement de la cible minimale sur Python 3.10 pour s'adapter à la réalité de l'environnement hôte de développement, tout en conservant une compatibilité ascendante avec Python 3.11+.
 
 ---

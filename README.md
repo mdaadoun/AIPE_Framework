@@ -57,8 +57,25 @@ AIPE_Framework/
 
 ## 🚀 Démarrage Rapide
 
-### 1. Démarrage du Dashboard de suivi
+### 1. Initialiser le projet (onboarding)
+Installe toutes les dépendances via Poetry et configure physiquement les hooks de commit locaux.
 ```bash
-python dashboard/app.py
+make install
+```
+
+### 2. Démarrer le Dashboard de suivi interactif
+Lance le serveur de suivi Flask local.
+```bash
+make dashboard
 ```
 Le tableau de bord de suivi interactif sera accessible sur [http://localhost:5001](http://localhost:5001).
+
+### 3. Exécuter la suite de tests unitaires & QA
+```bash
+make test
+```
+
+### 4. Lancer l'analyse statique de qualité (Ruff + Mypy)
+```bash
+make lint
+```

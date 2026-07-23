@@ -14,7 +14,7 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 ---
 
 ### Q2. Quel est l'avantage d'intégrer Ruff plutôt que la combinaison Black, Flake8, isort et autoflake ?
-*   **Réponse :** Ruff regroupe toutes ces fonctionnalités en un seul outil ultra-rapide écrit en Rust. 
+*   **Réponse :** Ruff regroupe toutes ces fonctionnalités en un seul outil ultra-rapide écrit en Rust.
 *   **Avantages :**
     1.  **Vitesse :** Ruff est 10 à 100 fois plus rapide que les outils originaux. Il analyse et formate un projet entier en quelques millisecondes.
     2.  **Maintenance simplifiée :** Une seule dépendance à déclarer et une seule section de configuration dans le `pyproject.toml` au lieu de 4 ou 5 fichiers séparés.
@@ -39,7 +39,7 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 
 ### Q5. Pourquoi utiliser un Dockerfile multi-stage ? Est-ce indispensable ?
 *   **Réponse :** Oui, c'est indispensable pour concilier sécurité et performance en production.
-*   **Justification :** 
+*   **Justification :**
     1.  **Réduction du poids :** L'image finale ne contient pas le gestionnaire Poetry ni les compilateurs système nécessaires au build de certains paquets Python (ex. `gcc`). L'image runtime passe ainsi de ~1 Go à moins de 250 Mo.
     2.  **Sécurité :** Moins d'outils et de bibliothèques installées signifie une surface d'attaque beaucoup plus restreinte (moins de vulnérabilités CVE dans les paquets système).
 
@@ -56,3 +56,15 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     1.  **Intégration IDE native :** Les éditeurs comme VSCode ou PyCharm détectent automatiquement l'environnement Python dès l'ouverture du dossier, sans action manuelle du développeur.
     2.  **Automatisation prédictible :** Les scripts locaux et serveurs de test (comme notre tableau de bord de QA) peuvent appeler l'interpréteur Python directement via un chemin relatif standardisé (`.venv/bin/python`).
     3.  **Nettoyage simple :** Supprimer l'environnement virtuel pour le reconstruire sainement se résume à un simple `rm -rf .venv`, sans devoir chercher dans les répertoires cachés du système de l'utilisateur.
+
+---
+
+### Q8. Comment testez-vous automatiquement l'efficacité de vos barrières de qualité (gatekeeping hooks) ?
+*   **Réponse :** Nous n'attendons pas qu'un développeur commette une erreur pour vérifier si les outils fonctionnent. Nous avons automatisé cette validation via une suite de tests unitaires dédiés (`tests/test_gatekeeping.py`).
+*   **Justification :** Ces tests créent dynamiquement des fichiers Python temporaires volontairement erronés (contenant une clé API en clair, du code mal formaté ou des signatures non annotées), puis exécutent les validateurs (`detect-secrets`, `ruff`, `mypy`) en analysant leurs codes de retour et sorties. Cela permet de garantir qu'une dérive de configuration ne désactivera pas silencieusement nos mécanismes de sécurité.
+
+---
+
+### Q9. Pourquoi ignorez-vous la règle Ruff E501 (longueur de ligne) dans ce projet ?
+*   **Réponse :** Bien que la longueur de ligne standard de 88 caractères ( PEP 8 / style Black) soit idéale pour la lisibilité générale du code Python, ce framework intègre un dashboard interactif local écrit avec des templates et des chaînes de caractères HTML volumineuses incorporées.
+*   **Justification :** Limiter de manière rigide ces fichiers à 88 caractères par ligne obligerait à découper artificiellement les blocs HTML ou les requêtes SQL complexes, ce qui nuirait grandement à leur lisibilité et à leur maintenance. Nous avons donc choisi de désactiver la règle `E501` tout en maintenant le niveau maximal de rigueur sur le style (E), la correction logique (F), le tri des imports (I) et les bonnes pratiques (B).

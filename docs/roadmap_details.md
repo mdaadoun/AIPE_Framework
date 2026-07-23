@@ -8,7 +8,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : Interface CLI ──> Phase 4 : API FastAPI ──> Phase 5 : Docker & Sécurité ──> Phase 6 : IDE & Onboarding
-     (✅ Validé)                 (🔲 À venir)                (🔲 À venir)             (🔲 À venir)               (🔲 À venir)               (🔲 À venir)
+     (✅ Validé)                 (✅ Validé)                 (⏳ En cours)               (🔲 À venir)               (🔲 À venir)               (🔲 À venir)
 ```
 
 ---
@@ -28,7 +28,7 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 
 ---
 
-## Phase 2 : Gatekeeping & Contrôle Qualité (Pre-commit & Linter) — 🔲 En cours
+## Phase 2 : Gatekeeping & Contrôle Qualité (Pre-commit & Linter) — ✅ Validé
 *Objectif : Mettre en place des barrières de sécurité et d'analyse statique au plus près du commit Git.*
 
 ### Étape 2.1 : Configuration Pre-commit & Sécurité — ✅ Validé
@@ -36,12 +36,12 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 *   **Concept clé :** Prévention active des fuites de secrets (API keys OpenAI, Gemini, etc.) dans les dépôts de code.
 *   **Critère de validation :** Tenter de commiter un fichier contenant `API_KEY = "sk-proj-12345"` est automatiquement bloqué localement par Git.
 
-### Étape 2.2 : Intégration de Ruff — 🔲 À venir
+### Étape 2.2 : Intégration de Ruff — ✅ Validé
 *   **Description :** Configurer Ruff dans [`pyproject.toml`](file:///home/michael/Code/job/projets/AIPE_Framework/pyproject.toml) avec les jeux de règles standards (E, F, I, B) et l'intégrer au pre-commit.
 *   **Concept clé :** Linting et formatage unifiés à haute vitesse.
 *   **Critère de validation :** L'analyse statique et le formatage s'exécutent sur l'ensemble des fichiers en moins de 2 secondes.
 
-### Étape 2.3 : Analyse statique avec Mypy (strict) — 🔲 À venir
+### Étape 2.3 : Analyse statique avec Mypy (strict) — ✅ Validé
 *   **Description :** Configuration stricte de Mypy dans [`pyproject.toml`](file:///home/michael/Code/job/projets/AIPE_Framework/pyproject.toml) et raccordement au hook pre-commit pour valider le typage statique de l'application.
 *   **Concept clé :** Robustesse et vérification formelle des types de données.
 *   **Critère de validation :** Tout commit contenant du code Python non-typé ou comportant des incohérences de types dans `src/` échoue.

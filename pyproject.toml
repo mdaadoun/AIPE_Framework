@@ -21,6 +21,7 @@ ruff = "^0.3.3"
 mypy = "^1.9.0"
 pre-commit = "^3.6.2"
 detect-secrets = "^1.4.0"
+flask = "^3.1.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -34,7 +35,7 @@ target-version = "py310"
 [tool.ruff.lint]
 # Sélectionner les règles standards de style (E), d'erreurs logiques (F), de tri des imports (I) et de bonnes pratiques (B)
 select = ["E", "F", "I", "B"]
-ignore = []
+ignore = ["E501"]
 
 # Configuration de Mypy (Vérificateur statique de types strict)
 [tool.mypy]
@@ -42,3 +43,7 @@ python_version = "3.10"
 strict = true                      # Active le mode strict (obligation de typer les retours de fonctions, etc.)
 warn_unused_configs = true
 ignore_missing_imports = true      # Ignore l'absence de typage dans les paquets tiers non-typés
+exclude = [
+    '^dashboard/',
+    '^tests/',
+]
