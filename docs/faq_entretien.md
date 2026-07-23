@@ -48,3 +48,11 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 ### Q6. À quoi sert le Makefile dans votre architecture ? Est-ce encore utile à l'ère des conteneurs ?
 *   **Réponse :** Le Makefile offre une couche d'abstraction essentielle pour l'expérience développeur (DX).
 *   **Justification :** Au lieu de demander à un développeur (ou à un pipeline de CI) de se souvenir des commandes exactes (`poetry run pytest`, `poetry run ruff check`, etc.), le Makefile unifie le cycle de vie sous forme de commandes universelles (`make install`, `make test`, `make lint`). C'est la promesse d'un temps de prise en main inférieur à 5 minutes pour tout nouveau collaborateur.
+
+---
+
+### Q7. Pourquoi forcer la configuration de l'environnement virtuel localement (in-project) plutôt que d'utiliser l'emplacement de cache par défaut de Poetry ?
+*   **Réponse :** Forcer la création du dossier `.venv` à la racine du projet présente trois avantages industriels clés :
+    1.  **Intégration IDE native :** Les éditeurs comme VSCode ou PyCharm détectent automatiquement l'environnement Python dès l'ouverture du dossier, sans action manuelle du développeur.
+    2.  **Automatisation prédictible :** Les scripts locaux et serveurs de test (comme notre tableau de bord de QA) peuvent appeler l'interpréteur Python directement via un chemin relatif standardisé (`.venv/bin/python`).
+    3.  **Nettoyage simple :** Supprimer l'environnement virtuel pour le reconstruire sainement se résume à un simple `rm -rf .venv`, sans devoir chercher dans les répertoires cachés du système de l'utilisateur.
