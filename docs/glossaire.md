@@ -52,3 +52,16 @@ Technique de build Docker permettant d'utiliser plusieurs instructions `FROM` te
 
 ### Hardening Non-Root
 Pratique de sécurité consistant à forcer l'exécution de l'application dans le conteneur Docker sous un utilisateur système non-privilégié (`appuser`) plutôt que sous l'utilisateur `root`. En cas de compromission de l'application, l'attaquant n'obtient pas les droits super-utilisateur sur la machine hôte.
+
+---
+
+## 🌐 Architecture Web & Microservices
+
+### FastAPI
+Framework web moderne, rapide et performant pour concevoir des API en Python. Il s'appuie sur le typage statique standard et Pydantic pour automatiser la validation à l'exécution et générer de manière interactive la documentation OpenAPI (/docs).
+
+### ASGI (Asynchronous Server Gateway Interface)
+Standard moderne de serveurs web Python succédant à WSGI. Il gère l'asynchronisme de manière native (async/await), ce qui est indispensable pour des cas d'usage à forte concurrence (comme les connexions WebSocket ou le streaming de réponses d'agents d'IA).
+
+### Pydantic
+Bibliothèque de validation de données s'appuyant sur les indices de types de Python. Utilisée par FastAPI, elle parse, valide et convertit les types à l'entrée et à la sortie des routes d'API, garantissant un typage strict et une détection précoce des données mal formées.

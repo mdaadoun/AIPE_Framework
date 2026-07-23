@@ -8,7 +8,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : Interface CLI ──> Phase 4 : API FastAPI ──> Phase 5 : Docker & Sécurité ──> Phase 6 : IDE & Onboarding
-     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (⏳ En cours)               (🔲 À venir)               (🔲 À venir)
+     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (⏳ En cours)               (🔲 À venir)
 ```
 
 ---
@@ -63,20 +63,20 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 
 ---
 
-## Phase 4 : API FastAPI Base & Healthcheck — 🔲 À venir
+## Phase 4 : API FastAPI Base & Healthcheck — ✅ Validé
 *Objectif : Mettre en place le microservice web minimaliste de production.*
 
-### Étape 4.1 : Initialisation de l'API et structure de paquets — 🔲 À venir
+### Étape 4.1 : Initialisation de l'API et structure de paquets — ✅ Validé
 *   **Description :** Création du dossier [`src/`](file:///home/michael/Code/job/projets/AIPE_Framework/src/) avec un fichier [`__init__.py`](file:///home/michael/Code/job/projets/AIPE_Framework/src/__init__.py) propre et le point d'entrée [`main.py`](file:///home/michael/Code/job/projets/AIPE_Framework/src/main.py) initialisant FastAPI.
 *   **Concept clé :** Serveur d'API asynchrone ASGI.
 *   **Critère de validation :** Le serveur se lance localement via la commande `make dev` sur le port 8000.
 
-### Étape 4.2 : Implémentation du Healthcheck conforme — 🔲 À venir
+### Étape 4.2 : Implémentation du Healthcheck conforme — ✅ Validé
 *   **Description :** Ajout de la route de santé `/health` renvoyant le schéma JSON requis contenant `status`, `environment`, et `version` (0.1.0).
 *   **Concept clé :** Contrat d'interface et observabilité minimale.
 *   **Critère de validation :** Un appel GET sur `http://localhost:8000/health` renvoie exactement le payload JSON ciblé.
 
-### Étape 4.3 : Suite de tests unitaires d'API — 🔲 À venir
+### Étape 4.3 : Suite de tests unitaires d'API — ✅ Validé
 *   **Description :** Création de [`tests/test_main.py`](file:///home/michael/Code/job/projets/AIPE_Framework/tests/test_main.py) utilisant `fastapi.testclient` et validation de la route de santé.
 *   **Concept clé :** Test d'intégration automatisé.
 *   **Critère de validation :** L'exécution de `make test` renvoie 100% de réussite avec couverture complète.

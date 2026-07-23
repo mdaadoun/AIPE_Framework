@@ -99,3 +99,18 @@ Unifier les lanceurs de qualité (`make lint` combinant Ruff Linter/Formatter et
 2.  **Tests automatisés du Makefile**
     *   * Constat :* Les commandes Make peuvent casser lors de modifications de fichiers de configuration ou de structure.
     *   * Décision :* Écriture de `tests/test_makefile.py` validant que `make help`, `make clean` et `make lint` s'exécutent avec succès.
+
+---
+
+## 📅 Séance 9 : API FastAPI Base & Healthcheck (23 Juillet 2026)
+
+### Objectif de la séance
+Initialiser le microservice d'API de production à l'aide de FastAPI, définir le schéma de Healthcheck et écrire les tests d'intégration associés.
+
+### Sujets abordés & Dilemmes techniques
+1.  **Sélection du Framework Web de production**
+    *   * Constat :* Les API d'IA exigent de la performance, de la validation stricte de types et de l'asynchronisme natif (par exemple pour streamer les réponses d'un LLM).
+    *   * Décision :* Utiliser FastAPI et ASGI de préférence à Flask pour le service de production.
+2.  **Gestion des dépendances de tests (httpx)**
+    *   * Constat :* Starlette (sur lequel repose FastAPI) requiert le package `httpx` pour faire fonctionner `TestClient` sous peine d'échec de collecte des tests.
+    *   * Décision :* Intégrer `httpx` aux dépendances de développement via `poetry add -G dev httpx` et mettre à jour le verrou de lock.

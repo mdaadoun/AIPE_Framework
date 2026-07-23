@@ -83,3 +83,15 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     1. L'aide récapitulative affiche toutes les cibles attendues.
     2. La cible `clean` supprime physiquement les caches locaux et fichiers de compilation temporaires.
     3. Les linters (`lint`) s'exécutent correctement sans lever de régression de configuration.
+
+---
+
+### Q12. Pourquoi avoir choisi FastAPI plutôt que Flask ou Django pour l'API de ce projet ?
+*   **Réponse :** FastAPI est particulièrement adapté pour les architectures de services d'IA modernes grâce à sa prise en charge native de l'asynchronisme (ASGI) et de Pydantic.
+*   **Justification :** Contrairement à WSGI (Flask/Django), ASGI permet de maintenir efficacement des connexions persistantes, ce qui est nécessaire pour diffuser en continu (streaming) les réponses de modèles d'IA. De plus, la validation automatique des schémas de typage à l'exécution avec Pydantic et l'auto-génération de la documentation OpenAPI (/docs) facilitent l'intégration par les développeurs frontend.
+
+---
+
+### Q13. Comment fonctionne le `TestClient` de FastAPI et quel est son intérêt pour les tests ?
+*   **Réponse :** Le `TestClient` simule de vraies requêtes HTTP en s'appuyant sur la bibliothèque `httpx` sans avoir besoin d'allouer de port réseau ou de démarrer un serveur Web complet.
+*   **Justification :** Il s'interface directement avec l'application FastAPI en invoquant son gestionnaire ASGI en boucle locale. Cela permet d'exécuter des tests d'intégration complets des routes, des schémas et de la sérialisation de façon extrêmement rapide (en quelques millisecondes), garantissant une boucle de feedback QA continue et fluide.
