@@ -288,11 +288,14 @@ def get_entretien_answer(question_id: int):
 @app.route("/api/run-tests", methods=["POST"])
 def run_tests():
     """Lancement de la suite de tests unitaires via subprocess (pytest)."""
-    # Puisque nous n'avons pas démarré le framework de code en dur, nous cherchons
-    # s'il y a des fichiers de test sous /tests
-    cmd = [sys.executable, "-m", "pytest", "tests/"]
+    # Utilise le python de l'environnement virtuel local s'il est présent pour garantir
+    # que les dépendances (fastapi, pydantic, etc.) sont bien chargées
+    venv_python = PROJECT_DIR / ".venv" / "bin" / "python"
+    if venv_python.exists():
+        cmd = [str(venv_python), "-m", "pytest", "tests/"]
+    else:
+        cmd = [sys.executable, "-m", "pytest", "tests/"]
     
-    # Si le dossier /tests n'existe pas, on peut exécuter une simple vérification ou pytest globale
     tests_dir = PROJECT_DIR / "tests"
     if not tests_dir.exists():
         return jsonify({

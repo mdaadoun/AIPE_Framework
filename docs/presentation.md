@@ -10,7 +10,7 @@ En ingénierie de l'IA, plus de 80 % des prototypes (PoC) n'arrivent jamais en p
 
 ## 🎯 Les Objectifs Stratégiques (La Valeur Métier / ROI)
 
-Pour un recruteur ou un directeur technique, ce blueprint apporte trois garanties fondamentales :
+ce blueprint apporte trois garanties fondamentales :
 
 ### 1. Temps d'Onboarding Division par 10 (Zero-Setup Friction)
 *   **Problème :** Configurer un environnement local de développement avec des dépendances complexes prend souvent plusieurs heures, voire des jours, pour un nouveau développeur.

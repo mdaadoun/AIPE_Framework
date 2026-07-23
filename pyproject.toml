@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "aipe-framework"
+version = "0.1.0"
+description = "Blueprint industriel d'ingénierie logicielle appliquée aux produits IA (AIPE)."
+authors = ["Michael <michael@example.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+# Dépendances requises pour l'exécution en production
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.110.0"
+uvicorn = {extras = ["standard"], version = "^0.28.0"}
+pydantic = "^2.6.4"
+
+# Dépendances requises uniquement pour le développement, la qualité et les tests (QA)
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+pytest-cov = "^4.1.0"
+ruff = "^0.3.3"
+mypy = "^1.9.0"
+pre-commit = "^3.6.2"
+detect-secrets = "^1.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# Configuration de Ruff (Linter & Formatter Rust ultra-rapide)
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+# Sélectionner les règles standards de style (E), d'erreurs logiques (F), de tri des imports (I) et de bonnes pratiques (B)
+select = ["E", "F", "I", "B"]
+ignore = []
+
+# Configuration de Mypy (Vérificateur statique de types strict)
+[tool.mypy]
+python_version = "3.10"
+strict = true                      # Active le mode strict (obligation de typer les retours de fonctions, etc.)
+warn_unused_configs = true
+ignore_missing_imports = true      # Ignore l'absence de typage dans les paquets tiers non-typés
