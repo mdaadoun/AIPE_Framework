@@ -771,7 +771,7 @@
         }
 
 
-        function renderTestLauncher(container) {
+        async function renderTestLauncher(container) {
             container.innerHTML = `
                 <div class="test-launcher-panel">
                     <div class="test-controls">
@@ -779,10 +779,15 @@
                             <h3 style="font-family: var(--font-outfit); font-size: 1.15rem; font-weight: 600; color: #ffffff;">Lanceur de Tests Live (QA)</h3>
                             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Exécute la suite de tests unitaires et de couverture (pytest) du framework.</p>
                         </div>
-                        <button class="btn" id="run-tests-btn" onclick="executeTests()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                            Lancer la Suite de Tests
-                        </button>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <select id="test-selector" style="background: rgba(9, 5, 20, 0.7); border: 1px solid var(--border); color: #ffffff; padding: 10px 16px; border-radius: 8px; font-family: var(--font-inter); font-size: 0.88rem; outline: none; cursor: pointer; transition: all 0.25s ease;">
+                                <option value="all">Toute la suite (pytest)</option>
+                            </select>
+                            <button class="btn" id="run-tests-btn" onclick="executeTests()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                Lancer les Tests
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="terminal" id="terminal-window">
@@ -798,32 +803,56 @@
                     </div>
                 </div>
             `;
+
+            // Charger les tests disponibles
+            try {
+                const response = await fetch('/api/tests/list');
+                const data = await response.json();
+                if (data.status === 'success' && data.tests.length > 0) {
+                    const selector = document.getElementById('test-selector');
+                    data.tests.forEach(testFile => {
+                        const opt = document.createElement('option');
+                        opt.value = testFile;
+                        opt.textContent = testFile.split('/').pop();
+                        selector.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error("Erreur chargement liste des tests:", err);
+            }
         }
 
         async function executeTests() {
             const btn = document.getElementById('run-tests-btn');
             const terminal = document.getElementById('terminal-content');
             const terminalWindow = document.getElementById('terminal-window');
+            const selector = document.getElementById('test-selector');
+            const selectedTest = selector ? selector.value : 'all';
             
             btn.disabled = true;
             btn.innerHTML = `<div class="spinner" style="width:16px; height:16px; margin:0;"></div> Exécution...`;
             terminalWindow.style.borderColor = 'var(--warning)';
             
-            terminal.innerHTML = `<span class="terminal-prompt">user@aipe-framework:~$</span> make test\n\n`;
-            terminal.innerHTML += `⏳ Lancement de la suite de tests unitaires (pytest)... \n`;
+            const cmdDisplay = selectedTest === 'all' ? 'pytest tests/' : `pytest ${selectedTest}`;
+            terminal.innerHTML = `<span class="terminal-prompt">user@aipe-framework:~$</span> ${cmdDisplay}\n\n`;
+            terminal.innerHTML += `⏳ Lancement de l'exécution... \n`;
             
             try {
-                const response = await fetch('/api/run-tests', { method: 'POST' });
+                const response = await fetch('/api/run-tests', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test_name: selectedTest })
+                });
                 const data = await response.json();
                 
                 if (data.status === 'success') {
                     terminalWindow.style.borderColor = 'var(--success)';
                     terminal.innerHTML += `<span class="terminal-output-success">[PASS] ${data.message}</span>\n\n`;
-                    terminal.innerHTML += htmlEscape(data.stdout || data.stderr || 'Aucune sortie standard.');
+                    terminal.innerHTML += htmlEscape(data.stdout || data.stderr || 'Aucune sortie.');
                 } else if (data.status === 'failed') {
                     terminalWindow.style.borderColor = 'var(--danger)';
                     terminal.innerHTML += `<span class="terminal-output-fail">[FAIL] ${data.message}</span>\n\n`;
-                    terminal.innerHTML += htmlEscape(data.stderr || data.stdout || 'Aucune sortie d\'erreur.');
+                    terminal.innerHTML += htmlEscape(data.stderr || data.stdout || 'Aucune sortie.');
                 } else {
                     terminalWindow.style.borderColor = 'var(--danger)';
                     terminal.innerHTML += `<span class="terminal-output-fail">[ERROR] ${data.message}</span>`;
@@ -835,7 +864,7 @@
                 btn.disabled = false;
                 btn.innerHTML = `
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Relancer la Suite de Tests
+                    Lancer les Tests
                 `;
             }
         }

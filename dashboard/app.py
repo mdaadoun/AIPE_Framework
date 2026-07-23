@@ -384,16 +384,45 @@ def get_entretien_answer(question_id: int):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route("/api/tests/list", methods=["GET"])
+def list_tests():
+    """Renvoie la liste des fichiers de tests unitaires découverts."""
+    tests_dir = PROJECT_DIR / "tests"
+    if not tests_dir.exists() or not tests_dir.is_dir():
+        return jsonify({"status": "success", "tests": []}), 200
+        
+    try:
+        test_files = [f"tests/{f.name}" for f in tests_dir.glob("test_*.py")]
+        return jsonify({"status": "success", "tests": sorted(test_files)}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route("/api/run-tests", methods=["POST"])
 def run_tests():
-    """Lancement de la suite de tests unitaires via subprocess (pytest)."""
+    """Lancement de la suite de tests unitaires (pytest) globale ou ciblée."""
+    test_name = "all"
+    if request.is_json and request.json.get("test_name"):
+        test_name = request.json.get("test_name")
+
     # Utilise le python de l'environnement virtuel local s'il est présent pour garantir
     # que les dépendances (fastapi, pydantic, etc.) sont bien chargées
     venv_python = PROJECT_DIR / ".venv" / "bin" / "python"
-    if venv_python.exists():
-        cmd = [str(venv_python), "-m", "pytest", "tests/"]
+    python_exec = str(venv_python) if venv_python.exists() else sys.executable
+
+    if test_name == "all":
+        cmd = [python_exec, "-m", "pytest", "tests/"]
     else:
-        cmd = [sys.executable, "-m", "pytest", "tests/"]
+        # Sécurisation du nom du fichier de test
+        clean_name = re.sub(r'[^a-zA-Z0-9_.-/]', '', test_name)
+        if not (clean_name.startswith("tests/test_") and clean_name.endswith(".py")):
+            return jsonify({"status": "error", "message": "Nom de test invalide ou non sécurisé."}), 400
+            
+        file_path = PROJECT_DIR / clean_name
+        if not file_path.exists():
+            return jsonify({"status": "error", "message": f"Fichier de test '{clean_name}' introuvable."}), 404
+            
+        cmd = [python_exec, "-m", "pytest", clean_name]
     
     tests_dir = PROJECT_DIR / "tests"
     if not tests_dir.exists():
@@ -419,7 +448,7 @@ def run_tests():
         if process.returncode == 0:
             return jsonify({
                 "status": "success",
-                "message": "Tous les tests sont passés avec succès !",
+                "message": f"Exécution réussie : {test_name}",
                 "stdout": stdout,
                 "stderr": stderr,
                 "exit_code": process.returncode
