@@ -243,14 +243,34 @@ def get_glossaire():
 
 @app.route("/api/journal", methods=["GET"])
 def get_journal():
-    """Renvoie le contenu HTML du journal d'apprentissage."""
+    """Renvoie le contenu HTML du journal d'apprentissage et des séances individuelles."""
     journal_file = DOCS_DIR / "journal_apprentissage.md"
-    if not journal_file.exists():
-        return jsonify({"status": "error", "message": "Fichier journal_apprentissage.md introuvable"}), 404
+    parts = []
+
+    # 1. Charger l'introduction globale si elle existe
+    if journal_file.exists():
+        try:
+            parts.append(journal_file.read_text(encoding="utf-8"))
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Erreur lecture intro: {str(e)}"}), 500
+
+    # 2. Découvrir et charger toutes les séances individuelles triées par ordre alphabétique
+    journal_dir = DOCS_DIR / "journal"
+    if journal_dir.exists() and journal_dir.is_dir():
+        seances = sorted([f for f in journal_dir.glob("*.md") if f.name != "journal_template.md"])
+        for seance in seances:
+            try:
+                seance_content = seance.read_text(encoding="utf-8")
+                parts.append(f"\n\n---\n\n{seance_content}")
+            except Exception as e:
+                pass
+
+    if not parts:
+        return jsonify({"status": "error", "message": "Aucun article de journal trouvé"}), 404
 
     try:
-        content = journal_file.read_text(encoding="utf-8")
-        html_content = markdown_to_html(content)
+        full_content = "\n".join(parts)
+        html_content = markdown_to_html(full_content)
         return jsonify({"status": "success", "html": html_content}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
