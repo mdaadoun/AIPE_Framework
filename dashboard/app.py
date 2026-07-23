@@ -193,6 +193,21 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/api/presentation", methods=["GET"])
+def get_presentation():
+    """Renvoie le contenu HTML de la présentation vulgarisée."""
+    presentation_file = DOCS_DIR / "presentation.md"
+    if not presentation_file.exists():
+        return jsonify({"status": "error", "message": "Fichier presentation.md introuvable"}), 404
+
+    try:
+        content = presentation_file.read_text(encoding="utf-8")
+        html_content = markdown_to_html(content)
+        return jsonify({"status": "success", "html": html_content}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route("/api/roadmap", methods=["GET"])
 def get_roadmap():
     """Renvoie le contenu HTML de la feuille de route."""
