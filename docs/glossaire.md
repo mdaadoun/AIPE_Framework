@@ -83,3 +83,12 @@ Capacité à mesurer et à déduire l'état interne d'un système à partir de s
 
 ### Sonde de santé (Healthcheck Probe)
 Mécanisme automatique de test périodique effectuant des requêtes sur un conteneur ou un service (souvent sur la route `/health`) pour surveiller son état de disponibilité et de fonctionnement. Ces sondes sont utilisées par les orchestrateurs (Docker, Kubernetes) pour piloter le routage du trafic et gérer le cycle de vie des conteneurs.
+
+### Test d'intégration
+Technique de test consistant à valider le fonctionnement conjoint de plusieurs composants ou modules d'une application (ex: le serveur d'API, le middleware, les configurations et la sérialisation des schémas), par opposition aux tests unitaires qui vérifient des isolats de fonctions logiques.
+
+### Couverture de code (Code Coverage)
+Mesure statistique (exprimée en pourcentage) qui comptabilise le taux de lignes de code exécutées lors du lancement de la suite de tests. Imposer un taux minimal strict (ex: 100% via fail-under) garantit qu'aucune modification de code n'est poussée en production sans validation automatique associée.
+
+### TestClient
+Utilitaire fourni par la bibliothèque Starlette qui permet d'exécuter des tests d'intégration HTTP rapides sur une application FastAPI en simulant des requêtes (GET, POST, etc.) en boucle locale fermée, éliminant ainsi le besoin de démarrer un serveur réseau réel.

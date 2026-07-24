@@ -128,3 +128,15 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     1. **Détection des régressions :** Si un développeur modifie la structure de données renvoyée par erreur, Pydantic bloque la réponse HTTP à l'exécution en levant une erreur de validation, empêchant la production de données invalides de casser les clients consommateurs.
     2. **Génération OpenAPI :** Pydantic exporte automatiquement les types exacts du schéma de réponse dans le fichier OpenAPI JSON. Cela permet aux outils de supervision de valider automatiquement les types sans codage manuel.
     3. **Sécurité opérationnelle :** Cela formalise un contrat d'interface inviolable avec le reste du système (monitoring, passerelles d'API).
+
+---
+
+### Q18. Viser une couverture de test de 100% est-il toujours nécessaire ou pertinent, et comment votre configuration garantit-elle cette métrique ?
+*   **Réponse :** Dans un projet d'envergure monolithique, une couverture stricte de 100% peut s'avérer contre-productive en raison du coût de maintenance des tests pour du code trivial. Cependant, pour un blueprint ou un framework réutilisable (comme AIPE_Framework), cela est indispensable pour assurer l'absence totale de régression.
+*   **Justification :** Nous avons configuré la règle `fail_under = 100` dans la section `[tool.coverage.report]` de notre `pyproject.toml`. De cette façon, tout lancement de test (`make test` ou en CI/CD) échouera automatiquement avec un code de retour d'erreur si la couverture descend, même d'une seule ligne, en dessous de 100% sur le répertoire `src/`, forçant les développeurs à maintenir la suite de tests à jour.
+
+---
+
+### Q19. Pourquoi utilisez-vous le `TestClient` synchrone de FastAPI plutôt qu'un `AsyncClient` d'HTTPX pour tester des endpoints asynchrones (`async def`) ?
+*   **Réponse :** Bien que les routes d'API soient déclarées asynchrones (`async def`), l'utilitaire `TestClient` de FastAPI résout l'exécution asynchrone en interne en exécutant l'application dans une boucle d'événements (event loop) dédiée en tâche de fond.
+*   **Justification :** Utiliser `TestClient` synchrone permet d'écrire des assertions limpides et linéaires sans surcharge de syntaxe (`await`). L'utilisation d'un `AsyncClient` d'HTTPX n'est réellement requise que pour tester des scénarios complexes de concurrence réelle ou des connexions asynchrones persistantes comme les WebSockets. Pour des tests d'intégration standards de routes HTTP, `TestClient` offre le meilleur compromis simplicité/performance.
