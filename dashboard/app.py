@@ -691,21 +691,77 @@ def get_entretien_answer(question_id: int):
 
 @app.route("/api/tests/list", methods=["GET"])
 def list_tests():
-    """Renvoie la liste des fichiers de tests unitaires découverts."""
+    """Renvoie la liste détaillée et hiérarchique des tests unitaires découverts dynamiquement via AST."""
     tests_dir = PROJECT_DIR / "tests"
     if not tests_dir.exists() or not tests_dir.is_dir():
         return jsonify({"status": "success", "tests": []}), 200
 
     try:
-        test_files = [f"tests/{f.name}" for f in tests_dir.glob("test_*.py")]
-        return jsonify({"status": "success", "tests": sorted(test_files)}), 200
+        import ast
+
+        test_list = [
+            {
+                "id": "all",
+                "name": "🧪 Toute la suite (pytest)",
+                "file": "all",
+                "docstring": "Exécute l'ensemble des tests unitaires et d'intégration du framework AIPE.",
+                "type": "suite",
+            }
+        ]
+
+        # Recherche et parcours de tous les fichiers de test
+        for file_path in sorted(tests_dir.glob("test_*.py")):
+            rel_path = f"tests/{file_path.name}"
+
+            # Parsing AST pour lire le docstring global et les fonctions du fichier
+            try:
+                tree = ast.parse(
+                    file_path.read_text(encoding="utf-8"), filename=str(file_path)
+                )
+                file_doc = ast.get_docstring(tree) or ""
+            except Exception:
+                file_doc = ""
+
+            test_list.append(
+                {
+                    "id": rel_path,
+                    "name": f"📁 {file_path.name} (Tout le fichier)",
+                    "file": rel_path,
+                    "docstring": file_doc.strip()
+                    or f"Exécute tous les tests du fichier {file_path.name}.",
+                    "type": "file",
+                }
+            )
+
+            # Extraction de chaque fonction commençant par "test_"
+            try:
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.FunctionDef) and node.name.startswith(
+                        "test_"
+                    ):
+                        docstring = ast.get_docstring(node) or ""
+                        test_id = f"{rel_path}::{node.name}"
+                        test_list.append(
+                            {
+                                "id": test_id,
+                                "name": f"   └─ {node.name}",
+                                "file": rel_path,
+                                "docstring": docstring.strip()
+                                or "Aucune description de test.",
+                                "type": "function",
+                            }
+                        )
+            except Exception:
+                pass
+
+        return jsonify({"status": "success", "tests": test_list}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/api/run-tests", methods=["POST"])
 def run_tests():
-    """Lancement de la suite de tests unitaires (pytest) globale ou ciblée."""
+    """Lancement de la suite de tests unitaires (pytest) globale ou ciblée à la fonction près."""
     test_name = "all"
     if request.is_json and request.json.get("test_name"):
         test_name = request.json.get("test_name")
@@ -718,19 +774,24 @@ def run_tests():
     if test_name == "all":
         cmd = [python_exec, "-m", "pytest", "tests/"]
     else:
-        # Sécurisation du nom du fichier de test
-        clean_name = re.sub(r"[^a-zA-Z0-9_.-/]", "", test_name)
-        if not (clean_name.startswith("tests/test_") and clean_name.endswith(".py")):
+        # Sécurisation du nom : on autorise les deux-points pour la syntaxe pytest (::)
+        clean_name = re.sub(r"[^a-zA-Z0-9_.-/:]", "", test_name)
+        if not (clean_name.startswith("tests/test_") and ".py" in clean_name):
             return jsonify(
-                {"status": "error", "message": "Nom de test invalide ou non sécurisé."}
+                {
+                    "status": "error",
+                    "message": "Nom de test ou de fonction de test invalide.",
+                }
             ), 400
 
-        file_path = PROJECT_DIR / clean_name
+        # Vérification de l'existence du fichier physique correspondant
+        file_part = clean_name.split("::")[0]
+        file_path = PROJECT_DIR / file_part
         if not file_path.exists():
             return jsonify(
                 {
                     "status": "error",
-                    "message": f"Fichier de test '{clean_name}' introuvable.",
+                    "message": f"Fichier de test '{file_part}' introuvable.",
                 }
             ), 404
 

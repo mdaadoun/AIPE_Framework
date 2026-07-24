@@ -985,22 +985,248 @@
         }
 
 
+        // Dictionnaire des fiches descriptives d'explication des tests
+        const TEST_DESCRIPTIONS = {
+            "all": {
+                title: "🧪 Suite de Tests Complète (pytest)",
+                objective: "Exécuter l'intégralité des tests unitaires et d'intégration du framework AIPE en une seule commande.",
+                input: "Tous les fichiers de test du répertoire tests/.",
+                output: "Rapport d'exécution global pytest (PASS/FAIL) avec taux de réussite.",
+                concept: "Intégration Continue (CI/CD) & Non-régression"
+            },
+            "tests/test_gatekeeping.py": {
+                title: "📁 test_gatekeeping.py (Tout le fichier)",
+                objective: "Valider l'efficacité des barrières de qualité de code (lint, types, secrets) configurées dans le framework.",
+                input: "Exécute la suite complète des vérificateurs ruff, mypy et detect-secrets.",
+                output: "Vérifications de sécurité et de style réussies à 100%.",
+                concept: "Gatekeeping & Qualité de code"
+            },
+            "tests/test_gatekeeping.py::test_detect_secrets_behavior": {
+                title: "🔑 Détection de secrets en clair",
+                objective: "Vérifier que detect-secrets intercepte correctement les clés privées (comme sk-proj-...) insérées dans le code.",
+                input: "Fichier temporaire contenant une variable d'API key fictive.",
+                output: "Sortie JSON de detect-secrets signalant un secret identifié.",
+                concept: "Prévention des fuites d'identifiants et de clés API"
+            },
+            "tests/test_gatekeeping.py::test_ruff_lint_behavior": {
+                title: "🧹 Analyse de style & imports avec Ruff",
+                objective: "S'assurer que Ruff intercepte les imports inutilisés ou le code mal formaté.",
+                input: "Fichier temporaire avec un import inutilisé.",
+                output: "Ruff check renvoie un code de sortie non nul et signale la règle F401.",
+                concept: "Linting automatisé & Homogénéisation"
+            },
+            "tests/test_gatekeeping.py::test_mypy_strict_behavior": {
+                title: "🏷️ Typage strict avec Mypy",
+                objective: "Garantir que Mypy rejette les fonctions dépourvues d'annotations de types.",
+                input: "Fichier avec des déclarations de fonctions sans types.",
+                output: "Mypy échoue et signale l'absence d'annotations de types.",
+                concept: "Typage statique strict"
+            },
+            "tests/test_main.py": {
+                title: "📁 test_main.py (Tout le fichier)",
+                objective: "Valider la conformité de l'endpoint /health et le bon démarrage du serveur FastAPI.",
+                input: "Requêtes de test HTTP GET transmises via TestClient.",
+                output: "Payload JSON conforme renvoyant status, environment, version avec un code 200.",
+                concept: "Contrat d'interface, observabilité minimale & Test d'intégration"
+            },
+            "tests/test_main.py::test_health_check": {
+                title: "🩺 Conformité de l'endpoint Healthcheck",
+                objective: "Vérifier la validité structurelle de la réponse JSON de santé.",
+                input: "Requête GET /health.",
+                output: "Assertions conformes aux variables de configuration de l'application.",
+                concept: "Observabilité & Sonde de santé de conteneurs"
+            },
+            "tests/test_makefile.py": {
+                title: "📁 test_makefile.py (Tout le fichier)",
+                objective: "S'assurer que les raccourcis de commande make help, clean et lint du Makefile fonctionnent sans erreur.",
+                input: "Exécution des commandes make dans des sous-processus.",
+                output: "Suppression physique des caches pour clean, code de retour 0 pour lint et help.",
+                concept: "Automatisation locale & Expérience Développeur (DX)"
+            },
+            "tests/test_makefile.py::test_makefile_help": {
+                title: "⚙️ Commande : make help",
+                objective: "Valider que la cible par défaut du Makefile affiche correctement l'aide descriptive.",
+                input: "make help",
+                output: "Code de sortie 0 et présence des mots clés 'Commandes Disponibles'.",
+                concept: "Auto-documentation des commandes"
+            },
+            "tests/test_makefile.py::test_makefile_clean": {
+                title: "⚙️ Commande : make clean",
+                objective: "Vérifier que la cible clean purge correctement tous les caches Python, ruff, mypy et pytest.",
+                input: "Création de fichiers temporaires dans .pytest_cache et .mypy_cache, puis make clean",
+                output: "Purge physique complète vérifiée des dossiers de cache.",
+                concept: "Nettoyage d'environnement de build"
+            },
+            "tests/test_makefile.py::test_make_lint": {
+                title: "⚙️ Commande : make lint",
+                objective: "Vérifier que le validateur make lint (Ruff + Mypy) s'exécute correctement.",
+                input: "make lint",
+                output: "Code de sortie 0 confirmant la conformité du code.",
+                concept: "Exécution des validations statiques unifiées"
+            },
+            "tests/test_poetry.py": {
+                title: "📁 test_poetry.py (Tout le fichier)",
+                objective: "Valider la configuration Poetry, l'isolation de l'environnement virtuel local et les exclusions Git.",
+                input: "Vérification des fichiers pyproject.toml, poetry.lock, dossier .venv et .gitignore.",
+                output: "Structure de projet saine et configurée.",
+                concept: "Environnement reproductible & Reproductibilité"
+            },
+            "tests/test_poetry.py::test_python_version": {
+                title: "🐍 Version de Python",
+                objective: "S'assurer que la version locale de Python est compatible avec les requis (>= 3.10).",
+                input: "sys.version_info",
+                output: "Version >= 3.10 confirmée.",
+                concept: "Validation des prérequis système"
+            },
+            "tests/test_poetry.py::test_poetry_configuration_files_exist": {
+                title: "📦 Manifestes de Dépendances",
+                objective: "Valider la présence physique des fichiers pyproject.toml et poetry.lock à la racine.",
+                input: "Fichiers pyproject.toml et poetry.lock",
+                output: "Existence et taille > 0 validées.",
+                concept: "Gestion déterministe des dépendances"
+            },
+            "tests/test_poetry.py::test_dependencies_are_importable": {
+                title: "📦 Dépendances de Production (Import)",
+                objective: "Vérifier que les packages requis en production (fastapi, pydantic, uvicorn) sont bien importables.",
+                input: "Imports Python de fastapi, pydantic, uvicorn",
+                output: "Pas d'ImportError lors des appels d'import.",
+                concept: "Disponibilité des dépendances de production"
+            },
+            "tests/test_poetry.py::test_dev_dependencies_are_importable": {
+                title: "📦 Dépendances de Développement (Import)",
+                objective: "Vérifier que les packages requis pour le dev (pytest, ruff, mypy) sont bien installés localement.",
+                input: "Imports Python de pytest, ruff, mypy",
+                output: "Imports réussis dans le contexte virtuel.",
+                concept: "Disponibilité des outils de qualité"
+            },
+            "tests/test_poetry.py::test_venv_directory_exists": {
+                title: "📦 Isolation : Dossier .venv",
+                objective: "S'assurer que l'environnement virtuel local .venv est bien initialisé à la racine du projet.",
+                input: "Dossier .venv à la racine",
+                output: "Existence et type dossier validés.",
+                concept: "Isolation locale hermétique (in-project venv)"
+            },
+            "tests/test_poetry.py::test_gitignore_ignores_venv": {
+                title: "📦 Isolation : .gitignore",
+                objective: "S'assurer que le fichier .gitignore contient la règle d'exclusion de .venv/.",
+                input: "Fichier .gitignore",
+                output: "Chaîne '.venv' présente dans le contenu.",
+                concept: "Prévention de commit d'environnement virtuel"
+            },
+            "tests/test_pre_commit.py": {
+                title: "📁 test_pre_commit.py (Tout le fichier)",
+                objective: "Vérifier l'existence et la configuration correcte des hooks de pre-commit Git.",
+                input: "Fichier .pre-commit-config.yaml",
+                output: "Hooks de nettoyage et de détection de secrets déclarés.",
+                concept: "Gatekeeping local automatique"
+            },
+            "tests/test_pre_commit.py::test_pre_commit_config_exists": {
+                title: "🛡️ Configuration Pre-commit",
+                objective: "S'assurer que le fichier .pre-commit-config.yaml est bien présent.",
+                input: "Fichier .pre-commit-config.yaml",
+                output: "Existence validée.",
+                concept: "Gestion de configuration de hooks"
+            },
+            "tests/test_pre_commit.py::test_pre_commit_hooks_declared": {
+                title: "🛡️ Hooks Git Déclarés",
+                objective: "Vérifier la déclaration des hooks indispensables (detect-secrets, trailing-whitespace, end-of-file-fixer).",
+                input: "Contenu YAML de .pre-commit-config.yaml",
+                output: "Présence validée des 3 hooks de sécurité et qualité de base.",
+                concept: "Sécurité passive et propreté de code"
+            }
+        };
+
+        // Mise à jour de la fiche d'explications du test sélectionné
+        function updateTestInfo() {
+            const selector = document.getElementById('test-selector');
+            if (!selector) return;
+            const val = selector.value;
+
+            const staticInfo = TEST_DESCRIPTIONS[val] || null;
+            const dynamicInfo = window.DISCOVERED_TESTS ? window.DISCOVERED_TESTS[val] : null;
+
+            const info = staticInfo || {
+                title: dynamicInfo ? (dynamicInfo.type === 'file' ? `📁 ${dynamicInfo.id.split('/').pop()}` : `🧪 Test : ${dynamicInfo.name.trim().replace(/^   └─ /, '')}`) : "🧪 Test Sélectionné",
+                objective: dynamicInfo ? dynamicInfo.docstring : "Exécute le test d'assertion configuré dans la suite pytest.",
+                input: dynamicInfo ? `Fichier de test: ${dynamicInfo.file}` : "Scénario de test",
+                output: "Assertions pytest conformes (PASS)",
+                concept: dynamicInfo ? (dynamicInfo.type === 'file' ? "Module de tests" : "Validation unitaire") : "Qualité logicielle"
+            };
+
+            const titleEl = document.getElementById('test-info-title');
+            const conceptEl = document.getElementById('test-info-concept');
+            const objEl = document.getElementById('test-info-objective');
+            const inputEl = document.getElementById('test-info-input');
+            const outputEl = document.getElementById('test-info-output');
+
+            if (titleEl) titleEl.innerHTML = `<span>📌</span> <span>${escapeHtml(info.title)}</span>`;
+            if (conceptEl) conceptEl.textContent = info.concept;
+            if (objEl) objEl.innerHTML = `<strong>Description & Scénario :</strong> ${escapeHtml(info.objective)}`;
+            if (inputEl) inputEl.textContent = info.input;
+            if (outputEl) outputEl.textContent = info.output;
+        }
+
         async function renderTestLauncher(container) {
             container.innerHTML = `
                 <div class="test-launcher-panel">
-                    <div class="test-controls">
+                    <div class="test-controls" style="margin-bottom: 12px;">
                         <div>
                             <h3 style="font-family: var(--font-outfit); font-size: 1.15rem; font-weight: 600; color: #ffffff;">Lanceur de Tests Live (QA)</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Exécute la suite de tests unitaires et de couverture (pytest) du framework.</p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Exécutez la suite globale ou ciblez précisément une fonction de test de l'architecture.</p>
                         </div>
                         <div style="display: flex; gap: 12px; align-items: center;">
-                            <select id="test-selector" style="background: rgba(9, 5, 20, 0.7); border: 1px solid var(--border); color: #ffffff; padding: 10px 16px; border-radius: 8px; font-family: var(--font-inter); font-size: 0.88rem; outline: none; cursor: pointer; transition: all 0.25s ease;">
+                            <select id="test-selector" onchange="updateTestInfo()" style="background: rgba(9, 5, 20, 0.7); border: 1px solid var(--border); color: #ffffff; padding: 10px 16px; border-radius: 8px; font-family: var(--font-inter); font-size: 0.88rem; outline: none; cursor: pointer; transition: all 0.25s ease; max-width: 250px;">
                                 <option value="all">Toute la suite (pytest)</option>
                             </select>
                             <button class="btn" id="run-tests-btn" onclick="executeTests()">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                                 Lancer les Tests
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Fiche d'explications du test sélectionné -->
+                    <div id="test-info-box" style="
+                        background: rgba(15, 23, 42, 0.45);
+                        border: 1px solid var(--border);
+                        border-radius: 8px;
+                        padding: 14px 16px;
+                        margin-bottom: 15px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        transition: all 0.3s ease;
+                    ">
+                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+                            <h4 id="test-info-title" style="margin: 0; font-family: var(--font-outfit); color: var(--secondary); font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <span>📌</span> <span>Chargement...</span>
+                            </h4>
+                            <span id="test-info-concept" style="font-size: 0.7rem; background: rgba(139, 92, 246, 0.15); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; border: 1px solid rgba(139, 92, 246, 0.2);">
+                                Concept
+                            </span>
+                        </div>
+
+                        <p id="test-info-objective" style="font-size: 0.83rem; color: #f8fafc; margin: 0; line-height: 1.5;">
+                            -
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2px;">
+                            <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 10px;">
+                                <div style="font-size: 0.75rem; font-weight: bold; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                                    <span>📥</span> Entrée attendue (INPUT) :
+                                </div>
+                                <div id="test-info-input" style="font-size: 0.78rem; font-family: monospace; color: #a5f3fc; line-height: 1.4; word-break: break-all;">
+                                    -
+                                </div>
+                             </div>
+                             <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 10px;">
+                                 <div style="font-size: 0.75rem; font-weight: bold; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                                     <span>📤</span> Sortie attendue (OUTPUT) :
+                                 </div>
+                                 <div id="test-info-output" style="font-size: 0.78rem; font-family: monospace; color: #86efac; line-height: 1.4; word-break: break-all;">
+                                     -
+                                 </div>
+                             </div>
                         </div>
                     </div>
 
@@ -1024,12 +1250,29 @@
                 const data = await response.json();
                 if (data.status === 'success' && data.tests.length > 0) {
                     const selector = document.getElementById('test-selector');
-                    data.tests.forEach(testFile => {
+                    selector.innerHTML = '';
+                    window.DISCOVERED_TESTS = {};
+
+                    data.tests.forEach(t => {
                         const opt = document.createElement('option');
-                        opt.value = testFile;
-                        opt.textContent = testFile.split('/').pop();
+                        opt.value = t.id;
+                        opt.textContent = t.name;
+
+                        if (t.type === 'function') {
+                            opt.style.paddingLeft = '15px';
+                            opt.style.color = '#c084fc';
+                        } else if (t.type === 'file') {
+                            opt.style.fontWeight = 'bold';
+                            opt.style.color = '#ffffff';
+                            opt.style.background = 'rgba(20, 10, 40, 0.9)';
+                        }
+
                         selector.appendChild(opt);
+                        window.DISCOVERED_TESTS[t.id] = t;
                     });
+
+                    // Initialiser la fiche descriptive
+                    updateTestInfo();
                 }
             } catch (err) {
                 console.error("Erreur chargement liste des tests:", err);
