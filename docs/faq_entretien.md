@@ -95,3 +95,18 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 ### Q13. Comment fonctionne le `TestClient` de FastAPI et quel est son intérêt pour les tests ?
 *   **Réponse :** Le `TestClient` simule de vraies requêtes HTTP en s'appuyant sur la bibliothèque `httpx` sans avoir besoin d'allouer de port réseau ou de démarrer un serveur Web complet.
 *   **Justification :** Il s'interface directement avec l'application FastAPI en invoquant son gestionnaire ASGI en boucle locale. Cela permet d'exécuter des tests d'intégration complets des routes, des schémas et de la sérialisation de façon extrêmement rapide (en quelques millisecondes), garantissant une boucle de feedback QA continue et fluide.
+
+---
+
+### Q14. Pourquoi avoir modularisé la structure de l'API (core, schemas, api/routes) plutôt que de laisser le code de base dans un fichier `main.py` unique ?
+*   **Réponse :** Bien qu'un fichier unique soit plus rapide à écrire pour un PoC rudimentaire, il pose de graves problèmes de scalabilité et de maintenance à mesure que le projet grandit.
+*   **Justification :**
+    1. **Séparation des préoccupations (SoC) :** Isoler la configuration (`core`), la validation des données (`schemas`) et la définition des endpoints (`api/routes`) permet de diviser la complexité. Chaque fichier a une responsabilité unique.
+    2. **Parallélisation du travail :** Plusieurs développeurs peuvent travailler simultanément sur des routes ou des modèles de données différents sans provoquer de conflits Git majeurs.
+    3. **Maintenance et onboarding :** Un développeur junior identifie immédiatement où placer un nouveau schéma ou une nouvelle route, et le point d'entrée `main.py` reste propre et lisible en ne faisant qu'orchestrer et brancher les modules.
+
+---
+
+### Q15. Comment gérez-vous la validation de champs et les dépréciations dans les modèles Pydantic entre les versions V1 et V2 (par exemple, le mot-clé `example`) ?
+*   **Réponse :** Pydantic V2 a introduit des changements majeurs de structure pour améliorer les performances (moteur écrit en Rust) et clarifier la spécification OpenAPI. Le mot-clé `example` passé directement dans `Field` a été déprécié.
+*   **Justification :** Pour être compatible avec Pydantic V2 et éviter les avertissements d'exécution (`PydanticDeprecatedSince20`), nous utilisons le paramètre `examples` (qui accepte une liste d'exemples) au lieu de `example`. Alternativement, on peut déclarer les exemples via la structure `json_schema_extra={"example": "..."}`. Cela garantit que la génération Swagger reste propre tout en assurant un typage à l'épreuve du temps (future-proof) pour les migrations vers Pydantic V3.

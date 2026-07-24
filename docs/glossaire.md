@@ -65,3 +65,12 @@ Standard moderne de serveurs web Python succédant à WSGI. Il gère l'asynchron
 
 ### Pydantic
 Bibliothèque de validation de données s'appuyant sur les indices de types de Python. Utilisée par FastAPI, elle parse, valide et convertit les types à l'entrée et à la sortie des routes d'API, garantissant un typage strict et une détection précoce des données mal formées.
+
+### APIRouter
+Composant de FastAPI servant à modulariser les points d'accès (endpoints) de l'API. Il permet de regrouper et d'isoler des ensembles cohérents de routes (ex: toutes les routes liées à la santé `/health`, au RAG, ou aux agents d'IA) dans des fichiers dédiés pour éviter d'encombrer le point d'entrée central `main.py`.
+
+### Séparation des préoccupations (Separation of Concerns - SoC)
+Principe d'architecture logicielle stipulant que le code doit être scindé en sections distinctes, chacune gérant une responsabilité unique. Dans ce framework, cela se traduit par le découpage en configurations (`core`), modèles de données (`schemas`), routes (`api/routes`), et logique d'initialisation (`main.py`).
+
+### Pattern Settings
+Pratique d'ingénierie consistant à centraliser toutes les variables de configuration et métadonnées d'une application dans un objet ou une classe unique (souvent couplée à des variables d'environnement). Cela facilite la portabilité et le déploiement du code sur différents environnements (développement, staging, production) sans modifier le code métier.
