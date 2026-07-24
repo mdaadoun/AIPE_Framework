@@ -10,24 +10,26 @@
 # .PHONY indique à Make que ces cibles ne correspondent pas à des fichiers physiques
 # sur le disque. Ainsi, même s'il existe un dossier nommé "install" ou "test",
 # la commande `make install` ou `make test` s'exécutera toujours.
-.PHONY: install clean lint test dev dashboard help
+.PHONY: install clean lint test dev dashboard docker-build help
 
 # La cible par défaut qui s'exécute si on tape juste `make`
 help:
 	@echo "======================================================================"
 	@echo "                   AIPE_Framework - Commandes Disponibles              "
 	@echo "======================================================================"
-	@echo "  make install   - Onboarding : Installe les dépendances (Poetry) et"
-	@echo "                   configure physiquement les hooks de commit locaux."
-	@echo "  make clean     - Entretien : Supprime les caches de compilation,"
-	@echo "                   de typage et de couverture de test."
-	@echo "  make lint      - Qualité : Lance l'analyse Ruff (style & imports)"
-	@echo "                   et le vérificateur de types Mypy (strict)."
-	@echo "  make test      - QA : Exécute la suite complète de tests avec pytest."
-	@echo "  make dashboard - Interface : Démarre le dashboard interactif Flask"
-	@echo "                   sur le port local 5001."
-	@echo "  make dev       - Run : Démarre le microservice FastAPI de production"
-	@echo "                   en mode rechargement automatique (reload)."
+	@echo "  make install      - Onboarding : Installe les dépendances (Poetry) et"
+	@echo "                      configure physiquement les hooks de commit locaux."
+	@echo "  make clean        - Entretien : Supprime les caches de compilation,"
+	@echo "                      de typage et de couverture de test."
+	@echo "  make lint         - Qualité : Lance l'analyse Ruff (style & imports)"
+	@echo "                      et le vérificateur de types Mypy (strict)."
+	@echo "  make test         - QA : Exécute la suite complète de tests avec pytest."
+	@echo "  make dashboard    - Interface : Démarre le dashboard interactif Flask"
+	@echo "                      sur le port local 5001."
+	@echo "  make dev          - Run : Démarre le microservice FastAPI de production"
+	@echo "                      en mode rechargement automatique (reload)."
+	@echo "  make docker-build - Docker : Construit l'image de production multi-stage"
+	@echo "                      et affiche son poids final (objectif : < 250 Mo)."
 	@echo "======================================================================"
 
 # --- 1. AUTOMATISATION DE L'ONBOARDING ET DU NETTOYAGE ---
@@ -73,3 +75,16 @@ dev:
 # Lance le dashboard local interactif Flask
 dashboard:
 	poetry run python dashboard/app.py
+
+# --- 3. CONTENEURISATION DE PRODUCTION ---
+
+# Construit l'image Docker multi-stage de production (Étape 5.1).
+# L'option '-t' attribue un nom et un tag à l'image.
+# Après la construction, la taille de l'image est affichée pour vérifier
+# le respect du critère de validation (< 250 Mo).
+docker-build:
+	@echo "--- Construction de l'image Docker multi-stage de production ---"
+	docker build -t aipe-framework:latest .
+	@echo "--- Poids de l'image finale ---"
+	@docker images aipe-framework:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+

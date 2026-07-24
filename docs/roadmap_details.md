@@ -8,7 +8,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : Interface CLI ──> Phase 4 : API FastAPI ──> Phase 5 : Docker & Sécurité ──> Phase 6 : IDE & Onboarding
-     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (⏳ En cours)               (🔲 À venir)
+     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (✅ Validé)                  (⏳ En cours)               (🔲 À venir)
 ```
 
 ---
@@ -83,11 +83,11 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 
 ---
 
-## Phase 5 : Conteneurisation de Production & Hardening (Docker) — 🔲 À venir
+## Phase 5 : Conteneurisation de Production & Hardening (Docker) — ⏳ En cours
 *Objectif : Créer une image de conteneur ultra-légère et hautement sécurisée.*
 
-### Étape 5.1 : Dockerfile Multi-stage avec Poetry — 🔲 À venir
-*   **Description :** Écriture du [`Dockerfile`](file:///home/michael/Code/job/projets/AIPE_Framework/Dockerfile) composé d'un stage `builder` (installation de Poetry et compilation des dépendances dans un `.venv` interne) et d'un stage `runtime` (copie du `.venv` et du code source uniquement).
+### Étape 5.1 : Dockerfile Multi-stage avec Poetry — ✅ Validé
+*   **Description :** Écriture du [`Dockerfile`](file:///home/michael/Code/ai-engineering/projets/AIPE_Framework/Dockerfile) composé d'un stage `builder` (installation de Poetry et compilation des dépendances dans un `.venv` interne) et d'un stage `runtime` (copie du `.venv` et du code source uniquement).
 *   **Concept clé :** Séparation des outils de compilation du runtime final (réduction de surface d'attaque).
 *   **Critère de validation :** Le build de l'image se termine avec succès et produit une image d'un poids inférieur à 250 Mo.
 

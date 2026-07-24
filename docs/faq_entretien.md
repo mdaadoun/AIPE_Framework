@@ -140,3 +140,31 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 ### Q19. Pourquoi utilisez-vous le `TestClient` synchrone de FastAPI plutôt qu'un `AsyncClient` d'HTTPX pour tester des endpoints asynchrones (`async def`) ?
 *   **Réponse :** Bien que les routes d'API soient déclarées asynchrones (`async def`), l'utilitaire `TestClient` de FastAPI résout l'exécution asynchrone en interne en exécutant l'application dans une boucle d'événements (event loop) dédiée en tâche de fond.
 *   **Justification :** Utiliser `TestClient` synchrone permet d'écrire des assertions limpides et linéaires sans surcharge de syntaxe (`await`). L'utilisation d'un `AsyncClient` d'HTTPX n'est réellement requise que pour tester des scénarios complexes de concurrence réelle ou des connexions asynchrones persistantes comme les WebSockets. Pour des tests d'intégration standards de routes HTTP, `TestClient` offre le meilleur compromis simplicité/performance.
+
+---
+
+### Q20. Pourquoi choisir `python:3.10-slim` plutôt que `python:3.10-alpine` comme image de base Docker ?
+*   **Réponse :** Bien qu'Alpine Linux soit plus légère (~5 Mo vs ~40 Mo pour Debian Slim), elle utilise `musl` au lieu de la `glibc` standard, ce qui provoque des incompatibilités avec certaines bibliothèques Python compilées.
+*   **Justification :**
+    1.  **Compatibilité universelle :** Debian Slim utilise la `glibc` standard, garantissant le fonctionnement de toutes les bibliothèques de l'écosystème Python (y compris `uvloop`, le moteur asynchrone d'Uvicorn).
+    2.  **Gain marginal :** L'économie de ~35 Mo d'Alpine est insignifiante face au risque de bugs d'exécution subtils et difficiles à diagnostiquer en production.
+    3.  **Temps de build :** Avec Alpine, il faut souvent installer manuellement `gcc`, `musl-dev` et d'autres paquets de compilation, annulant une partie du gain de poids et complexifiant le Dockerfile.
+
+---
+
+### Q21. Quel est le rôle du fichier `.dockerignore` et pourquoi est-il critique pour la sécurité et les performances ?
+*   **Réponse :** Le fichier `.dockerignore` filtre les fichiers envoyés au démon Docker lors du build, exactement comme `.gitignore` filtre les fichiers suivis par Git.
+*   **Justification :**
+    1.  **Performance :** Sans `.dockerignore`, Docker envoie tout le répertoire courant (le « contexte de build ») au démon, y compris `.venv` (potentiellement des centaines de Mo), `.git` (historique complet) et `node_modules`. Un `.dockerignore` bien configuré réduit le transfert de quelques secondes à quasiment instantané.
+    2.  **Sécurité :** Exclure `.git`, `.env`, `.secrets.baseline` et les fichiers de configuration locale empêche l'inclusion accidentelle de données sensibles (clés API, historique de commits) dans l'image finale distribuée sur un registre public ou privé.
+    3.  **Déterminisme :** Exclure le `.venv` local évite que des dépendances de développement ne se retrouvent copiées accidentellement dans l'image de production.
+
+---
+
+### Q22. Expliquez la stratégie d'optimisation du cache de couches Docker dans votre Dockerfile. Pourquoi copiez-vous `pyproject.toml` et `poetry.lock` séparément du code source ?
+*   **Réponse :** Chaque instruction `COPY` ou `RUN` dans un Dockerfile crée une « couche » (layer) mise en cache par Docker. Si les fichiers d'entrée d'une couche n'ont pas changé, Docker réutilise la version en cache au lieu de la reconstruire.
+*   **Justification :**
+    1.  **Séparation stratégique :** En copiant d'abord les fichiers de manifeste (`pyproject.toml`, `poetry.lock`), puis en exécutant `poetry install`, on crée une couche dédiée aux dépendances. Cette couche ne sera invalidée que si les dépendances changent effectivement.
+    2.  **Gain de vitesse :** Le code source de l'application change fréquemment (à chaque commit), mais les dépendances changent rarement. Sans cette séparation, chaque modification de code déclencherait un `poetry install` complet (plusieurs minutes). Avec cette optimisation, seule la copie du code (quelques millisecondes) est rejouée.
+    3.  **Impact en CI/CD :** Sur un pipeline de CI exécutant 50 builds par jour, cette optimisation peut économiser des heures de temps machine cumulé et réduire les coûts d'infrastructure.
+

@@ -862,6 +862,8 @@ def list_code_files():
         "pyproject.toml",
         ".pre-commit-config.yaml",
         ".gitignore",
+        "Dockerfile",
+        ".dockerignore",
     ]
 
     files = []

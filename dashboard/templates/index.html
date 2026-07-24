@@ -739,6 +739,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-makefile.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
 </head>
 <body>
 
@@ -1237,6 +1238,69 @@
                 input: "Contenu YAML de .pre-commit-config.yaml",
                 output: "Présence validée des 3 hooks de sécurité et qualité de base.",
                 concept: "Sécurité passive et propreté de code"
+            },
+            "tests/test_dockerfile.py": {
+                title: "📁 test_dockerfile.py (Tout le fichier)",
+                objective: "Valider la structure et la conformité du Dockerfile multi-stage et du fichier .dockerignore.",
+                input: "Analyse structurelle du Dockerfile et de .dockerignore.",
+                output: "Présence des deux stages, dépendances de production uniquement, variables d'environnement Python configurées.",
+                concept: "Conteneurisation de production & Multi-Stage Build"
+            },
+            "tests/test_dockerfile.py::test_dockerfile_exists": {
+                title: "🐳 Présence du Dockerfile",
+                objective: "Vérifier que le fichier Dockerfile existe physiquement à la racine du projet.",
+                input: "Fichier Dockerfile",
+                output: "Existence et taille > 0 validées.",
+                concept: "Conteneurisation"
+            },
+            "tests/test_dockerfile.py::test_dockerfile_has_multi_stage_build": {
+                title: "🐳 Build Multi-Stage (builder + runtime)",
+                objective: "S'assurer que le Dockerfile contient bien deux stages distincts nommés 'builder' et 'runtime' avec une copie inter-stages.",
+                input: "Contenu du Dockerfile",
+                output: "Présence de 'AS builder', 'AS runtime' et '--from=builder'.",
+                concept: "Docker Multi-Stage Build"
+            },
+            "tests/test_dockerfile.py::test_dockerfile_installs_only_production_deps": {
+                title: "🐳 Dépendances de production uniquement",
+                objective: "Vérifier que Poetry n'installe que les dépendances de production (--only main).",
+                input: "Instruction poetry install dans le Dockerfile",
+                output: "Présence de '--only main' dans la commande d'installation.",
+                concept: "Réduction de surface d'attaque"
+            },
+            "tests/test_dockerfile.py::test_dockerfile_exposes_port_8000": {
+                title: "🐳 Exposition du port 8000",
+                objective: "Vérifier que le Dockerfile expose le port 8000 (port standard Uvicorn).",
+                input: "Instruction EXPOSE dans le Dockerfile",
+                output: "EXPOSE 8000 présent.",
+                concept: "Documentation de port réseau"
+            },
+            "tests/test_dockerfile.py::test_dockerfile_uses_uvicorn_cmd": {
+                title: "🐳 Commande de démarrage Uvicorn",
+                objective: "Vérifier que le conteneur lance bien Uvicorn ciblant src.main:app.",
+                input: "Instruction CMD dans le Dockerfile",
+                output: "Présence de 'uvicorn' et 'src.main:app' dans CMD.",
+                concept: "Point d'entrée ASGI"
+            },
+            "tests/test_dockerfile.py::test_dockerfile_sets_python_env_vars": {
+                title: "🐳 Variables d'environnement Python",
+                objective: "Vérifier la présence de PYTHONDONTWRITEBYTECODE et PYTHONUNBUFFERED pour la production.",
+                input: "Instructions ENV dans le Dockerfile",
+                output: "Variables de production Python correctement déclarées.",
+                concept: "Configuration de production Python"
+            },
+            "tests/test_dockerfile.py::test_dockerignore_exists": {
+                title: "🐳 Présence du .dockerignore",
+                objective: "Vérifier que le fichier .dockerignore existe pour optimiser le contexte de build.",
+                input: "Fichier .dockerignore",
+                output: "Existence validée.",
+                concept: "Optimisation du contexte de build"
+            },
+            "tests/test_dockerfile.py::test_dockerignore_excludes_dev_artifacts": {
+                title: "🐳 Exclusions du .dockerignore",
+                objective: "S'assurer que .dockerignore exclut .venv, .git, tests/, dashboard/ et __pycache__.",
+                input: "Contenu de .dockerignore",
+                output: "Toutes les exclusions critiques sont déclarées.",
+                concept: "Réduction du contexte de build Docker"
             }
         };
 
@@ -1530,6 +1594,7 @@
 
                         let icon = '📄';
                         if (file.name === 'Makefile') icon = '⚙️';
+                        else if (file.name === 'Dockerfile' || file.name === '.dockerignore') icon = '🐳';
                         else if (file.name.endsWith('.toml')) icon = '📦';
                         else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) icon = '🛡️';
                         else if (file.name.endsWith('.py')) icon = '🐍';
@@ -1577,6 +1642,7 @@
             else if (path.endsWith('.json')) lang = 'json';
             else if (path.endsWith('Makefile')) lang = 'makefile';
             else if (path.endsWith('.html')) lang = 'html';
+            else if (path.endsWith('Dockerfile') || path.endsWith('.dockerignore')) lang = 'docker';
 
             badgeEl.textContent = lang;
             codeBlock.className = `language-${lang}`;

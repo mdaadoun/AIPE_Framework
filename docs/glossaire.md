@@ -53,6 +53,21 @@ Technique de build Docker permettant d'utiliser plusieurs instructions `FROM` te
 ### Hardening Non-Root
 Pratique de sécurité consistant à forcer l'exécution de l'application dans le conteneur Docker sous un utilisateur système non-privilégié (`appuser`) plutôt que sous l'utilisateur `root`. En cas de compromission de l'application, l'attaquant n'obtient pas les droits super-utilisateur sur la machine hôte.
 
+### Dockerfile
+Fichier texte contenant une série d'instructions ordonnées (`FROM`, `COPY`, `RUN`, `CMD`) décrivant comment assembler une image Docker couche par couche. Chaque instruction crée une nouvelle couche immuable dans l'image, empilée sur la précédente. Le Dockerfile est le « plan de construction » de l'environnement d'exécution de l'application.
+
+### Couche Docker (Layer) et cache de build
+Chaque instruction d'un Dockerfile (`RUN`, `COPY`, etc.) produit une couche (layer) immuable. Docker met en cache ces couches et les réutilise si les fichiers d'entrée n'ont pas changé. C'est pourquoi l'ordre des instructions est stratégique : copier les fichiers de dépendances (`pyproject.toml`, `poetry.lock`) *avant* le code source permet de réutiliser la couche d'installation des paquets lors des modifications de code, accélérant les rebuilds de plusieurs minutes à quelques secondes.
+
+### Contexte de build Docker (Build Context)
+Ensemble de tous les fichiers et dossiers envoyés au démon Docker au moment du `docker build`. Par défaut, c'est l'intégralité du répertoire courant. Un contexte trop volumineux (contenant `.venv`, `.git`, `node_modules`) ralentit le transfert et risque d'inclure des fichiers sensibles dans l'image. Le fichier `.dockerignore` sert à filtrer ce contexte.
+
+### .dockerignore
+Fichier de configuration fonctionnant comme `.gitignore`, mais pour Docker. Il spécifie les fichiers et dossiers à exclure du contexte de build. Les exclusions typiques incluent l'environnement virtuel local (`.venv`), l'historique Git (`.git`), les tests, la documentation et les caches de développement. Un `.dockerignore` bien configuré peut réduire le contexte de build de plusieurs centaines de Mo à quelques Ko.
+
+### COPY --from (Copie inter-stages)
+Instruction Docker spécifique au pattern multi-stage build permettant de copier sélectivement des fichiers depuis un stage précédent vers le stage courant. La syntaxe `COPY --from=builder /app/.venv /app/.venv` copie uniquement l'environnement virtuel compilé depuis le stage `builder` vers l'image finale, sans embarquer les outils de compilation qui ont servi à le créer.
+
 ---
 
 ## 🌐 Architecture Web & Microservices
