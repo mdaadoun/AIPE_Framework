@@ -643,6 +643,94 @@
 
         .step-card.completed .validation-item { border-left-color: var(--success); }
         .step-card.active .validation-item { border-left-color: var(--secondary); }
+
+        /* ==========================================================================
+           Responsive Design (Mobile & Tablettes)
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            header {
+                padding: 16px 20px;
+            }
+            .header-container {
+                flex-direction: column;
+                gap: 16px;
+                align-items: center;
+                text-align: center;
+            }
+            main {
+                padding: 0 20px;
+                margin: 20px auto;
+            }
+            .content-card {
+                padding: 24px;
+            }
+            .interview-grid {
+                grid-template-columns: 280px 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                position: static;
+                padding: 16px 12px;
+            }
+            .nav-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            }
+            .tab-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+            main {
+                padding: 0 12px;
+                margin: 12px auto;
+            }
+            .content-card {
+                padding: 16px;
+                border-radius: 12px;
+                min-height: auto;
+            }
+            .interview-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 24px;
+            }
+            .question-list-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding-right: 0;
+                padding-bottom: 16px;
+                max-height: 250px;
+            }
+            #answer-card {
+                max-height: none;
+                height: auto;
+            }
+            .journal-container {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+            .sidebar-panel {
+                max-height: 250px !important;
+            }
+            .content-panel {
+                max-height: none !important;
+            }
+            .test-launcher-panel .test-controls {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 12px;
+            }
+            .test-launcher-panel .test-controls select {
+                max-width: 100% !important;
+            }
+        }
     </style>
     <!-- PrismJS for Syntax Highlighting in Code Browser -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
