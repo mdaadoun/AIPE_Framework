@@ -74,3 +74,12 @@ Principe d'architecture logicielle stipulant que le code doit être scindé en s
 
 ### Pattern Settings
 Pratique d'ingénierie consistant à centraliser toutes les variables de configuration et métadonnées d'une application dans un objet ou une classe unique (souvent couplée à des variables d'environnement). Cela facilite la portabilité et le déploiement du code sur différents environnements (développement, staging, production) sans modifier le code métier.
+
+### Contrat d'interface
+Spécification technique rigoureuse qui décrit la structure, les types de données, les codes de statut HTTP et le comportement d'un point d'accès d'une API. Le respect strict de ce contrat garantit la compatibilité et la communication entre les différents services d'un système distribué (ex: microservices, applications frontales).
+
+### Observabilité
+Capacité à mesurer et à déduire l'état interne d'un système à partir de ses sorties externes (journaux, métriques, traces et endpoints de santé). Une observabilité minimale permet aux systèmes d'orchestration ou de surveillance de s'assurer du fonctionnement correct et continu de l'application.
+
+### Sonde de santé (Healthcheck Probe)
+Mécanisme automatique de test périodique effectuant des requêtes sur un conteneur ou un service (souvent sur la route `/health`) pour surveiller son état de disponibilité et de fonctionnement. Ces sondes sont utilisées par les orchestrateurs (Docker, Kubernetes) pour piloter le routage du trafic et gérer le cycle de vie des conteneurs.

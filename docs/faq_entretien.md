@@ -110,3 +110,21 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 ### Q15. Comment gérez-vous la validation de champs et les dépréciations dans les modèles Pydantic entre les versions V1 et V2 (par exemple, le mot-clé `example`) ?
 *   **Réponse :** Pydantic V2 a introduit des changements majeurs de structure pour améliorer les performances (moteur écrit en Rust) et clarifier la spécification OpenAPI. Le mot-clé `example` passé directement dans `Field` a été déprécié.
 *   **Justification :** Pour être compatible avec Pydantic V2 et éviter les avertissements d'exécution (`PydanticDeprecatedSince20`), nous utilisons le paramètre `examples` (qui accepte une liste d'exemples) au lieu de `example`. Alternativement, on peut déclarer les exemples via la structure `json_schema_extra={"example": "..."}`. Cela garantit que la génération Swagger reste propre tout en assurant un typage à l'épreuve du temps (future-proof) pour les migrations vers Pydantic V3.
+
+---
+
+### Q16. Quelle est la différence entre une sonde de démarrage (Startup), de vie (Liveness) et de disponibilité (Readiness), et comment votre endpoint s'intègre-t-il dans cette logique ?
+*   **Réponse :**
+    1. **Startup Probe :** Vérifie si l'application a démarré (crucial pour les applications lentes à charger).
+    2. **Liveness Probe :** Indique si le conteneur est vivant. Si la route répond en échec, l'orchestrateur redémarre le conteneur.
+    3. **Readiness Probe :** Indique si l'application est prête à traiter du trafic. Si elle échoue, le trafic réseau est redirigé vers d'autres conteneurs sains, sans redémarrer le conteneur.
+*   **Justification :** Notre endpoint `/health` fournit le socle pour ces trois types de sondes. Dans une architecture avancée, la readiness probe pourrait interroger des chemins dépendants pour s'assurer que la base de données est accessible, tandis que la liveness probe reste ultra-légère pour simplement attester que le serveur ASGI traite les requêtes sans bloquer.
+
+---
+
+### Q17. Pourquoi est-il important de valider la réponse d'un endpoint de Healthcheck via un schéma strict (ex: Pydantic) plutôt que de simplement renvoyer un dictionnaire Python standard ?
+*   **Réponse :** Renvoyer un simple dictionnaire `dict` en Python n'offre aucune garantie de structure à l'exécution ni au moment de la compilation.
+*   **Justification :**
+    1. **Détection des régressions :** Si un développeur modifie la structure de données renvoyée par erreur, Pydantic bloque la réponse HTTP à l'exécution en levant une erreur de validation, empêchant la production de données invalides de casser les clients consommateurs.
+    2. **Génération OpenAPI :** Pydantic exporte automatiquement les types exacts du schéma de réponse dans le fichier OpenAPI JSON. Cela permet aux outils de supervision de valider automatiquement les types sans codage manuel.
+    3. **Sécurité opérationnelle :** Cela formalise un contrat d'interface inviolable avec le reste du système (monitoring, passerelles d'API).
