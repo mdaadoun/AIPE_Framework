@@ -1159,9 +1159,9 @@
             const inputEl = document.getElementById('test-info-input');
             const outputEl = document.getElementById('test-info-output');
 
-            if (titleEl) titleEl.innerHTML = `<span>📌</span> <span>${escapeHtml(info.title)}</span>`;
+            if (titleEl) titleEl.innerHTML = `<span>📌</span> <span>${htmlEscape(info.title)}</span>`;
             if (conceptEl) conceptEl.textContent = info.concept;
-            if (objEl) objEl.innerHTML = `<strong>Description & Scénario :</strong> ${escapeHtml(info.objective)}`;
+            if (objEl) objEl.innerHTML = `<strong>Description & Scénario :</strong> ${htmlEscape(info.objective)}`;
             if (inputEl) inputEl.textContent = info.input;
             if (outputEl) outputEl.textContent = info.output;
         }
