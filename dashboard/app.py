@@ -853,5 +853,74 @@ def run_tests():
         ), 500
 
 
+@app.route("/api/code/list", methods=["GET"])
+def list_code_files():
+    """Renvoie la liste des fichiers éligibles pour le navigateur de code."""
+    allowed_roots = ["src", "tests"]
+    allowed_files = [
+        "Makefile",
+        "pyproject.toml",
+        ".pre-commit-config.yaml",
+        ".gitignore",
+    ]
+
+    files = []
+    try:
+        # Ajout des fichiers autorisés à la racine
+        for fname in allowed_files:
+            fpath = PROJECT_DIR / fname
+            if fpath.exists() and fpath.is_file():
+                files.append({"name": fname, "path": fname})
+
+        # Parcours récursif des dossiers sources
+        for rdir in allowed_roots:
+            target_dir = PROJECT_DIR / rdir
+            if target_dir.exists() and target_dir.is_dir():
+                for path in sorted(target_dir.rglob("*")):
+                    if path.is_file():
+                        # Ignorer les répertoires de cache système
+                        if "__pycache__" in path.parts or ".pytest_cache" in path.parts:
+                            continue
+                        rel_path = str(path.relative_to(PROJECT_DIR))
+                        files.append({"name": path.name, "path": rel_path})
+
+        files.sort(key=lambda x: x["path"])
+        return jsonify({"status": "success", "files": files}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/code/file", methods=["GET"])
+def get_code_file():
+    """Renvoie le contenu textuel d'un fichier de code sécurisé."""
+    file_path = request.args.get("path", "")
+    if not file_path:
+        return jsonify(
+            {"status": "error", "message": "Chemin du fichier manquant"}
+        ), 400
+
+    try:
+        # Sécurisation contre la traversée de répertoires (directory traversal)
+        resolved_path = (PROJECT_DIR / file_path).resolve()
+        project_resolved = PROJECT_DIR.resolve()
+
+        if not str(resolved_path).startswith(str(project_resolved)):
+            return jsonify({"status": "error", "message": "Accès interdit"}), 403
+
+        # Interdiction d'accès aux répertoires masqués et système (.venv, .git)
+        if ".venv" in resolved_path.parts or ".git" in resolved_path.parts:
+            return jsonify(
+                {"status": "error", "message": "Accès aux dossiers système interdit"}
+            ), 403
+
+        if not resolved_path.exists() or not resolved_path.is_file():
+            return jsonify({"status": "error", "message": "Fichier introuvable"}), 404
+
+        content = resolved_path.read_text(encoding="utf-8")
+        return jsonify({"status": "success", "content": content}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5001, debug=True)

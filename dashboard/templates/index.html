@@ -644,6 +644,13 @@
         .step-card.completed .validation-item { border-left-color: var(--success); }
         .step-card.active .validation-item { border-left-color: var(--secondary); }
     </style>
+    <!-- PrismJS for Syntax Highlighting in Code Browser -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-makefile.min.js"></script>
 </head>
 <body>
 
@@ -681,6 +688,10 @@
                 <button class="tab-btn" onclick="switchTab('docs_api')">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                     Docs API
+                </button>
+                <button class="tab-btn" onclick="switchTab('code')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Code
                 </button>
             </div>
         </div>
@@ -724,6 +735,11 @@
             container.innerHTML = '<div class="spinner"></div>';
 
             try {
+                if (tabName === 'code') {
+                    renderCodeBrowser(container);
+                    return;
+                }
+
                 if (tabName === 'entretien') {
                     renderInterviewSimulator(container);
                     return;
@@ -1344,6 +1360,121 @@
                     </a>
                 </div>
             `;
+        }
+
+        async function renderCodeBrowser(container) {
+            container.innerHTML = `
+                <div class="journal-container" style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; min-height: 580px;">
+                    <div class="sidebar-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; max-height: 600px;">
+                        <h4 style="font-family: var(--font-outfit); font-size: 0.95rem; font-weight: bold; color: #ffffff; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span>📁</span> Fichiers sources
+                        </h4>
+                        <div id="code-file-list" style="display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; padding-right: 4px;">
+                            <div class="spinner" style="margin: 20px auto;"></div>
+                        </div>
+                    </div>
+                    <div class="content-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; max-height: 600px; position: relative;">
+                        <div id="code-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px;">
+                            <h4 id="code-filepath" style="margin: 0; font-family: var(--font-outfit); color: var(--secondary); font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%;">Sélectionnez un fichier</h4>
+                            <span id="code-language-badge" style="font-size: 0.68rem; background: rgba(139, 92, 246, 0.15); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(139, 92, 246, 0.2);">Code</span>
+                        </div>
+                        <div id="code-viewer-container" style="flex: 1; overflow: auto; position: relative; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: #1d1f21;">
+                            <pre style="margin: 0; padding: 15px; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.45; overflow: auto; min-height: 400px; height: 100%;"><code id="code-block" class="language-python"># En attente de sélection d'un fichier...</code></pre>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/code/list');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    const listPanel = document.getElementById('code-file-list');
+                    listPanel.innerHTML = '';
+
+                    const files = data.files;
+                    files.forEach(file => {
+                        const btn = document.createElement('button');
+                        btn.className = 'question-item';
+                        btn.style.width = '100%';
+                        btn.style.textAlign = 'left';
+                        btn.style.padding = '8px 12px';
+                        btn.style.fontSize = '0.82rem';
+                        btn.style.display = 'flex';
+                        btn.style.alignItems = 'center';
+                        btn.style.gap = '8px';
+                        btn.style.border = 'none';
+                        btn.style.background = 'none';
+                        btn.style.cursor = 'pointer';
+
+                        let icon = '📄';
+                        if (file.name === 'Makefile') icon = '⚙️';
+                        else if (file.name.endsWith('.toml')) icon = '📦';
+                        else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) icon = '🛡️';
+                        else if (file.name.endsWith('.py')) icon = '🐍';
+                        else if (file.name.endsWith('.json')) icon = '⚙️';
+                        else if (file.name.endsWith('.html')) icon = '🌐';
+                        else if (file.name.startsWith('.')) icon = '⚙️';
+
+                        const nestingLevel = file.path.split('/').length - 1;
+                        btn.style.paddingLeft = `${12 + nestingLevel * 12}px`;
+
+                        btn.innerHTML = `<span>${icon}</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span>`;
+                        btn.onclick = () => selectCodeFile(file.path, btn);
+                        listPanel.appendChild(btn);
+                    });
+
+                    // Auto-charger le premier fichier
+                    if (files.length > 0) {
+                        selectCodeFile(files[0].path, listPanel.firstChild);
+                    }
+                } else {
+                    document.getElementById('code-file-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Erreur : ${data.message}</div>`;
+                }
+            } catch (err) {
+                document.getElementById('code-file-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Erreur : ${err.message}</div>`;
+            }
+        }
+
+        async function selectCodeFile(path, btnElement) {
+            document.querySelectorAll('#code-file-list .question-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (btnElement) btnElement.classList.add('active');
+
+            const filepathEl = document.getElementById('code-filepath');
+            const badgeEl = document.getElementById('code-language-badge');
+            const codeBlock = document.getElementById('code-block');
+
+            filepathEl.textContent = path;
+            codeBlock.textContent = '# Chargement du fichier...';
+
+            let lang = 'python';
+            if (path.endsWith('.toml')) lang = 'toml';
+            else if (path.endsWith('.yaml') || path.endsWith('.yml')) lang = 'yaml';
+            else if (path.endsWith('.json')) lang = 'json';
+            else if (path.endsWith('Makefile')) lang = 'makefile';
+            else if (path.endsWith('.html')) lang = 'html';
+
+            badgeEl.textContent = lang;
+            codeBlock.className = `language-${lang}`;
+
+            try {
+                const response = await fetch(`/api/code/file?path=${encodeURIComponent(path)}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    codeBlock.textContent = data.content;
+                    if (window.Prism) {
+                        Prism.highlightElement(codeBlock);
+                    }
+                } else {
+                    codeBlock.textContent = `# Erreur : ${data.message}`;
+                }
+            } catch (err) {
+                codeBlock.textContent = `# Erreur de chargement : ${err.message}`;
+            }
         }
 
         function htmlEscape(str) {
