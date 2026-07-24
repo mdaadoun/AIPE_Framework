@@ -1394,7 +1394,39 @@
                     listPanel.innerHTML = '';
 
                     const files = data.files;
+                    const renderedDirs = new Set();
+
                     files.forEach(file => {
+                        const parts = file.path.split('/');
+
+                        // Rendu des dossiers intermédiaires dans la hiérarchie
+                        let currentDirPath = '';
+                        for (let i = 0; i < parts.length - 1; i++) {
+                            const part = parts[i];
+                            currentDirPath = currentDirPath ? `${currentDirPath}/${part}` : part;
+
+                            if (!renderedDirs.has(currentDirPath)) {
+                                renderedDirs.add(currentDirPath);
+
+                                const folderDiv = document.createElement('div');
+                                folderDiv.style.padding = '6px 12px';
+                                folderDiv.style.fontSize = '0.78rem';
+                                folderDiv.style.fontWeight = 'bold';
+                                folderDiv.style.color = 'var(--secondary)';
+                                folderDiv.style.display = 'flex';
+                                folderDiv.style.alignItems = 'center';
+                                folderDiv.style.gap = '6px';
+                                folderDiv.style.paddingLeft = `${12 + i * 14}px`;
+                                folderDiv.style.marginTop = '6px';
+                                folderDiv.style.marginBottom = '2px';
+                                folderDiv.style.opacity = '0.9';
+
+                                folderDiv.innerHTML = `<span>📁</span> <span style="font-family: var(--font-outfit);">${part}</span>`;
+                                listPanel.appendChild(folderDiv);
+                            }
+                        }
+
+                        // Rendu du bouton de fichier
                         const btn = document.createElement('button');
                         btn.className = 'question-item';
                         btn.style.width = '100%';
@@ -1417,17 +1449,18 @@
                         else if (file.name.endsWith('.html')) icon = '🌐';
                         else if (file.name.startsWith('.')) icon = '⚙️';
 
-                        const nestingLevel = file.path.split('/').length - 1;
-                        btn.style.paddingLeft = `${12 + nestingLevel * 12}px`;
+                        const nestingLevel = parts.length - 1;
+                        btn.style.paddingLeft = `${12 + nestingLevel * 14}px`;
 
                         btn.innerHTML = `<span>${icon}</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span>`;
                         btn.onclick = () => selectCodeFile(file.path, btn);
                         listPanel.appendChild(btn);
                     });
 
-                    // Auto-charger le premier fichier
-                    if (files.length > 0) {
-                        selectCodeFile(files[0].path, listPanel.firstChild);
+                    // Auto-charger le premier fichier réel
+                    const firstBtn = listPanel.querySelector('.question-item');
+                    if (firstBtn && files.length > 0) {
+                        selectCodeFile(files[0].path, firstBtn);
                     }
                 } else {
                     document.getElementById('code-file-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Erreur : ${data.message}</div>`;
