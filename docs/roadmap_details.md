@@ -91,7 +91,7 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 *   **Concept clé :** Séparation des outils de compilation du runtime final (réduction de surface d'attaque).
 *   **Critère de validation :** Le build de l'image se termine avec succès et produit une image d'un poids inférieur à 250 Mo.
 
-### Étape 5.2 : Sécurisation Non-root (Hardening) — 🔲 À venir
+### Étape 5.2 : Sécurisation Non-root (Hardening) — ✅ Validé
 *   **Description :** Créer un utilisateur non-privilégié `appuser` dans le conteneur final et lui transférer les droits de possession sur les fichiers exécutables de l'application.
 *   **Concept clé :** Principe de moindre privilège appliqué à l'exécution de conteneurs.
 *   **Critère de validation :** Lancer le conteneur et inspecter le processus en cours d'exécution confirme que le serveur tourne sous l'identité de `appuser` (UID 1000) et non `root`.

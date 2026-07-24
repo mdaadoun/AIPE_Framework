@@ -68,6 +68,18 @@ Fichier de configuration fonctionnant comme `.gitignore`, mais pour Docker. Il s
 ### COPY --from (Copie inter-stages)
 Instruction Docker spécifique au pattern multi-stage build permettant de copier sélectivement des fichiers depuis un stage précédent vers le stage courant. La syntaxe `COPY --from=builder /app/.venv /app/.venv` copie uniquement l'environnement virtuel compilé depuis le stage `builder` vers l'image finale, sans embarquer les outils de compilation qui ont servi à le créer.
 
+### Principe de moindre privilège (Least Privilege)
+Principe fondamental de sécurité informatique stipulant qu'un processus, un utilisateur ou un programme ne doit disposer que des permissions strictement nécessaires à l'accomplissement de sa tâche. Dans le contexte Docker, cela signifie exécuter l'application sous un utilisateur système non-privilégié (`appuser`) plutôt que sous `root` (UID 0). En cas de compromission, l'attaquant hérite uniquement des droits limités de cet utilisateur, sans pouvoir installer de paquets, modifier les fichiers système ou s'échapper du conteneur.
+
+### Directive USER (Dockerfile)
+Instruction Dockerfile qui bascule définitivement l'identité sous laquelle s'exécutent toutes les commandes suivantes (`RUN`, `CMD`, `ENTRYPOINT`). Placée après la création de l'utilisateur et la copie des fichiers, elle constitue le verrou final du hardening : le processus principal du conteneur (PID 1) démarre avec les privilèges limités de l'utilisateur spécifié, et non ceux du super-utilisateur `root`.
+
+### COPY --chown (Transfert de propriété Docker)
+Option de l'instruction `COPY` dans un Dockerfile permettant de transférer la propriété des fichiers copiés à un utilisateur et un groupe spécifiques en une seule opération atomique. La syntaxe `COPY --chown=appuser:appgroup` évite de recourir à une instruction `RUN chown -R` séparée, ce qui économise une couche Docker supplémentaire et le temps de parcours récursif de l'arborescence de fichiers.
+
+### Port privilégié vs non-privilégié
+Sur les systèmes Linux, les ports réseau inférieurs à 1024 (comme le port 80 HTTP ou 443 HTTPS) sont dits « privilégiés » et ne peuvent être ouverts que par un processus exécuté en tant que `root`. Les ports supérieurs à 1024 (comme le port 8000 utilisé par Uvicorn) sont « non-privilégiés » et accessibles à tout utilisateur du système. Le choix d'un port non-privilégié est donc un prérequis technique pour l'exécution de l'application sous un utilisateur non-root dans un conteneur Docker.
+
 ---
 
 ## 🌐 Architecture Web & Microservices

@@ -130,9 +130,50 @@ ENV PATH="/app/.venv/bin:${PATH}"
 # Définit le répertoire de travail par défaut dans le conteneur.
 WORKDIR /app
 
-# --- Copie chirurgicale depuis le stage builder ---
+# ==============================================================================
+# ÉTAPE 5.2 : SÉCURISATION NON-ROOT (HARDENING)
+# ==============================================================================
+# Principe de moindre privilège ("Least Privilege") :
+# Par défaut, un conteneur Docker exécute tout en tant que 'root' (UID 0).
+# C'est dangereux car si un attaquant exploite une faille dans l'application
+# (ex: injection de commande, traversée de répertoire), il obtient les droits
+# root à l'intérieur du conteneur. Avec certaines configurations Docker mal
+# sécurisées, cela peut même permettre de s'échapper du conteneur et
+# compromettre la machine hôte.
+#
+# La solution : créer un utilisateur système non-privilégié ('appuser') et
+# exécuter l'application sous son identité. Ainsi, même en cas de compromission,
+# l'attaquant n'a que des droits limités (pas d'installation de paquets,
+# pas de modification des fichiers système, pas d'accès aux processus d'autres
+# conteneurs).
+# ==============================================================================
+
+# --- Création du groupe et de l'utilisateur non-privilégié ---
+# 'addgroup --system appgroup' : Crée un groupe système (sans répertoire home,
+#   sans shell de connexion). Les groupes système sont réservés aux services
+#   et démons, pas aux utilisateurs humains.
+# 'adduser --system --uid 1000 --ingroup appgroup --no-create-home appuser' :
+#   Crée un utilisateur système avec un UID fixe de 1000 (convention standard
+#   pour le premier utilisateur non-root dans les conteneurs). L'option
+#   '--no-create-home' évite de créer un répertoire /home/appuser inutile.
+#   L'option '--ingroup appgroup' associe cet utilisateur au groupe créé.
+#
+# Pourquoi un UID fixe à 1000 ?
+#   En production, les orchestrateurs (Kubernetes, ECS) peuvent imposer des
+#   contraintes de sécurité (PodSecurityPolicy, SecurityContext) interdisant
+#   l'exécution avec un UID < 1000. Fixer l'UID garantit la compatibilité
+#   avec ces politiques de sécurité d'entreprise.
+RUN addgroup --system appgroup \
+    && adduser --system --uid 1000 --ingroup appgroup --no-create-home appuser
+
+# --- Copie chirurgicale depuis le stage builder avec transfert de propriété ---
 # '--from=builder' : Instruction Docker multi-stage qui copie des fichiers
 #                     depuis le stage nommé 'builder' (défini plus haut).
+# '--chown=appuser:appgroup' : Transfère directement la propriété des fichiers
+#   copiés à l'utilisateur 'appuser' et au groupe 'appgroup'. Sans cette option,
+#   les fichiers copiés appartiendraient à root, et appuser ne pourrait pas les
+#   lire ou les exécuter correctement.
+#
 # On ne copie que deux éléments :
 #   1. /app/.venv : L'environnement virtuel contenant toutes les dépendances
 #                   Python compilées (FastAPI, Uvicorn, Pydantic et leurs
@@ -141,13 +182,25 @@ WORKDIR /app
 #
 # Tout le reste (Poetry, curl, caches pip, fichiers temporaires) est abandonné
 # avec le stage builder et n'apparaît jamais dans l'image finale.
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/src /app/src
+COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
+COPY --from=builder --chown=appuser:appgroup /app/src /app/src
+
+# --- Basculement vers l'utilisateur non-privilégié ---
+# À partir de cette instruction, TOUTES les commandes suivantes (CMD, ENTRYPOINT)
+# seront exécutées sous l'identité de 'appuser' (UID 1000) et non plus 'root'.
+# C'est le verrou final du hardening : même si un attaquant accède au conteneur,
+# il n'a aucun droit administrateur.
+USER appuser
 
 # --- Exposition du port réseau ---
 # EXPOSE documente le port sur lequel le conteneur écoute. Cette instruction
 # est purement informative (elle n'ouvre pas réellement le port). Elle sert
 # de documentation pour les développeurs et les outils d'orchestration.
+#
+# Note de sécurité : Le port 8000 est un port non-privilégié (> 1024).
+# C'est important car seul 'root' peut ouvrir des ports < 1024 (ports
+# privilégiés comme 80 ou 443). Notre choix du port 8000 est donc compatible
+# avec l'exécution en tant que 'appuser'.
 EXPOSE 8000
 
 # --- Commande de démarrage du serveur de production ---

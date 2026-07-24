@@ -168,3 +168,29 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     2.  **Gain de vitesse :** Le code source de l'application change fréquemment (à chaque commit), mais les dépendances changent rarement. Sans cette séparation, chaque modification de code déclencherait un `poetry install` complet (plusieurs minutes). Avec cette optimisation, seule la copie du code (quelques millisecondes) est rejouée.
     3.  **Impact en CI/CD :** Sur un pipeline de CI exécutant 50 builds par jour, cette optimisation peut économiser des heures de temps machine cumulé et réduire les coûts d'infrastructure.
 
+---
+
+### Q23. Pourquoi exécutez-vous votre conteneur Docker sous un utilisateur non-root plutôt que sous root par défaut ?
+*   **Réponse :** Par défaut, le processus principal d'un conteneur Docker s'exécute en tant que `root` (UID 0). Si l'application est compromise (via une injection de commande, une faille de désérialisation ou une traversée de répertoire), l'attaquant obtient immédiatement les pleins pouvoirs à l'intérieur du conteneur.
+*   **Justification :**
+    1.  **Principe de moindre privilège :** En créant un utilisateur système `appuser` (UID 1000) et en basculant via la directive `USER`, le processus ne peut ni installer de paquets, ni modifier les fichiers système, ni accéder aux sockets Docker.
+    2.  **Conformité Kubernetes :** Les clusters de production imposent souvent des `PodSecurityPolicy` ou des `SecurityContext` interdisant l'exécution en tant que root (UID 0). Un conteneur non-root est immédiatement compatible avec ces contraintes sans reconfiguration.
+    3.  **Défense en profondeur :** Combiné aux namespaces Linux et à l'isolation réseau, l'exécution non-root ajoute une couche de sécurité supplémentaire dans la stratégie de défense en profondeur.
+
+---
+
+### Q24. Pourquoi utilisez-vous `--chown` dans l'instruction COPY plutôt qu'un `RUN chown` séparé ?
+*   **Réponse :** L'option `--chown=appuser:appgroup` intégrée à l'instruction `COPY` combine la copie et le transfert de propriété en une seule opération atomique.
+*   **Justification :**
+    1.  **Réduction des couches Docker :** Chaque instruction `RUN` crée une nouvelle couche dans l'image. Un `RUN chown -R appuser:appgroup /app` ajouterait une couche supplémentaire contenant une copie complète de tous les fichiers modifiés (car le changement de métadonnées de propriété invalide la couche précédente).
+    2.  **Performance :** Le `--chown` intégré à COPY est exécuté pendant la phase de copie elle-même, évitant un parcours récursif supplémentaire de toute l'arborescence après la copie.
+    3.  **Taille de l'image :** Sans `--chown`, l'image contiendrait les fichiers en double : une fois dans la couche COPY (propriété root) et une fois dans la couche RUN chown (propriété appuser). Avec `--chown`, les fichiers n'existent qu'une seule fois avec la bonne propriété.
+
+---
+
+### Q25. Comment validez-vous automatiquement que votre conteneur ne s'exécute pas en tant que root ?
+*   **Réponse :** Nous appliquons une stratégie de validation à deux niveaux : tests statiques (analyse du Dockerfile) et tests dynamiques (inspection du conteneur en cours d'exécution).
+*   **Justification :**
+    1.  **Tests statiques (pytest) :** Notre suite `test_dockerfile.py` vérifie la présence des directives `USER appuser`, `adduser`, `addgroup` et `--chown=appuser:appgroup` dans le texte du Dockerfile. Cela garantit qu'une modification accidentelle du Dockerfile (suppression du USER) sera détectée avant même le build.
+    2.  **Validation dynamique (post-build) :** Après construction de l'image, la commande `docker run --rm aipe-framework:latest whoami` doit renvoyer `appuser`. On peut aussi inspecter le processus avec `docker top <container>` pour confirmer que le PID 1 (uvicorn) appartient à l'UID 1000.
+    3.  **Intégration CI/CD :** Ces tests font partie du pipeline de validation continue (`make test`), bloquant automatiquement toute régression de sécurité avant le déploiement.

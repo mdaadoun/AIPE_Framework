@@ -1,10 +1,12 @@
 """Tests de validation du Dockerfile Multi-Stage et de la configuration Docker.
 
 Ce module vérifie la présence, la structure et la conformité du Dockerfile
-multi-stage produit à l'étape 5.1 du blueprint AIPE_Framework. Les tests
-valident que le fichier respecte les bonnes pratiques industrielles :
-deux stages distincts, exclusion des outils de développement, et présence
-d'un fichier .dockerignore pour optimiser le contexte de build.
+multi-stage produit aux étapes 5.1 et 5.2 du blueprint AIPE_Framework.
+
+Étape 5.1 : Valide le pattern multi-stage build (deux stages, exclusion des
+    outils de développement, fichier .dockerignore).
+Étape 5.2 : Valide le hardening non-root (création de l'utilisateur appuser,
+    transfert de propriété via --chown, directive USER, ordonnancement correct).
 """
 
 from pathlib import Path
@@ -20,9 +22,9 @@ def test_dockerfile_exists() -> None:
         "Le fichier 'Dockerfile' est introuvable à la racine du projet. "
         "Il doit être créé pour conteneuriser l'application."
     )
-    assert dockerfile.stat().st_size > 0, (
-        "Le fichier 'Dockerfile' existe mais est vide."
-    )
+    assert (
+        dockerfile.stat().st_size > 0
+    ), "Le fichier 'Dockerfile' existe mais est vide."
 
 
 def test_dockerfile_has_multi_stage_build() -> None:
@@ -140,3 +142,100 @@ def test_dockerignore_excludes_dev_artifacts() -> None:
             f"Le fichier .dockerignore ne contient pas l'exclusion '{exclusion}'. "
             f"Ce répertoire ou fichier ne doit pas être inclus dans le contexte de build Docker."
         )
+
+
+# ==============================================================================
+# Tests de Sécurisation Non-root (Hardening) — Étape 5.2
+# ==============================================================================
+# Ces tests valident que le Dockerfile applique le principe de moindre privilège
+# en exécutant l'application sous un utilisateur non-root (appuser, UID 1000).
+# ==============================================================================
+
+
+def test_dockerfile_creates_non_root_user() -> None:
+    """Vérifie que le Dockerfile crée un utilisateur et un groupe système non-root.
+
+    La sécurisation non-root nécessite la création d'un groupe système
+    ('appgroup') et d'un utilisateur système ('appuser') avec un UID fixe
+    de 1000. L'UID fixe garantit la compatibilité avec les politiques de
+    sécurité Kubernetes (PodSecurityPolicy, SecurityContext).
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    # Vérification de la création du groupe système
+    assert "addgroup" in content and "appgroup" in content, (
+        "Le Dockerfile ne crée pas le groupe système 'appgroup'. "
+        "Un groupe dédié est nécessaire pour isoler les permissions de l'application."
+    )
+
+    # Vérification de la création de l'utilisateur système avec UID 1000
+    assert "adduser" in content and "appuser" in content, (
+        "Le Dockerfile ne crée pas l'utilisateur système 'appuser'. "
+        "Un utilisateur non-root est requis pour le principe de moindre privilège."
+    )
+    assert "1000" in content, (
+        "Le Dockerfile ne fixe pas l'UID à 1000 pour 'appuser'. "
+        "Un UID fixe est requis pour la compatibilité avec les orchestrateurs."
+    )
+
+
+def test_dockerfile_uses_user_directive() -> None:
+    """Vérifie que le Dockerfile contient la directive USER pour basculer l'identité.
+
+    La directive 'USER appuser' est le verrou final du hardening : elle garantit
+    que la commande CMD (uvicorn) s'exécutera sous l'identité de 'appuser'
+    et non sous 'root'.
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    assert "USER appuser" in content, (
+        "Le Dockerfile ne contient pas la directive 'USER appuser'. "
+        "Sans cette directive, le conteneur s'exécutera en tant que root, "
+        "ce qui constitue une faille de sécurité majeure."
+    )
+
+
+def test_dockerfile_uses_chown_on_copy() -> None:
+    """Vérifie que les instructions COPY utilisent --chown pour transférer la propriété.
+
+    Sans le flag --chown, les fichiers copiés appartiendraient à root et
+    l'utilisateur appuser ne pourrait pas les lire ou les exécuter.
+    Le flag --chown est préféré à un 'RUN chown -R' séparé car il évite
+    de créer une couche Docker supplémentaire.
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    assert "--chown=appuser:appgroup" in content, (
+        "Le Dockerfile n'utilise pas '--chown=appuser:appgroup' dans les "
+        "instructions COPY. Les fichiers copiés doivent appartenir à appuser "
+        "pour qu'il puisse les exécuter."
+    )
+
+
+def test_dockerfile_user_after_copy() -> None:
+    """Vérifie que la directive USER est placée APRÈS les instructions COPY.
+
+    L'ordre est critique : les fichiers doivent être copiés (en tant que root)
+    puis la propriété transférée via --chown AVANT de basculer vers appuser.
+    Si USER était placé avant COPY, les opérations de copie pourraient échouer
+    faute de permissions suffisantes.
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    # Trouver les positions relatives de la dernière instruction COPY et de USER
+    last_copy_pos = content.rfind("COPY --from=builder")
+    user_pos = content.find("USER appuser")
+
+    assert last_copy_pos != -1 and user_pos != -1, (
+        "Le Dockerfile ne contient pas les instructions COPY --from=builder "
+        "et USER appuser nécessaires au hardening non-root."
+    )
+    assert user_pos > last_copy_pos, (
+        "La directive 'USER appuser' doit être placée APRÈS les instructions "
+        "'COPY --from=builder' pour garantir que les fichiers sont copiés "
+        "avant le basculement d'identité."
+    )
