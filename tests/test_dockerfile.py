@@ -1,12 +1,14 @@
 """Tests de validation du Dockerfile Multi-Stage et de la configuration Docker.
 
 Ce module vérifie la présence, la structure et la conformité du Dockerfile
-multi-stage produit aux étapes 5.1 et 5.2 du blueprint AIPE_Framework.
+multi-stage produit aux étapes 5.1, 5.2 et 5.3 du blueprint AIPE_Framework.
 
 Étape 5.1 : Valide le pattern multi-stage build (deux stages, exclusion des
     outils de développement, fichier .dockerignore).
 Étape 5.2 : Valide le hardening non-root (création de l'utilisateur appuser,
     transfert de propriété via --chown, directive USER, ordonnancement correct).
+Étape 5.3 : Valide la sonde de surveillance système (instruction HEALTHCHECK,
+    installation de curl, paramètres de timing, ordonnancement correct).
 """
 
 from pathlib import Path
@@ -226,9 +228,12 @@ def test_dockerfile_user_after_copy() -> None:
     dockerfile = PROJECT_DIR / "Dockerfile"
     content = dockerfile.read_text(encoding="utf-8")
 
-    # Trouver les positions relatives de la dernière instruction COPY et de USER
-    last_copy_pos = content.rfind("COPY --from=builder")
-    user_pos = content.find("USER appuser")
+    runtime_start = content.find("AS runtime")
+    runtime_content = content[runtime_start:]
+
+    # Trouver la position de la dernière instruction COPY et de 'USER appuser' dans le runtime
+    last_copy_pos = runtime_content.rfind("COPY --from=builder")
+    user_pos = runtime_content.find("USER appuser\n")
 
     assert last_copy_pos != -1 and user_pos != -1, (
         "Le Dockerfile ne contient pas les instructions COPY --from=builder "
@@ -239,3 +244,108 @@ def test_dockerfile_user_after_copy() -> None:
         "'COPY --from=builder' pour garantir que les fichiers sont copiés "
         "avant le basculement d'identité."
     )
+
+
+# ==============================================================================
+# Tests de la Sonde de Surveillance Système (Healthcheck) — Étape 5.3
+# ==============================================================================
+# Ces tests valident que le Dockerfile intègre une sonde de santé native Docker
+# (instruction HEALTHCHECK) interrogeant l'endpoint /health via curl, avec les
+# paramètres de timing requis pour l'orchestration de production.
+# ==============================================================================
+
+
+def test_dockerfile_has_healthcheck() -> None:
+    """Vérifie la présence de l'instruction HEALTHCHECK avec les bons paramètres.
+
+    La sonde de santé Docker doit :
+    - Utiliser l'instruction HEALTHCHECK (pas un script externe).
+    - Interroger l'endpoint /health de l'API locale via curl.
+    - Définir un intervalle de 15 secondes entre chaque vérification.
+    - Accorder un timeout de 5 secondes maximum par requête.
+    - Prévoir un délai de grâce (start-period) de 10 secondes au démarrage.
+    - Tolérer 3 échecs consécutifs avant de déclarer le conteneur 'unhealthy'.
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    # Présence de l'instruction HEALTHCHECK
+    assert "HEALTHCHECK" in content, (
+        "Le Dockerfile ne contient pas l'instruction 'HEALTHCHECK'. "
+        "Une sonde de santé native est requise pour l'orchestration de production."
+    )
+
+    # Vérification de l'utilisation de curl vers /health
+    assert "curl" in content and "/health" in content, (
+        "Le HEALTHCHECK doit utiliser 'curl' pour interroger l'endpoint '/health'. "
+        "C'est le mécanisme standard de vérification de santé HTTP dans Docker."
+    )
+
+    # Vérification des paramètres de timing
+    assert "--interval=15s" in content, (
+        "Le HEALTHCHECK ne définit pas '--interval=15s'. "
+        "L'intervalle de vérification doit être de 15 secondes."
+    )
+    assert "--timeout=5s" in content, (
+        "Le HEALTHCHECK ne définit pas '--timeout=5s'. "
+        "Le timeout par requête doit être de 5 secondes."
+    )
+    assert "--start-period=10s" in content, (
+        "Le HEALTHCHECK ne définit pas '--start-period=10s'. "
+        "Un délai de grâce de 10 secondes est nécessaire au démarrage d'Uvicorn."
+    )
+    assert "--retries=3" in content, (
+        "Le HEALTHCHECK ne définit pas '--retries=3'. "
+        "3 échecs consécutifs doivent être tolérés avant de déclarer 'unhealthy'."
+    )
+
+
+def test_dockerfile_runtime_has_curl() -> None:
+    """Vérifie que curl est installé dans le stage runtime pour le HEALTHCHECK.
+
+    L'image python:3.10-slim ne contient pas curl par défaut. Sans curl,
+    l'instruction HEALTHCHECK échouerait systématiquement car la commande
+    serait introuvable, rendant le conteneur perpétuellement 'unhealthy'.
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    # Extraire le contenu du stage runtime (après "AS runtime")
+    runtime_start = content.find("AS runtime")
+    assert runtime_start != -1, "Le stage runtime n'est pas défini dans le Dockerfile."
+    runtime_content = content[runtime_start:]
+
+    # Vérifier l'installation d'apt-get curl dans le runtime
+    assert "apt-get" in runtime_content and "curl" in runtime_content, (
+        "Le stage runtime n'installe pas curl via apt-get. "
+        "curl est indispensable pour que l'instruction HEALTHCHECK fonctionne."
+    )
+
+
+def test_dockerfile_curl_before_user() -> None:
+    """Vérifie que l'installation de curl est faite AVANT la directive USER.
+
+    L'ordre est critique : apt-get nécessite les privilèges root pour
+    installer des paquets. Si curl était installé après 'USER appuser',
+    la commande apt-get échouerait avec une erreur de permissions.
+    """
+    dockerfile = PROJECT_DIR / "Dockerfile"
+    content = dockerfile.read_text(encoding="utf-8")
+
+    # Extraire le stage runtime uniquement
+    runtime_start = content.find("AS runtime")
+    runtime_content = content[runtime_start:]
+
+    # Trouver les positions relatives de l'instruction RUN apt-get et USER appuser dans le runtime
+    curl_install_pos = runtime_content.find("RUN apt-get update")
+    user_pos = runtime_content.find("USER appuser\n")
+
+    assert curl_install_pos != -1 and user_pos != -1, (
+        "Le stage runtime doit contenir à la fois l'installation de curl "
+        "et la directive USER appuser."
+    )
+    assert curl_install_pos < user_pos, (
+        "L'installation de curl (apt-get) doit être placée AVANT la directive "
+        "'USER appuser' car apt-get nécessite les privilèges root."
+    )
+

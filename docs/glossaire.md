@@ -80,6 +80,15 @@ Option de l'instruction `COPY` dans un Dockerfile permettant de transférer la p
 ### Port privilégié vs non-privilégié
 Sur les systèmes Linux, les ports réseau inférieurs à 1024 (comme le port 80 HTTP ou 443 HTTPS) sont dits « privilégiés » et ne peuvent être ouverts que par un processus exécuté en tant que `root`. Les ports supérieurs à 1024 (comme le port 8000 utilisé par Uvicorn) sont « non-privilégiés » et accessibles à tout utilisateur du système. Le choix d'un port non-privilégié est donc un prérequis technique pour l'exécution de l'application sous un utilisateur non-root dans un conteneur Docker.
 
+### Directive HEALTHCHECK (Dockerfile)
+Instruction du Dockerfile qui configure une sonde de surveillance native au sein du conteneur. Elle indique au moteur Docker la commande à exécuter périodiquement (ex: `curl -f http://localhost:8000/health`) et les seuils de tolérance (`--interval`, `--timeout`, `--retries`) pour déterminer si l'application est opérationnelle (`healthy`) ou défaillante (`unhealthy`).
+
+### Statut de santé d'un conteneur (Healthy / Unhealthy / Starting)
+État de santé d'un conteneur géré dynamiquement par le démon Docker à partir des résultats de la directive `HEALTHCHECK`. Au démarrage, le conteneur est en état `starting` (pendant la période de grâce `--start-period`). Si la sonde répond avec succès, l'état devient `healthy`. En cas d'échecs consécutifs dépassant le seuil `--retries`, l'état bascule à `unhealthy`, déclenchant des actions correctives au niveau de l'orchestrateur.
+
+### Option `curl -f` (Fail Fast HTTP)
+Drapeau `-f` (ou `--fail`) de l'outil `curl` qui force la commande à renvoyer immédiatement un code de sortie d'erreur (non-zéro) lorsque le serveur HTTP répond avec un code d'erreur 4xx ou 5xx. Sans ce drapeau, `curl` considérerait la requête comme réussie tant qu'une réponse HTTP est reçue, même si cette réponse est une erreur `500 Internal Server Error`.
+
 ---
 
 ## 🌐 Architecture Web & Microservices

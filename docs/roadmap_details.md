@@ -83,7 +83,7 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 
 ---
 
-## Phase 5 : Conteneurisation de Production & Hardening (Docker) — ⏳ En cours
+## Phase 5 : Conteneurisation & Build Multi-Stage (Docker) — ✅ Validé
 *Objectif : Créer une image de conteneur ultra-légère et hautement sécurisée.*
 
 ### Étape 5.1 : Dockerfile Multi-stage avec Poetry — ✅ Validé
@@ -96,7 +96,7 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 *   **Concept clé :** Principe de moindre privilège appliqué à l'exécution de conteneurs.
 *   **Critère de validation :** Lancer le conteneur et inspecter le processus en cours d'exécution confirme que le serveur tourne sous l'identité de `appuser` (UID 1000) et non `root`.
 
-### Étape 5.3 : Sonde de surveillance système (Healthcheck) — 🔲 À venir
+### Étape 5.3 : Sonde de surveillance système (Healthcheck) — ✅ Validé
 *   **Description :** Ajouter la clause `HEALTHCHECK` dans le Dockerfile interrogeant l'API locale `/health` toutes les 15 secondes à l'aide de `curl`.
 *   **Concept clé :** Healthchecking conteneur natif pour l'orchestration (K8s, ECS, Cloud Run).
 *   **Critère de validation :** La commande `docker ps` affiche le statut `(healthy)` après le démarrage du conteneur.

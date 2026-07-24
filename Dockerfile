@@ -8,6 +8,8 @@
 #                        nécessaires pour assembler les dépendances Python.
 #   Stage 2 (runtime) : On copie UNIQUEMENT le résultat compilé (le dossier .venv)
 #                        et le code source dans une image Python nue et minimale.
+#                        On y ajoute le hardening non-root (appuser, UID 1000)
+#                        et une sonde de surveillance native (HEALTHCHECK).
 #
 # Résultat : l'image finale ne contient ni Poetry, ni pip, ni gcc, ni aucun outil
 # de compilation. Elle est donc plus légère (~150 Mo vs ~1 Go) et présente une
@@ -131,6 +133,25 @@ ENV PATH="/app/.venv/bin:${PATH}"
 WORKDIR /app
 
 # ==============================================================================
+# ÉTAPE 5.3 : INSTALLATION DE CURL POUR LA SONDE DE SANTÉ (HEALTHCHECK)
+# ==============================================================================
+# L'image python:3.10-slim ne contient pas d'outil de transfert HTTP (ni curl,
+# ni wget). Or, la sonde de santé Docker HEALTHCHECK a besoin d'un client HTTP
+# pour interroger l'endpoint /health de notre API.
+#
+# On installe curl de façon minimale :
+#   '--no-install-recommends' évite les paquets optionnels (gain ~20 Mo).
+#   'rm -rf /var/lib/apt/lists/*' nettoie le cache APT pour ne pas gonfler
+#   la couche Docker.
+#
+# Note importante : cette installation doit être faite AVANT la directive
+# 'USER appuser', car apt-get nécessite les privilèges root pour fonctionner.
+# ==============================================================================
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# ==============================================================================
 # ÉTAPE 5.2 : SÉCURISATION NON-ROOT (HARDENING)
 # ==============================================================================
 # Principe de moindre privilège ("Least Privilege") :
@@ -202,6 +223,51 @@ USER appuser
 # privilégiés comme 80 ou 443). Notre choix du port 8000 est donc compatible
 # avec l'exécution en tant que 'appuser'.
 EXPOSE 8000
+
+# ==============================================================================
+# ÉTAPE 5.3 : SONDE DE SURVEILLANCE SYSTÈME (HEALTHCHECK)
+# ==============================================================================
+# L'instruction HEALTHCHECK configure Docker pour tester automatiquement si
+# l'application à l'intérieur du conteneur fonctionne correctement.
+#
+# C'est comme un médecin qui prend le pouls d'un patient à intervalles
+# réguliers : si le pouls s'arrête (l'API ne répond plus), l'alarme se
+# déclenche et les mesures correctives sont prises automatiquement.
+#
+# Fonctionnement :
+#   1. Docker exécute la commande 'curl' toutes les 15 secondes (--interval).
+#   2. Si l'API répond avec un code HTTP 2xx, le conteneur est marqué 'healthy'.
+#   3. Si curl échoue ou que l'API met plus de 5 secondes à répondre (--timeout),
+#      Docker compte un échec.
+#   4. Après 3 échecs consécutifs (--retries), le conteneur passe à 'unhealthy'.
+#   5. Le premier test est retardé de 10 secondes (--start-period) pour laisser
+#      à Uvicorn le temps de démarrer complètement.
+#
+# Utilité en production :
+#   - Docker Swarm redémarre automatiquement les conteneurs 'unhealthy'.
+#   - Kubernetes utilise cette information pour ses propres sondes (liveness).
+#   - 'docker ps' affiche le statut (healthy) à côté du conteneur.
+#   - Les outils de monitoring (Prometheus, Grafana) peuvent exploiter cet état.
+#
+# Options détaillées :
+#   --interval=15s    : Fréquence des vérifications (toutes les 15 secondes).
+#   --timeout=5s      : Temps maximum accordé à curl pour obtenir une réponse.
+#   --start-period=10s: Délai de grâce après le démarrage du conteneur pendant
+#                       lequel les échecs ne comptent pas (le temps qu'Uvicorn
+#                       charge les modules Python et commence à servir).
+#   --retries=3       : Nombre d'échecs consécutifs avant de déclarer le
+#                       conteneur 'unhealthy'.
+#
+# 'curl -f' : L'option '-f' (fail silently) fait échouer curl avec un code
+#             de sortie non-nul si le serveur renvoie un code HTTP d'erreur
+#             (4xx ou 5xx). Sans cette option, curl renverrait un succès même
+#             si l'API répond 500 Internal Server Error.
+# '|| exit 1': Si curl échoue pour une raison quelconque (serveur injoignable,
+#              timeout, erreur réseau), on force un code de sortie 1 pour que
+#              Docker comptabilise l'échec.
+# ==============================================================================
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # --- Commande de démarrage du serveur de production ---
 # CMD définit la commande exécutée au lancement du conteneur.

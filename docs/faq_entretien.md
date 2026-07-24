@@ -194,3 +194,28 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     1.  **Tests statiques (pytest) :** Notre suite `test_dockerfile.py` vérifie la présence des directives `USER appuser`, `adduser`, `addgroup` et `--chown=appuser:appgroup` dans le texte du Dockerfile. Cela garantit qu'une modification accidentelle du Dockerfile (suppression du USER) sera détectée avant même le build.
     2.  **Validation dynamique (post-build) :** Après construction de l'image, la commande `docker run --rm aipe-framework:latest whoami` doit renvoyer `appuser`. On peut aussi inspecter le processus avec `docker top <container>` pour confirmer que le PID 1 (uvicorn) appartient à l'UID 1000.
     3.  **Intégration CI/CD :** Ces tests font partie du pipeline de validation continue (`make test`), bloquant automatiquement toute régression de sécurité avant le déploiement.
+
+---
+
+### Q26. Pourquoi utiliser l'instruction native HEALTHCHECK dans le Dockerfile plutôt que d'attendre que l'orchestrateur externe s'en charge ?
+*   **Réponse :** L'instruction `HEALTHCHECK` embarquée dans le Dockerfile fournit une auto-déclaration standardisée et autonome de la santé du conteneur, indépendamment de la plateforme de déploiement.
+*   **Justification :**
+    1.  **Standardisation :** La sonde est définie une fois pour toutes dans le Dockerfile. Que le conteneur soit exécuté via `docker run`, Docker Compose, Docker Swarm ou Kubernetes, le test de santé reste identique sans réécriture de manifeste.
+    2.  **Visibilité locale (`docker ps`) :** En développement et en staging, `docker ps` affiche immédiatement le statut `(healthy)` ou `(unhealthy)`, permettant aux développeurs d'identifier un blocage applicatif sans consulter les logs.
+    3.  **Intégration transparente :** Les orchestrateurs comme Kubernetes ou AWS ECS peuvent lire directement le statut `HEALTHCHECK` Docker pour piloter les sondes de disponibilité (Liveness/Readiness probes) ou la rotation d'instances sans downtime.
+
+---
+
+### Q27. À quoi sert le paramètre `--start-period` dans une directive HEALTHCHECK et pourquoi est-il critique ?
+*   **Réponse :** Le paramètre `--start-period` définit un délai de grâce au démarrage du conteneur pendant lequel les échecs de la sonde de santé sont ignorés et ne comptent pas dans le quota d'échecs (`--retries`).
+*   **Justification :**
+    1.  **Temps de warm-up applicatif :** Lors du lancement, un serveur Web comme Uvicorn doit charger l'interprète Python, importer les modules (FastAPI, Pydantic), initialiser les connexions aux bases de données et compiler les routes. Ce processus prend quelques secondes.
+    2.  **Éviter les fausses erreurs :** Sans `--start-period`, la première vérification exécutée immédiatement au démarrage échouerait car le serveur n'écoute pas encore sur le port 8000. Le conteneur risquerait d'être marqué `unhealthy` ou tué prématurément par l'orchestrateur avant même d'avoir fini de démarrer.
+
+---
+
+### Q28. Pourquoi l'option `-f` de `curl` est-elle indispensable dans la commande CMD du HEALTHCHECK ?
+*   **Réponse :** L'option `-f` (`--fail`) fait échouer la commande `curl` avec un code de sortie non-zéro lorsque le serveur HTTP répond avec un code d'erreur (4xx ou 5xx).
+*   **Justification :**
+    1.  **Comportement par défaut de curl :** Par défaut, `curl` considère une requête HTTP comme "réussie" (code de sortie 0) tant qu'il a pu établir une connexion TCP et recevoir une réponse HTTP, même s'il s'agit d'une erreur `500 Internal Server Error` ou `503 Service Unavailable`.
+    2.  **Détection réelle des pannes :** En ajoutant `-f`, si l'endpoint `/health` retourne une erreur 500 (ex: base de données déconnectée), `curl` échoue immédiatement avec un code de retour 22. La clause `|| exit 1` transmet cet échec à Docker, qui comptabilise correctement une tentative infructueuse.
