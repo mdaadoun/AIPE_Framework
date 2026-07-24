@@ -13,7 +13,6 @@ from src.core.config import settings
 
 # Initialisation de l'application FastAPI.
 #
-# Pour un dev junior :
 # - 'FastAPI' est la classe principale représentant notre serveur web d'API.
 # - Nous lui passons des métadonnées issues de notre module centralisé de configuration.
 # - La documentation OpenAPI interactive est automatiquement générée et exposée
@@ -26,7 +25,6 @@ app = FastAPI(
 
 # Inclusion des routeurs modulaires.
 #
-# Pour un dev junior :
 # Nous attachons ici le routeur de santé (/health) que nous avons défini dans son
 # propre sous-module. Cela permet de garder main.py léger, lisible et propre.
 # Plus tard, si nous créons d'autres fonctionnalités (ex: routes RAG, agents, LLM),

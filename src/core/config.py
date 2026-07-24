@@ -14,7 +14,6 @@ class Settings:
     """
     Configuration de l'application FastAPI.
 
-    Pour un dev junior :
     - Utiliser 'os.getenv' permet d'injecter dynamiquement des variables d'environnement
       sans modifier une seule ligne de code. Par exemple, lors du déploiement Docker
       ou sur un orchestrateur (Kubernetes, Cloud Run), nous pourrons injecter

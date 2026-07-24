@@ -12,7 +12,6 @@ class HealthCheckResponse(BaseModel):
     """
     Schéma de validation Pydantic pour la réponse de l'endpoint Healthcheck.
 
-    Pour un dev junior :
     - Un "schema" ou "model" définit la structure attendue des données (leurs clés et leurs types).
     - Pydantic effectue deux tâches majeures à l'exécution :
       1. Validation : Si les types ne correspondent pas (ex: un int là où on attend un str),

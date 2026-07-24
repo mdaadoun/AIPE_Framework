@@ -10,7 +10,6 @@ from fastapi import APIRouter
 from src.core.config import settings
 from src.schemas.health import HealthCheckResponse
 
-# Pour un dev junior :
 # Un APIRouter permet de découper les routes de notre API en différents fichiers.
 # Au lieu d'écrire toutes les routes sur l'objet 'app' global dans main.py,
 # nous déclarons un sous-routeur ici et nous l'inclurons dans main.py.
@@ -27,7 +26,6 @@ async def health_check() -> HealthCheckResponse:
     """
     Retourne les métadonnées de santé de l'API de façon asynchrone.
 
-    Pour un dev junior :
     - 'async def' : En utilisant des fonctions asynchrones, FastAPI n'attend pas passivement
       la fin d'une requête pour en traiter une autre. Cela permet à notre serveur ASGI
       (Uvicorn) de gérer des milliers de requêtes de façon hautement concurrente.

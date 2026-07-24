@@ -12,7 +12,6 @@ from src.main import app
 
 # Initialisation du client de test FastAPI.
 #
-# Pour un dev junior :
 # Le 'TestClient' simule de véritables appels HTTP (GET, POST, etc.) sur notre
 # application FastAPI sans avoir à lancer de serveur réseau réel (pas d'écoute sur le port 8000).
 # Cela permet d'exécuter nos tests en quelques millisecondes et de les intégrer
@@ -24,7 +23,6 @@ def test_health_check() -> None:
     """
     Vérifie le comportement et la conformité de la route GET /health.
 
-    Pour un dev junior :
     Un test d'intégration s'assure du bon fonctionnement combiné de plusieurs composants :
     le routeur, les schémas de données Pydantic, et la configuration globale.
     """
