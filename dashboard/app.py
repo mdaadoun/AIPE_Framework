@@ -795,7 +795,9 @@ def run_tests():
                 }
             ), 404
 
-        cmd = [python_exec, "-m", "pytest", clean_name]
+        # En exécution ciblée (un seul fichier/test), on ajoute --no-cov pour éviter le fail_under
+        # si le test ciblé ne parcours pas le code source src/
+        cmd = [python_exec, "-m", "pytest", "--no-cov", clean_name]
 
     tests_dir = PROJECT_DIR / "tests"
     if not tests_dir.exists():
