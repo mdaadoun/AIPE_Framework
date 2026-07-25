@@ -1,13 +1,16 @@
 import subprocess
+import sys
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 VENV_BIN = PROJECT_DIR / ".venv" / "bin"
 
 
-def get_cmd(tool_name: str) -> str:
+def get_cmd(tool_name: str) -> list[str]:
     bin_path = VENV_BIN / tool_name
-    return str(bin_path) if bin_path.exists() else tool_name
+    if bin_path.exists():
+        return [str(bin_path)]
+    return [sys.executable, "-m", tool_name.replace("-", "_")]
 
 
 def test_detect_secrets_behavior() -> None:
@@ -18,7 +21,7 @@ def test_detect_secrets_behavior() -> None:
 
     try:
         # Exécution de detect-secrets scan sur ce fichier
-        cmd = [get_cmd("detect-secrets"), "scan", str(secret_file)]
+        cmd = get_cmd("detect-secrets") + ["scan", str(secret_file)]
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -47,7 +50,7 @@ def test_ruff_lint_behavior(tmp_path: Path) -> None:
     dirty_file.write_text(dirty_code)
 
     # Exécution de Ruff check
-    cmd = [get_cmd("ruff"), "check", str(dirty_file)]
+    cmd = get_cmd("ruff") + ["check", str(dirty_file)]
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -70,7 +73,7 @@ def test_mypy_strict_behavior(tmp_path: Path) -> None:
     untyped_file.write_text(untyped_code)
 
     # Exécution de Mypy en mode strict
-    cmd = [get_cmd("mypy"), "--strict", str(untyped_file)]
+    cmd = get_cmd("mypy") + ["--strict", str(untyped_file)]
     result = subprocess.run(
         cmd,
         capture_output=True,
