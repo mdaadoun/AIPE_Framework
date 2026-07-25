@@ -856,7 +856,7 @@ def run_tests():
 @app.route("/api/code/list", methods=["GET"])
 def list_code_files():
     """Renvoie la liste des fichiers éligibles pour le navigateur de code."""
-    allowed_roots = ["src", "tests"]
+    allowed_roots = ["src", "tests", "scripts"]
     allowed_files = [
         "Makefile",
         "pyproject.toml",

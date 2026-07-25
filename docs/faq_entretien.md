@@ -248,3 +248,30 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     3.  **Tests de cohérence croisée :** 2 tests comparent les paramètres de `settings.json` avec les hooks pre-commit (`insertFinalNewline` ↔ `end-of-file-fixer`, `trimTrailingWhitespace` ↔ `trailing-whitespace`). Un test croise la valeur `ruff.lineLength` avec celle de `pyproject.toml` pour détecter tout désalignement.
     4.  **Tests d'extensions :** 2 tests vérifient que les extensions Ruff et Python sont dans la liste des recommandations.
 
+---
+
+### Q32. Que signifie le KPI « Zero-Setup Friction » et comment le mesurez-vous concrètement ?
+*   **Réponse :** Le « Zero-Setup Friction » est un indicateur de performance d'onboarding qui mesure le temps nécessaire à un développeur externe pour passer du clonage du projet (`git clone`) à un serveur fonctionnel (`/health` opérationnel).
+*   **Justification :**
+    1.  **Seuil objectif :** Nous avons fixé un budget de 5 minutes maximum (300 secondes). Au-delà, le projet est considéré comme ayant une friction d'installation excessive.
+    2.  **Mesure automatisée :** Le script `scripts/simulate_onboarding.sh` clone le projet dans un dossier temporaire vierge, exécute `make install`, vérifie la cohérence de l'environnement et teste le healthcheck de l'API — le tout chronométré par étape.
+    3.  **Reproductibilité :** La simulation est lancée via `make onboarding-check`, garantissant que n'importe quel membre de l'équipe peut la reproduire et valider le KPI à tout moment.
+
+---
+
+### Q33. Pourquoi testez-vous automatiquement le contenu de votre README plutôt que de vous fier à la relecture humaine ?
+*   **Réponse :** Le README est le premier point de contact d'un développeur externe. Si les instructions qu'il contient ne correspondent pas à la réalité du projet, l'onboarding échoue avant même de commencer.
+*   **Justification :**
+    1.  **Dérive documentation/code :** Un développeur peut renommer une cible Makefile (par exemple `make start` → `make dev`) sans mettre à jour le README. Le nouveau contributeur suit des instructions obsolètes et échoue.
+    2.  **Tests de présence :** Nos tests vérifient que le README mentionne explicitement `make install` et `make dev` (ou `make dashboard`). Si un refactoring supprime ces commandes, la CI détecte immédiatement l'incohérence.
+    3.  **Documentation vivante :** En traitant la documentation comme du code testé, on garantit qu'elle reste synchronisée avec l'implémentation réelle à chaque commit.
+
+---
+
+### Q34. Pourquoi adoptez-vous une stratégie hybride (tests statiques rapides + script de simulation) plutôt qu'un unique test de bout en bout ?
+*   **Réponse :** Un test de bout en bout complet (clonage + installation + démarrage serveur) prend 2 à 4 minutes et nécessite un accès réseau. L'intégrer dans la boucle de CI standard (`make test`) ralentirait considérablement le feedback.
+*   **Justification :**
+    1.  **Tests statiques (21 tests, < 0.3s) :** Exécutés à chaque `make test`, ils vérifient que tous les prérequis d'onboarding sont en place (structure de fichiers, README, Makefile, script exécutable, API fonctionnelle). Ils détectent instantanément une régression sans coût réseau.
+    2.  **Simulation complète (script bash, ~3 min) :** Réservée aux validations ponctuelles via `make onboarding-check`. Elle effectue un vrai clonage propre pour simuler l'expérience d'un nouveau développeur.
+    3.  **Complémentarité :** Les tests rapides garantissent que les briques sont en place ; la simulation garantit que les briques s'assemblent correctement de bout en bout.
+

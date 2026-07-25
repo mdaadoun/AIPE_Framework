@@ -147,3 +147,17 @@ Fichier `.vscode/extensions.json` versionné dans Git qui déclare les extension
 
 ### Alignement IDE / CI (DX Consistency)
 Principe d'ingénierie consistant à garantir que l'environnement de développement local (IDE, éditeur) applique exactement les mêmes règles de formatage, de linting et de validation que la chaîne d'intégration continue (CI). Dans ce framework, l'alignement est assuré par le triptyque : `.vscode/settings.json` (temps réel dans l'éditeur) → `.pre-commit-config.yaml` (au moment du commit) → `Makefile` (exécution manuelle ou CI).
+
+---
+
+## 🧪 Validation & Onboarding
+
+### Smoke Test (Test de fumée)
+Test de validation minimale qui vérifie qu'un système démarre et répond sans erreur fatale, sans entrer dans le détail des fonctionnalités. L'analogie vient de l'électronique : on branche le circuit et on vérifie qu'il n'y a pas de fumée. Dans ce framework, le smoke test interroge l'endpoint `/health` de l'API FastAPI pour confirmer que le serveur est opérationnel après installation.
+
+### Test de complétude structurelle
+Catégorie de test qui ne vérifie pas le comportement du code mais la présence et la cohérence de tous les fichiers nécessaires au bon fonctionnement du projet (README, Makefile, pyproject.toml, .gitignore, scripts, src/__init__.py). Un fichier manquant peut rendre l'onboarding impossible même si le code est parfaitement fonctionnel.
+
+### Trap (piège shell)
+Mécanisme bash (`trap cleanup EXIT`) qui enregistre une fonction de nettoyage exécutée automatiquement à la sortie d'un script, que ce soit une fin normale, une erreur, ou un signal d'interruption (`Ctrl+C`). Dans le script de simulation d'onboarding, le trap garantit la suppression des dossiers temporaires et l'arrêt des processus serveur résiduels, même si le script échoue en cours de route.
+

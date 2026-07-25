@@ -10,7 +10,7 @@
 # .PHONY indique à Make que ces cibles ne correspondent pas à des fichiers physiques
 # sur le disque. Ainsi, même s'il existe un dossier nommé "install" ou "test",
 # la commande `make install` ou `make test` s'exécutera toujours.
-.PHONY: install clean lint test dev dashboard docker-build help
+.PHONY: install clean lint test dev dashboard docker-build onboarding-check help
 
 # La cible par défaut qui s'exécute si on tape juste `make`
 help:
@@ -30,6 +30,8 @@ help:
 	@echo "                      en mode rechargement automatique (reload)."
 	@echo "  make docker-build - Docker : Construit l'image de production multi-stage"
 	@echo "                      et affiche son poids final (objectif : < 250 Mo)."
+	@echo "  make onboarding-check - Simulation : Clone le projet dans un dossier"
+	@echo "                      temporaire et valide l'onboarding en < 5 min."
 	@echo "======================================================================"
 
 # --- 1. AUTOMATISATION DE L'ONBOARDING ET DU NETTOYAGE ---
@@ -87,4 +89,14 @@ docker-build:
 	docker build -t aipe-framework:latest .
 	@echo "--- Poids de l'image finale ---"
 	@docker images aipe-framework:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+# --- 4. SIMULATION D'ONBOARDING (ZERO-SETUP FRICTION) ---
+
+# Exécute le script de simulation d'onboarding complet (Étape 6.2).
+# Ce script clone le projet dans un dossier temporaire, exécute 'make install',
+# vérifie la cohérence de l'environnement et teste le healthcheck de l'API.
+# Le chronomètre global doit rester sous les 300 secondes (5 minutes).
+onboarding-check:
+	@echo "--- Simulation d'onboarding Zero-Setup Friction ---"
+	bash scripts/simulate_onboarding.sh
 
