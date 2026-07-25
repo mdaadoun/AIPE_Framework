@@ -219,3 +219,32 @@ Cette foire aux questions présente les questions d'entretien classiques posées
 *   **Justification :**
     1.  **Comportement par défaut de curl :** Par défaut, `curl` considère une requête HTTP comme "réussie" (code de sortie 0) tant qu'il a pu établir une connexion TCP et recevoir une réponse HTTP, même s'il s'agit d'une erreur `500 Internal Server Error` ou `503 Service Unavailable`.
     2.  **Détection réelle des pannes :** En ajoutant `-f`, si l'endpoint `/health` retourne une erreur 500 (ex: base de données déconnectée), `curl` échoue immédiatement avec un code de retour 22. La clause `|| exit 1` transmet cet échec à Docker, qui comptabilise correctement une tentative infructueuse.
+
+---
+
+### Q29. Pourquoi versionnez-vous le dossier `.vscode/` dans Git plutôt que de le laisser dans le `.gitignore` ?
+*   **Réponse :** Le dossier `.vscode/` contient la configuration de l'éditeur partagée par toute l'équipe. Le versionner dans Git relève de la philosophie « Infrastructure as Code » (IaC).
+*   **Justification :**
+    1.  **Uniformité de l'outillage :** Sans ce fichier, chaque développeur pourrait utiliser un formateur différent (Black, autopep8, yapf). Les commits résultants auraient des styles incompatibles, générant du bruit dans les diffs Git et des conflits de merge artificiels.
+    2.  **Zero-Setup Friction :** Un nouveau développeur qui clone le projet obtient immédiatement le bon formateur, les bonnes Code Actions et les recommandations d'extensions. Il n'a pas besoin de lire une documentation pour configurer son éditeur.
+    3.  **Distinction critique :** On ne versionne que les fichiers de configuration *partagés* (`settings.json`, `extensions.json`). Les fichiers *personnels* comme `launch.json` (configurations de débogage spécifiques à la machine) ne sont pas inclus.
+
+---
+
+### Q30. Pourquoi utiliser Ruff comme formateur VSCode plutôt que l'extension Black ?
+*   **Réponse :** Ruff intègre à la fois un linter et un formateur dans un seul outil. L'utiliser dans VSCode garantit un alignement parfait avec les hooks pre-commit et le Makefile.
+*   **Justification :**
+    1.  **Outil unique, résultat unique :** Si le pre-commit utilise Ruff et que l'IDE utilise Black, il existe un risque de « ping-pong de formatage » : Black formate le code à la sauvegarde, puis Ruff le re-formate différemment au commit (ou inversement). Utiliser le même outil partout élimine ce problème.
+    2.  **Performance :** Ruff est écrit en Rust et formate un fichier en quelques millisecondes, alors que Black (écrit en Python) peut prendre plusieurs centaines de millisecondes. Sur des sauvegardes fréquentes, la différence est perceptible.
+    3.  **Réduction de la surface de maintenance :** Une seule extension (`charliermarsh.ruff`) remplace trois extensions séparées (Black, Flake8, isort), simplifiant les mises à jour et la configuration.
+
+---
+
+### Q31. Comment validez-vous automatiquement que votre configuration IDE est correcte et cohérente avec le reste du projet ?
+*   **Réponse :** Nous traitons les fichiers de configuration IDE avec la même rigueur que le code de production, en les validant via une suite de tests unitaires dédiés (`tests/test_vscode_settings.py`).
+*   **Justification :**
+    1.  **Tests de structure :** 4 tests vérifient l'existence et la validité syntaxique des fichiers `.vscode/settings.json` et `.vscode/extensions.json`, y compris le nettoyage des commentaires JSONC pour le parsing.
+    2.  **Tests de contenu :** 5 tests valident que les paramètres critiques sont présents (Ruff comme formateur, format-on-save activé, Code Actions configurées, longueur de ligne alignée, linting activé).
+    3.  **Tests de cohérence croisée :** 2 tests comparent les paramètres de `settings.json` avec les hooks pre-commit (`insertFinalNewline` ↔ `end-of-file-fixer`, `trimTrailingWhitespace` ↔ `trailing-whitespace`). Un test croise la valeur `ruff.lineLength` avec celle de `pyproject.toml` pour détecter tout désalignement.
+    4.  **Tests d'extensions :** 2 tests vérifient que les extensions Ruff et Python sont dans la liste des recommandations.
+

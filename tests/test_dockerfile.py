@@ -348,4 +348,3 @@ def test_dockerfile_curl_before_user() -> None:
         "L'installation de curl (apt-get) doit être placée AVANT la directive "
         "'USER appuser' car apt-get nécessite les privilèges root."
     )
-

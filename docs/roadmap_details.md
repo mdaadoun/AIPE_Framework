@@ -8,7 +8,7 @@ Cette feuille de route détaille l'ordre chronologique des étapes pour réalise
 
 ```text
 Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : Interface CLI ──> Phase 4 : API FastAPI ──> Phase 5 : Docker & Sécurité ──> Phase 6 : IDE & Onboarding
-     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (✅ Validé)                  (⏳ En cours)               (🔲 À venir)
+     (✅ Validé)                 (✅ Validé)                 (✅ Validé)                 (✅ Validé)                  (✅ Validé)                 (⏳ En cours)
 ```
 
 ---
@@ -103,10 +103,10 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 
 ---
 
-## Phase 6 : Intégration IDE & Validation Finale — 🔲 À venir
+## Phase 6 : Intégration IDE & Validation Finale — ⏳ En cours
 *Objectif : Valider l'expérience globale du développeur et de la chaîne d'outils.*
 
-### Étape 6.1 : Configuration de l'environnement IDE — 🔲 À venir
+### Étape 6.1 : Configuration de l'environnement IDE — ✅ Validé
 *   **Description :** Création du fichier de paramètres VSCode `.vscode/settings.json` pour configurer le formatage automatique à la sauvegarde via le formateur officiel de Ruff.
 *   **Concept clé :** Alignement de l'environnement de développement et de la CI locale.
 *   **Critère de validation :** Sauvegarder un fichier Python mal formaté dans VSCode applique instantanément la correction.

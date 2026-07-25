@@ -128,3 +128,22 @@ Mesure statistique (exprimée en pourcentage) qui comptabilise le taux de lignes
 
 ### TestClient
 Utilitaire fourni par la bibliothèque Starlette qui permet d'exécuter des tests d'intégration HTTP rapides sur une application FastAPI en simulant des requêtes (GET, POST, etc.) en boucle locale fermée, éliminant ainsi le besoin de démarrer un serveur réseau réel.
+
+---
+
+## 🖥️ IDE & Expérience Développeur
+
+### Format-on-Save (Formatage à la Sauvegarde)
+Fonctionnalité de l'éditeur de code (VSCode, PyCharm, etc.) qui déclenche automatiquement le formateur configuré à chaque sauvegarde de fichier (`Ctrl+S`). Dans ce framework, le formateur Ruff reformate le code Python à la sauvegarde, reproduisant exactement le même résultat que le hook pre-commit ou la commande `make lint`, mais de manière instantanée et sans attendre le commit Git.
+
+### JSONC (JSON with Comments)
+Variante du format JSON standard qui autorise les commentaires (`//` et `/* */`). C'est le format utilisé par VSCode pour ses fichiers de configuration (`.vscode/settings.json`, `.vscode/extensions.json`). Le JSON classique défini par la spécification RFC 8259 interdit strictement les commentaires, ce qui rend les fichiers de configuration difficiles à documenter.
+
+### Code Actions on Save
+Mécanisme avancé de VSCode permettant d'exécuter des « actions de code » automatiquement au moment de la sauvegarde. Contrairement au simple formatage (qui n'ajuste que l'indentation et les sauts de ligne), les Code Actions peuvent corriger le code lui-même : supprimer les imports inutilisés (`source.fixAll`), réorganiser les imports selon PEP 8 (`source.organizeImports`), et appliquer des quick-fixes proposés par le linter.
+
+### Workspace Recommendations (extensions.json)
+Fichier `.vscode/extensions.json` versionné dans Git qui déclare les extensions indispensables au projet. Lorsqu'un développeur ouvre le dossier du projet, VSCode affiche automatiquement une notification proposant d'installer les extensions manquantes. Cela garantit l'uniformité de l'outillage dans l'équipe sans documentation supplémentaire.
+
+### Alignement IDE / CI (DX Consistency)
+Principe d'ingénierie consistant à garantir que l'environnement de développement local (IDE, éditeur) applique exactement les mêmes règles de formatage, de linting et de validation que la chaîne d'intégration continue (CI). Dans ce framework, l'alignement est assuré par le triptyque : `.vscode/settings.json` (temps réel dans l'éditeur) → `.pre-commit-config.yaml` (au moment du commit) → `Makefile` (exécution manuelle ou CI).

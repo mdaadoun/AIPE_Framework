@@ -864,6 +864,8 @@ def list_code_files():
         ".gitignore",
         "Dockerfile",
         ".dockerignore",
+        ".vscode/settings.json",
+        ".vscode/extensions.json",
     ]
 
     files = []
