@@ -40,6 +40,7 @@ AIPE_Framework/
     ├── roadmap_en.md          # Chronological step-by-step 6-phase roadmap
     ├── glossary_en.md         # Technical glossary of key framework concepts
     ├── questions_en.md        # Interactive technical interview FAQ (34 Q&A)
+    ├── code_guide_en.md       # Comprehensive bilingual source code architecture guide
     └── journal_en.md          # Architecture Decision Records (ADR) & development logbook
 ```
 

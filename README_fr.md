@@ -38,6 +38,7 @@ AIPE_Framework/
     ├── roadmap_fr.md           # Feuille de route chronologique par étapes
     ├── glossary_fr.md          # Glossaire des concepts techniques clés du framework
     ├── questions_fr.md         # FAQ interactive pour la simulation d'entretien oral
+    ├── code_guide_fr.md        # Guide bilingue détaillé d'architecture du code source
     └── journal_fr.md           # Journal de bord d'apprentissage et choix d'architecture
 ```
 
