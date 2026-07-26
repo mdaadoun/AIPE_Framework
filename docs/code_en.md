@@ -82,3 +82,9 @@ This document provides a detailed breakdown of every module, class, schema, and 
 ## 🚀 9. Onboarding Automation: `scripts/simulate_onboarding.sh`
 
 - **Purpose:** Automated E2E verification script that clones the repository into an isolated temporary folder, executes `make install`, boots the server, and validates the `/health` API contract within a 300-second timer.
+
+---
+
+## 📊 10. Interactive Dashboard Backend: `dashboard/app.py`
+
+- **Purpose:** Flask backend service hosting the interactive project dashboard UI, API documentation viewer, dynamic AST-based unit test runner (`/api/run-tests`), and secure source code browser (`/api/code/file`).

@@ -82,3 +82,9 @@ Ce document présente une explication détaillée de chaque module, classe, sch�
 ## 🚀 9. Simulation d'Onboarding : `scripts/simulate_onboarding.sh`
 
 - **Rôle :** Script de validation automatisé E2E qui clone le dépôt dans un dossier temporaire isolé, exécute `make install`, démarre le serveur et valide le contrat d'interface `/health` en moins de 300 secondes.
+
+---
+
+## 📊 10. Backend du Dashboard Interactif : `dashboard/app.py`
+
+- **Rôle :** Service backend Flask alimentant le dashboard interactif, la visualisation des spécifications, le lanceur de tests basé sur l'analyse AST Python (`/api/run-tests`) et le navigateur de code source sécurisé (`/api/code/file`).
