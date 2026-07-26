@@ -1,4 +1,4 @@
-# 📌 Séance 17 : Simulation d'Onboarding « Zero-Setup Friction » (Phase 6 - Étape 6.2)
+# 📌 Séance 6.2 : Simulation d'Onboarding « Zero-Setup Friction »
 **Date :** 25 Juillet 2026
 
 Dernière étape du framework AIPE. L'objectif est de valider de bout en bout que l'expérience d'onboarding d'un nouveau développeur respecte le KPI « Zero-Setup Friction » : cloner le projet, exécuter `make install`, démarrer le serveur avec `make dev` et obtenir un healthcheck fonctionnel — le tout en moins de 5 minutes chrono. Cette étape clôture la Phase 6 « Intégration IDE & Validation Finale » et boucle le cycle complet du socle technique.

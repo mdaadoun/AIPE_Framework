@@ -1,4 +1,4 @@
-# 📌 Séance 11 : Implémentation du Healthcheck conforme & Principes d'Observabilité (Phase 4 - Étape 4.2)
+# 📌 Séance 4.2 : Implémentation du Healthcheck conforme & Principes d'Observabilité (`/health`)
 **Date :** 24 Juillet 2026
 
 L'objectif de cette séance est de finaliser et de valider la conformité de l'endpoint `/health` avec le Cahier des Charges Fonctionnel et Technique (CDCFT). Nous analysons l'importance de cette route en tant que contrat d'interface pour l'observabilité minimale exigée par les orchestrateurs cloud modernes.

@@ -1,4 +1,4 @@
-# 📌 Séance 10 : Modularisation de l'API & Structure Clean Architecture (Phase 4)
+# 📌 Séance 4.1 : Modularisation de l'API & Structure Clean Architecture (`src/`)
 **Date :** 24 Juillet 2026
 
 L'objectif de cette séance est de refondre l'initialisation de l'API FastAPI en passant d'un fichier monolithique unique à une structure modulaire et extensible adaptée à des projets industriels. Ce découpage facilite la compréhension par un développeur junior et pose les fondations pour ajouter de nouvelles routes d'IA (RAG, agents).

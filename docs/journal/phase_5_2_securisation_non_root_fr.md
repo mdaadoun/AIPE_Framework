@@ -1,4 +1,4 @@
-# 📌 Séance 14 : Sécurisation Non-root du Conteneur Docker (Phase 5 - Étape 5.2)
+# 📌 Séance 5.2 : Sécurisation Non-root du Conteneur Docker
 **Date :** 24 Juillet 2026
 
 L'objectif de cette séance est de renforcer la sécurité de l'image Docker de production en appliquant le principe de moindre privilège. Concrètement, on crée un utilisateur système non-privilégié `appuser` (UID 1000) dans le stage `runtime` du Dockerfile et on bascule l'exécution de l'application sous son identité, de sorte que le serveur Uvicorn ne tourne jamais en tant que `root`.

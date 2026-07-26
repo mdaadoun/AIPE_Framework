@@ -1,4 +1,4 @@
-# 📌 Séance 6 : Validation Automatisée du Gatekeeping & Intégration Dashboard
+# 📌 Séance 2.4 : Validation Automatisée du Gatekeeping & Intégration Dashboard
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'implémenter une suite de tests unitaires et d'intégration afin de valider automatiquement le fonctionnement de nos barrières de sécurité (detect-secrets), de linting (Ruff) et de typage (Mypy). Ces tests garantissent que tout dysfonctionnement ou changement de configuration inattendu de nos outils de qualité sera immédiatement détecté et visible sur le dashboard.

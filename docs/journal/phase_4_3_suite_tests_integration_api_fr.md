@@ -1,4 +1,4 @@
-# 📌 Séance 12 : Suite de Tests d'Intégration de l'API & Couverture de Code (Phase 4 - Étape 4.3)
+# 📌 Séance 4.3 : Suite de Tests d'Intégration de l'API & Couverture de Code
 **Date :** 24 Juillet 2026
 
 L'objectif de cette séance est d'implémenter et d'automatiser les tests d'intégration pour le point d'accès de santé de l'API FastAPI avec `TestClient` et d'assurer une configuration globale du projet pour atteindre et maintenir un taux de couverture de test de 100%.

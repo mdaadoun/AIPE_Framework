@@ -1,4 +1,4 @@
-# 📌 Séance 15 : Sonde de Surveillance Système (HEALTHCHECK) (Phase 5 - Étape 5.3)
+# 📌 Séance 5.3 : Sonde de Surveillance Système (HEALTHCHECK)
 **Date :** 24 Juillet 2026
 
 L'objectif de cette séance est d'intégrer une sonde de surveillance de santé native Docker (`HEALTHCHECK`) dans le stage `runtime` du Dockerfile. Cette sonde interroge l'endpoint `/health` de notre API toutes les 15 secondes via `curl` afin de permettre aux orchestrateurs de conteneurs (Docker Swarm, Kubernetes, ECS, Cloud Run) de connaître l'état réel de santé du service et de réagir automatiquement en cas de défaillance.
@@ -35,7 +35,7 @@ L'objectif de cette séance est d'intégrer une sonde de surveillance de santé 
 #### Dilemme C : Configuration des paramètres de timing (`--interval`, `--timeout`, `--start-period`, `--retries`)
 
 *   **Choix retenu :** `--interval=15s --timeout=5s --start-period=10s --retries=3`
-    *   *Justification :* 
+    *   *Justification :*
         *   `--interval=15s` offre un bon compromis entre réactivité face aux pannes et économie de ressources CPU.
         *   `--timeout=5s` évite de bloquer la sonde si le serveur est ralenti.
         *   `--start-period=10s` laisse 10 secondes à Uvicorn pour démarrer proprement.

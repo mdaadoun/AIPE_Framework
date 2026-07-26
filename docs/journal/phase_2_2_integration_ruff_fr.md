@@ -1,4 +1,4 @@
-# 📌 Séance 4 : Intégration de Ruff pour le Linting et le Formatage
+# 📌 Séance 2.2 : Intégration de Ruff pour le Linting et le Formatage
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'intégrer Ruff comme outil unifié de linting et de formatage de code à haute performance. En le branchant sur le système de pre-commit, nous garantisons un code propre, standardisé et exempt d'erreurs courantes avant chaque commit.

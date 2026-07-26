@@ -34,7 +34,7 @@ Phase 1 : Poetry & Setup ──> Phase 2 : Qualité & Hooks ──> Phase 3 : In
 ### Étape 2.1 : Configuration Pre-commit & Sécurité — ✅ Validé
 *   **Description :** Initialisation du fichier [`.pre-commit-config.yaml`](file:///home/michael/Code/job/projets/AIPE_Framework/.pre-commit-config.yaml) intégrant des hooks de nettoyage de base et le hook de sécurité passive `detect-secrets`.
 *   **Concept clé :** Prévention active des fuites de secrets (API keys OpenAI, Gemini, etc.) dans les dépôts de code.
-*   **Critère de validation :** Tenter de commiter un fichier contenant `API_KEY = "sk-proj-12345"` est automatiquement bloqué localement par Git.
+*   **Critère de validation :** Le commit d'un fichier contenant `API_KEY = "sk-proj-12345"` <!-- pragma: allowlist secret --> est automatiquement bloqué localement par Git.
 
 ### Étape 2.2 : Intégration de Ruff — ✅ Validé
 *   **Description :** Configurer Ruff dans [`pyproject.toml`](file:///home/michael/Code/job/projets/AIPE_Framework/pyproject.toml) avec les jeux de règles standards (E, F, I, B) et l'intégrer au pre-commit.

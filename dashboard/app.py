@@ -218,9 +218,25 @@ def markdown_to_html(md_text: str) -> str:
     return html_content
 
 
-def parse_faq_questions():
-    """Parcoure docs/faq_entretien.md et en extrait une liste de questions/réponses."""
-    faq_file = DOCS_DIR / "faq_entretien.md"
+def get_doc_file(base_name: str, lang: str = "en") -> Path:
+    """Resolves documentation path according to selected language (_en.md or _fr.md)."""
+    suffix = "_en" if lang == "en" else "_fr"
+    target_path = DOCS_DIR / f"{base_name}{suffix}.md"
+    if target_path.exists():
+        return target_path
+
+    # Fallback to alternate language or base file
+    fallback_suffix = "_fr" if lang == "en" else "_en"
+    fallback_path = DOCS_DIR / f"{base_name}{fallback_suffix}.md"
+    if fallback_path.exists():
+        return fallback_path
+
+    return DOCS_DIR / f"{base_name}.md"
+
+
+def parse_faq_questions(lang: str = "en"):
+    """Parse docs/faq_entretien.md (or _en.md) and extract questions & answers list."""
+    faq_file = get_doc_file("faq_entretien", lang)
     if not faq_file.exists():
         return []
 
@@ -246,17 +262,21 @@ def parse_faq_questions():
 
 @app.route("/")
 def index():
-    """Rend l'interface Single Page Application (SPA)."""
+    """Rend l'interface Single Page Application (SPA). / Renders SPA UI."""
     return render_template("index.html")
 
 
 @app.route("/api/presentation", methods=["GET"])
 def get_presentation():
-    """Renvoie le contenu HTML de la présentation vulgarisée."""
-    presentation_file = DOCS_DIR / "presentation.md"
+    """Returns presentation HTML content in requested language (lang=en|fr). / Renvoie le contenu HTML de la présentation."""
+    lang = request.args.get("lang", "en")
+    presentation_file = get_doc_file("presentation", lang)
     if not presentation_file.exists():
         return jsonify(
-            {"status": "error", "message": "Fichier presentation.md introuvable"}
+            {
+                "status": "error",
+                "message": f"File {presentation_file.name} not found / Introuvable",
+            }
         ), 404
 
     try:
@@ -267,16 +287,16 @@ def get_presentation():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-def parse_roadmap_to_html() -> str:
-    """Parse le fichier roadmap_details.md et le convertit en grille de cartes de phases et d'étapes."""
-    roadmap_file = DOCS_DIR / "roadmap_details.md"
+def parse_roadmap_to_html(lang: str = "en") -> str:
+    """Parses roadmap_details.md (or _en.md) and converts to UI grid."""
+    roadmap_file = get_doc_file("roadmap_details", lang)
     if not roadmap_file.exists():
-        return "<div style='color: var(--danger); padding: 20px;'>Fichier roadmap_details.md introuvable.</div>"
+        return "<div style='color: var(--danger); padding: 20px;'>Roadmap file not found / Fichier roadmap_details.md introuvable.</div>"
 
     try:
         content = roadmap_file.read_text(encoding="utf-8")
     except Exception as e:
-        return f"<div style='color: var(--danger); padding: 20px;'>Erreur de lecture : {html.escape(str(e))}</div>"
+        return f"<div style='color: var(--danger); padding: 20px;'>Read error / Erreur de lecture : {html.escape(str(e))}</div>"
 
     def clean_text(txt):
         txt = html.escape(txt.strip())
@@ -336,13 +356,17 @@ def parse_roadmap_to_html() -> str:
         badge_text = "À venir"
         badge_class = "badge-pending"
 
-        if "✅" in status_part or "Validé" in status_part:
+        if "✅" in status_part or "Validé" in status_part or "Completed" in status_part:
             status_class = "completed"
-            badge_text = "Validé"
+            badge_text = "Completed" if lang == "en" else "Validé"
             badge_class = "badge-completed"
-        elif "En cours" in status_part or "⏳" in status_part:
+        elif (
+            "En cours" in status_part
+            or "In Progress" in status_part
+            or "⏳" in status_part
+        ):
             status_class = "active"
-            badge_text = "En cours"
+            badge_text = "In Progress" if lang == "en" else "En cours"
             badge_class = "badge-active"
 
         step_html = []
@@ -371,33 +395,49 @@ def parse_roadmap_to_html() -> str:
                     .replace("**Description:**", "")
                     .strip()
                 )
+                label = "Description:" if lang == "en" else "Description :"
                 step_html.append(
-                    f'    <div class="detail-item"><strong>Description :</strong> {clean_text(desc_text)}</div>'
+                    f'    <div class="detail-item"><strong>{label}</strong> {clean_text(desc_text)}</div>'
                 )
             elif (
                 line_str.startswith("**Concept clé :**")
                 or line_str.startswith("**Concept clé:**")
                 or line_str.startswith("**Concept clef :**")
+                or line_str.startswith("**Key Concept:**")
+                or line_str.startswith("**Key Concept :**")
             ):
                 concept_text = (
                     line_str.replace("**Concept clé :**", "")
                     .replace("**Concept clé:**", "")
                     .replace("**Concept clef :**", "")
+                    .replace("**Key Concept:**", "")
+                    .replace("**Key Concept :**", "")
                     .strip()
                 )
+                label = "Key Concept:" if lang == "en" else "Concept clé :"
                 step_html.append(
-                    f'    <div class="detail-item"><strong>Concept clé :</strong> {clean_text(concept_text)}</div>'
+                    f'    <div class="detail-item"><strong>{label}</strong> {clean_text(concept_text)}</div>'
                 )
-            elif line_str.startswith(
-                "**Critère de validation :**"
-            ) or line_str.startswith("**Critère de validation:**"):
+            elif (
+                line_str.startswith("**Critère de validation :**")
+                or line_str.startswith("**Critère de validation:**")
+                or line_str.startswith("**Validation Criterion:**")
+                or line_str.startswith("**Validation Criterion :**")
+            ):
                 validation_text = (
                     line_str.replace("**Critère de validation :**", "")
                     .replace("**Critère de validation:**", "")
+                    .replace("**Validation Criterion:**", "")
+                    .replace("**Validation Criterion :**", "")
                     .strip()
                 )
+                label = (
+                    "Validation Criterion:"
+                    if lang == "en"
+                    else "Critère de validation :"
+                )
                 step_html.append(
-                    f'    <div class="detail-item validation-item"><strong>Critère de validation :</strong> {clean_text(validation_text)}</div>'
+                    f'    <div class="detail-item validation-item"><strong>{label}</strong> {clean_text(validation_text)}</div>'
                 )
             else:
                 step_html.append(
@@ -444,7 +484,7 @@ def parse_roadmap_to_html() -> str:
 
             parts = line_str.split("—")
             phase_part = parts[0].replace("##", "").strip()
-            status_part = parts[1].strip() if len(parts) > 1 else "🔲 À venir"
+            status_part = parts[1].strip() if len(parts) > 1 else "🔲 Pending"
 
             phase_subparts = phase_part.split(":")
             phase_idx = phase_subparts[0].strip()
@@ -455,13 +495,21 @@ def parse_roadmap_to_html() -> str:
             )
 
             status_class = "pending"
-            status_text = "À venir"
-            if "✅" in status_part or "Validé" in status_part:
+            status_text = "Pending" if lang == "en" else "À venir"
+            if (
+                "✅" in status_part
+                or "Validé" in status_part
+                or "Completed" in status_part
+            ):
                 status_class = "completed"
-                status_text = "Validé"
-            elif "En cours" in status_part or "⏳" in status_part:
+                status_text = "Completed" if lang == "en" else "Validé"
+            elif (
+                "En cours" in status_part
+                or "In Progress" in status_part
+                or "⏳" in status_part
+            ):
                 status_class = "active"
-                status_text = "En cours"
+                status_text = "In Progress" if lang == "en" else "En cours"
 
             html_out.append(f'  <div class="phase-section {status_class}">')
             html_out.append(f'    <div class="phase-banner {status_class}">')
@@ -474,13 +522,13 @@ def parse_roadmap_to_html() -> str:
             )
             html_out.append("    </div>")
 
-        elif line_str.startswith("*Objectif"):
+        elif line_str.startswith("*Objectif") or line_str.startswith("*Objective"):
             obj_text = line_str.replace("*", "").strip()
             html_out.append(f'    <p class="phase-objective"><em>{obj_text}</em></p>')
             html_out.append('    <div class="steps-grid">')
             in_steps_grid = True
 
-        elif line_str.startswith("### Étape"):
+        elif line_str.startswith("### Étape") or line_str.startswith("### Step"):
             if current_step_lines:
                 html_out.append(flush_step())
                 current_step_lines = []
@@ -519,17 +567,18 @@ def parse_roadmap_to_html() -> str:
 
 @app.route("/api/roadmap", methods=["GET"])
 def get_roadmap():
-    """Renvoie le contenu HTML de la feuille de route."""
+    """Renvoie le contenu HTML de la feuille de route. / Returns roadmap HTML."""
     try:
-        html_content = parse_roadmap_to_html()
+        lang = request.args.get("lang", "en")
+        html_content = parse_roadmap_to_html(lang)
         return jsonify({"status": "success", "html": html_content}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-def parse_glossary_concepts():
-    """Parse le fichier glossaire.md et extrait les concepts et leurs définitions."""
-    glossaire_file = DOCS_DIR / "glossaire.md"
+def parse_glossary_concepts(lang: str = "en"):
+    """Parse le fichier glossaire.md (ou glossaire_en.md) et extrait les concepts et leurs définitions."""
+    glossaire_file = get_doc_file("glossaire", lang)
     if not glossaire_file.exists():
         return []
 
@@ -558,7 +607,8 @@ def parse_glossary_concepts():
 def get_glossaire():
     """Renvoie la liste des concepts du glossaire."""
     try:
-        concepts = parse_glossary_concepts()
+        lang = request.args.get("lang", "en")
+        concepts = parse_glossary_concepts(lang)
         clean_concepts = [{"id": c["id"], "concept": c["concept"]} for c in concepts]
         return jsonify({"status": "success", "concepts": clean_concepts}), 200
     except Exception as e:
@@ -569,7 +619,8 @@ def get_glossaire():
 def get_glossaire_concept(concept_id: int):
     """Renvoie la définition d'un concept spécifique."""
     try:
-        concepts = parse_glossary_concepts()
+        lang = request.args.get("lang", "en")
+        concepts = parse_glossary_concepts(lang)
         if concept_id < 0 or concept_id >= len(concepts):
             return jsonify({"status": "error", "message": "Concept introuvable"}), 404
 
@@ -588,49 +639,81 @@ def parse_journal_file_info(file_path, file_id):
     """Extrait le titre et la date d'un fichier journal Markdown pour les boutons d'indexation."""
     try:
         content = file_path.read_text(encoding="utf-8")
-        title = "Sans titre"
-        date = "Date inconnue"
+        title = None
+        date = "Date inconnue / Unknown"
 
         for line in content.splitlines():
             line_str = line.strip()
-            if line_str.startswith("# "):
-                title = line_str[2:].strip()
-                # Nettoyer les emojis de début de titre pour l'affichage du bouton
-                title = re.sub(r"^[^\w\s\d]+", "", title).strip()
-            elif "Date :" in line_str:
-                date_match = re.search(r"\*\*Date\s*:\s*\*\*(.*)", line_str)
-                if date_match:
+            if line_str.startswith("# ") and title is None:
+                raw_title = line_str[2:].strip()
+                # Supprimer uniquement l'emoji 📌 initial s'il est présent
+                if raw_title.startswith("📌"):
+                    title = raw_title[1:].strip()
+                else:
+                    title = raw_title
+            elif "Date" in line_str and (":" in line_str or "**" in line_str):
+                date_match = re.search(
+                    r"\*\*Date\s*:?\s*\*\*:?\s*(.*)", line_str, re.IGNORECASE
+                )
+                if date_match and date_match.group(1).strip():
                     date = date_match.group(1).strip()
                 else:
-                    date = line_str.replace("Date :", "").replace("**", "").strip()
+                    date = (
+                        line_str.replace("Date :", "")
+                        .replace("Date:", "")
+                        .replace("**", "")
+                        .strip()
+                    )
+
+        if not title:
+            title = file_path.stem.replace("_", " ").capitalize()
 
         return {"id": file_id, "title": title, "date": date}
     except Exception:
         return {
             "id": file_id,
             "title": file_path.stem.replace("_", " ").capitalize(),
-            "date": "Date inconnue",
+            "date": "Date inconnue / Unknown",
         }
 
 
 @app.route("/api/journal", methods=["GET"])
 def get_journal():
-    """Renvoie la liste des articles de journal disponibles avec leurs métadonnées."""
+    """Renvoie la liste des articles de journal disponibles avec leurs métadonnées. / Returns journal entries list."""
     entries = []
+    lang = request.args.get("lang", "en")
 
     # 1. Ajouter l'introduction
-    journal_file = DOCS_DIR / "journal_apprentissage.md"
+    journal_file = get_doc_file("journal_apprentissage", lang)
     if journal_file.exists():
         entries.append(parse_journal_file_info(journal_file, "intro"))
 
     # 2. Ajouter les séances individuelles triées par nom de fichier
     journal_dir = DOCS_DIR / "journal"
     if journal_dir.exists() and journal_dir.is_dir():
-        seances = sorted(
-            [f for f in journal_dir.glob("*.md") if f.name != "journal_template.md"]
-        )
-        for seance in seances:
-            entries.append(parse_journal_file_info(seance, seance.stem))
+        # Extrait les identifiants uniques de séances (en supprimant _en.md et _fr.md)
+        unique_stems = set()
+        for f in journal_dir.glob("*.md"):
+            if f.name == "journal_template.md":
+                continue
+            stem = f.stem
+            if stem.endswith("_en") or stem.endswith("_fr"):
+                stem = stem[:-3]
+            unique_stems.add(stem)
+
+        for base_stem in sorted(unique_stems):
+            suffix = "_en" if lang == "en" else "_fr"
+            target_path = journal_dir / f"{base_stem}{suffix}.md"
+
+            if not target_path.exists():
+                fallback_suffix = "_fr" if lang == "en" else "_en"
+                target_path = journal_dir / f"{base_stem}{fallback_suffix}.md"
+
+            if not target_path.exists():
+                target_path = journal_dir / f"{base_stem}.md"
+
+            if target_path.exists():
+                entries.append(parse_journal_file_info(target_path, base_stem))
 
     return jsonify({"status": "success", "entries": entries}), 200
 
@@ -638,12 +721,24 @@ def get_journal():
 @app.route("/api/journal/<article_id>", methods=["GET"])
 def get_journal_content(article_id: str):
     """Renvoie le contenu HTML rendu d'un article de journal spécifique."""
+    lang = request.args.get("lang", "en")
     if article_id == "intro":
-        file_path = DOCS_DIR / "journal_apprentissage.md"
+        file_path = get_doc_file("journal_apprentissage", lang)
     else:
         # Assainir l'identifiant pour empêcher toute traversée de chemin (path traversal)
         clean_id = re.sub(r"[^a-zA-Z0-9_.-]", "", article_id)
-        file_path = DOCS_DIR / "journal" / f"{clean_id}.md"
+        if clean_id.endswith("_en") or clean_id.endswith("_fr"):
+            clean_id = clean_id[:-3]
+
+        suffix = "_en" if lang == "en" else "_fr"
+        file_path = DOCS_DIR / "journal" / f"{clean_id}{suffix}.md"
+
+        if not file_path.exists():
+            fallback_suffix = "_fr" if lang == "en" else "_en"
+            file_path = DOCS_DIR / "journal" / f"{clean_id}{fallback_suffix}.md"
+
+        if not file_path.exists():
+            file_path = DOCS_DIR / "journal" / f"{clean_id}.md"
 
     if not file_path.exists():
         return jsonify(
@@ -662,7 +757,8 @@ def get_journal_content(article_id: str):
 def get_entretien_questions():
     """Renvoie la liste des questions d'entretien disponibles pour le simulateur."""
     try:
-        questions = parse_faq_questions()
+        lang = request.args.get("lang", "en")
+        questions = parse_faq_questions(lang)
         clean_questions = [
             {"id": idx, "question": q["question"]} for idx, q in enumerate(questions)
         ]
@@ -675,7 +771,8 @@ def get_entretien_questions():
 def get_entretien_answer(question_id: int):
     """Renvoie la réponse pour une question spécifique."""
     try:
-        questions = parse_faq_questions()
+        lang = request.args.get("lang", "en")
+        questions = parse_faq_questions(lang)
         if question_id < 0 or question_id >= len(questions):
             return jsonify({"status": "error", "message": "Question introuvable"}), 404
         return jsonify(

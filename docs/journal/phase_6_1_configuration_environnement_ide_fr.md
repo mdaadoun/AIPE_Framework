@@ -1,4 +1,4 @@
-# 📌 Séance 16 : Configuration de l'Environnement IDE (Phase 6 - Étape 6.1)
+# 📌 Séance 6.1 : Configuration de l'Environnement IDE (.vscode/settings.json)
 **Date :** 25 Juillet 2026
 
 Première étape de la phase 6 « Intégration IDE & Validation Finale ». L'objectif est de configurer VSCode pour que chaque sauvegarde d'un fichier Python applique automatiquement le formatage Ruff, le tri des imports et les corrections de style — exactement comme le ferait la chaîne pre-commit ou `make lint`, mais en temps réel dans l'éditeur. Cela referme la boucle de feedback : le développeur voit instantanément les corrections sans attendre le commit.

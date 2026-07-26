@@ -1,4 +1,4 @@
-# 📌 Séance 2 : Configuration locale de l'environnement virtuel (.venv)
+# 📌 Séance 1.2 : Configuration locale de l'environnement virtuel (.venv)
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'ancrer l'environnement virtuel au sein même du dossier du projet. Cette configuration assure une intégration instantanée et transparente avec les IDE modernes (comme VSCode) et simplifie grandement l'automatisation locale.

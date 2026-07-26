@@ -1,4 +1,4 @@
-# 📌 Séance 3 : Configuration de Pre-commit & detect-secrets
+# 📌 Séance 2.1 : Configuration de Pre-commit & detect-secrets
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'installer des barrières de sécurité et d'automatisation de formatage de code au plus près du développeur (git hooks). Nous mettons en œuvre `detect-secrets` de Yelp pour empêcher de manière proactive toute fuite de clés d'API (comme OpenAI, Gemini, ou AWS) dans l'historique Git.

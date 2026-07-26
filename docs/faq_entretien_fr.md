@@ -274,4 +274,3 @@ Cette foire aux questions présente les questions d'entretien classiques posées
     1.  **Tests statiques (21 tests, < 0.3s) :** Exécutés à chaque `make test`, ils vérifient que tous les prérequis d'onboarding sont en place (structure de fichiers, README, Makefile, script exécutable, API fonctionnelle). Ils détectent instantanément une régression sans coût réseau.
     2.  **Simulation complète (script bash, ~3 min) :** Réservée aux validations ponctuelles via `make onboarding-check`. Elle effectue un vrai clonage propre pour simuler l'expérience d'un nouveau développeur.
     3.  **Complémentarité :** Les tests rapides garantissent que les briques sont en place ; la simulation garantit que les briques s'assemblent correctement de bout en bout.
-

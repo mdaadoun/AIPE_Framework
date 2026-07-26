@@ -1,4 +1,4 @@
-# 📌 Séance 5 : Analyse statique avec Mypy (strict)
+# 📌 Séance 2.3 : Analyse statique avec Mypy (strict)
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'implémenter l'analyse statique de type stricte sur le répertoire source principal de l'application via Mypy, afin de sécuriser l'architecture et de prévenir les bugs d'exécution liés aux incohérences de type.

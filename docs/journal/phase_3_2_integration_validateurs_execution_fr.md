@@ -1,4 +1,4 @@
-# 📌 Séance 8 : Intégration des Validateurs et Commandes d'Exécution (Cibles lint, test, dev, dashboard)
+# 📌 Séance 3.2 : Intégration des Validateurs et Commandes d'Exécution (`make lint`, `make test`, `make dev`)
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'implémenter les raccourcis de validation et d'exécution dans le Makefile : `make lint` (Ruff + Mypy), `make test` (pytest), `make dev` (FastAPI), et `make dashboard` (Flask). Ces cibles encapsulent l'exécution des validateurs de qualité dans l'environnement virtuel sans que le développeur ait besoin de l'activer manuellement.

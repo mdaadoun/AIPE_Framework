@@ -1,4 +1,4 @@
-# 📌 Séance 7 : Automatisation de l'Onboarding et du Nettoyage (Cibles install & clean)
+# 📌 Séance 3.1 : Automatisation de l'Onboarding et du Nettoyage (Makefile)
 **Date :** 23 Juillet 2026
 
 L'objectif de cette séance est d'implémenter les cibles `make install` et `make clean` du Makefile. Ces cibles automatisent la mise en place de l'environnement virtuel et l'installation des outils de qualité d'une part, et purgent l'ensemble des fichiers de cache d'autre part. Cela permet d'avoir un état de dépôt reproductible et propre.

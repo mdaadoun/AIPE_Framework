@@ -1,4 +1,4 @@
-# 📌 Séance 1 : Initialisation de Poetry et du fichier pyproject.toml
+# 📌 Séance 1.1 : Initialisation de Poetry et du fichier pyproject.toml
 **Date :** 23 Juillet 2026
 
 Cette première séance pose les bases du blueprint industriel d'AIPE_Framework. L'objectif est d'implémenter un système déterministe de gestion de dépendances et d'isoler proprement l'environnement virtuel local pour éliminer l'effet "marche sur ma machine".

@@ -160,4 +160,3 @@ Catégorie de test qui ne vérifie pas le comportement du code mais la présence
 
 ### Trap (piège shell)
 Mécanisme bash (`trap cleanup EXIT`) qui enregistre une fonction de nettoyage exécutée automatiquement à la sortie d'un script, que ce soit une fin normale, une erreur, ou un signal d'interruption (`Ctrl+C`). Dans le script de simulation d'onboarding, le trap garantit la suppression des dossiers temporaires et l'arrêt des processus serveur résiduels, même si le script échoue en cours de route.
-

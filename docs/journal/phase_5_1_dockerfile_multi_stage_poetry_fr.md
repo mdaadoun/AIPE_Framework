@@ -1,4 +1,4 @@
-# 📌 Séance 13 : Dockerfile Multi-Stage avec Poetry (Phase 5 - Étape 5.1)
+# 📌 Séance 5.1 : Dockerfile Multi-Stage avec Poetry
 **Date :** 24 Juillet 2026
 
 L'objectif de cette séance est de conteneuriser l'application de production AIPE_Framework dans une image Docker optimisée en utilisant le pattern multi-stage build. Le stage `builder` installe Poetry et compile les dépendances, tandis que le stage `runtime` ne conserve que l'environnement virtuel compilé et le code source, produisant une image finale inférieure à 250 Mo.
