@@ -46,3 +46,39 @@ Ce document présente une explication détaillée de chaque module, classe, sch�
     - `environment: str` : Environnement d'exécution actif.
     - `version: str` : Version applicative actuelle.
   - Utilise `Field(..., description=..., examples=...)` pour la génération automatique de la doc Swagger et le contrôle strict des données au runtime.
+
+---
+
+## 📦 5. Manifeste & Environnement Projet : `pyproject.toml`
+
+- **Rôle :** Déclaration centralisée du projet via Poetry. Définit les dépendances de production (`fastapi`, `uvicorn`, `pydantic`), l'outillage de qualité (`pytest`, `ruff`, `mypy`, `pre-commit`, `detect-secrets`) et les paramètres des linters.
+- **Note Pédagogique :** Centraliser la configuration dans `pyproject.toml` respecte la norme PEP 518 et garantit des builds reproductibles grâce à `poetry.lock`.
+
+---
+
+## 🛠️ 6. Automatisation des Tâches : `Makefile`
+
+- **Rôle :** Offre une interface de commandes unifiée pour les workflows de développement (`make install`, `make lint`, `make test`, `make dev`, `make docker-build`, `make onboarding-check`).
+- **Note Pédagogique :** Masque la complexité des outils sous-jacents pour garantir un onboarding **Zero-Setup Friction** en moins de 5 minutes.
+
+---
+
+## 🐳 7. Conteneurisation & Sécurité : `Dockerfile`
+
+- **Rôle :** Image Docker de production multi-stage produisant un conteneur d'exécution non-root ultra-sécurisé et léger (< 250 Mo).
+- **Patterns d'Architecture & Sécurité :**
+  - **Multi-Stage Build (`AS builder` -> `AS runtime`) :** Compile les dépendances avec les outils lourds dans le stage 1, puis ne copie que `.venv` et `src/` dans une image Python slim vierge.
+  - **Hardening Non-Root :** Crée un utilisateur/groupe système (`appuser:appgroup`, UID 1000) et bascule l'exécution via `USER appuser` (Principe du moindre privilège).
+  - **Sonde de Santé (Healthcheck) :** Configure la directive native `HEALTHCHECK` avec `curl` pour surveiller l'état de l'API toutes les 15 secondes.
+
+---
+
+## 🔐 8. Contrôle Qualité Pré-Commit : `.pre-commit-config.yaml`
+
+- **Rôle :** Configure les hooks Git pre-commit locaux exécutés automatiquement à chaque commit pour vérifier les espaces, valider le YAML, détecter les secrets (`detect-secrets`) et appliquer le linter (`ruff`).
+
+---
+
+## 🚀 9. Simulation d'Onboarding : `scripts/simulate_onboarding.sh`
+
+- **Rôle :** Script de validation automatisé E2E qui clone le dépôt dans un dossier temporaire isolé, exécute `make install`, démarre le serveur et valide le contrat d'interface `/health` en moins de 300 secondes.

@@ -46,3 +46,39 @@ This document provides a detailed breakdown of every module, class, schema, and 
     - `environment: str`: Active runtime environment (e.g., `"development"`).
     - `version: str`: Application version (e.g., `"0.1.0"`).
   - Uses `Field(..., description=..., examples=...)` for automatic Swagger documentation generation and strict runtime type enforcement.
+
+---
+
+## 📦 5. Project Manifest & Environment: `pyproject.toml`
+
+- **Purpose:** Centralized project declaration using Poetry. Defines production dependencies (`fastapi`, `uvicorn`, `pydantic`), QA tooling (`pytest`, `ruff`, `mypy`, `pre-commit`, `detect-secrets`), and strict linter/type-checker configurations.
+- **Educational Note:** Moving configuration from scattered files into `pyproject.toml` standardizes Python packaging (PEP 518) and guarantees reproducible builds via `poetry.lock`.
+
+---
+
+## 🛠️ 6. Task Automation: `Makefile`
+
+- **Purpose:** Provides a unified command-line entry point for developer workflows (`make install`, `make lint`, `make test`, `make dev`, `make docker-build`, `make onboarding-check`).
+- **Educational Note:** Abstracts tool complexity to achieve **Zero-Setup Friction** onboarding for new developers in under 5 minutes.
+
+---
+
+## 🐳 7. Containerization & Security: `Dockerfile`
+
+- **Purpose:** Production multi-stage Docker build producing an unprivileged, hardened runtime container image (< 250 MB).
+- **Key Security & Architecture Patterns:**
+  - **Multi-Stage Build (`AS builder` -> `AS runtime`):** Compiles dependencies with heavy build tools in Stage 1, then copies only the `.venv` and `src/` into a pristine Python slim image.
+  - **Non-Root Hardening:** Creates system user/group (`appuser:appgroup`, UID 1000) and executes with `USER appuser` to enforce the Principle of Least Privilege.
+  - **Health Probe:** Configures native `HEALTHCHECK` with `curl` to monitor HTTP operational status every 15s.
+
+---
+
+## 🔐 8. Quality Gatekeeping: `.pre-commit-config.yaml`
+
+- **Purpose:** Configures local git pre-commit hooks to automatically execute trailing whitespace trimming, YAML validation, secret scanning (`detect-secrets`), and code formatting (`ruff`) before code is committed.
+
+---
+
+## 🚀 9. Onboarding Automation: `scripts/simulate_onboarding.sh`
+
+- **Purpose:** Automated E2E verification script that clones the repository into an isolated temporary folder, executes `make install`, boots the server, and validates the `/health` API contract within a 300-second timer.
