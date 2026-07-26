@@ -218,20 +218,30 @@ def markdown_to_html(md_text: str) -> str:
     return html_content
 
 
+ALIASES = {
+    "roadmap_details": "roadmap",
+    "faq_entretien": "questions",
+    "glossaire": "glossary",
+    "journal_apprentissage": "journal",
+    "cahier_charges": "specifications",
+}
+
+
 def get_doc_file(base_name: str, lang: str = "en") -> Path:
     """Resolves documentation path according to selected language (_en.md or _fr.md)."""
+    resolved_name = ALIASES.get(base_name, base_name)
     suffix = "_en" if lang == "en" else "_fr"
-    target_path = DOCS_DIR / f"{base_name}{suffix}.md"
+    target_path = DOCS_DIR / f"{resolved_name}{suffix}.md"
     if target_path.exists():
         return target_path
 
     # Fallback to alternate language or base file
     fallback_suffix = "_fr" if lang == "en" else "_en"
-    fallback_path = DOCS_DIR / f"{base_name}{fallback_suffix}.md"
+    fallback_path = DOCS_DIR / f"{resolved_name}{fallback_suffix}.md"
     if fallback_path.exists():
         return fallback_path
 
-    return DOCS_DIR / f"{base_name}.md"
+    return DOCS_DIR / f"{resolved_name}.md"
 
 
 def parse_faq_questions(lang: str = "en"):
@@ -288,10 +298,10 @@ def get_presentation():
 
 
 def parse_roadmap_to_html(lang: str = "en") -> str:
-    """Parses roadmap_details.md (or _en.md) and converts to UI grid."""
-    roadmap_file = get_doc_file("roadmap_details", lang)
+    """Parses roadmap_en.md (or _fr.md) and converts to UI grid."""
+    roadmap_file = get_doc_file("roadmap", lang)
     if not roadmap_file.exists():
-        return "<div style='color: var(--danger); padding: 20px;'>Roadmap file not found / Fichier roadmap_details.md introuvable.</div>"
+        return "<div style='color: var(--danger); padding: 20px;'>Roadmap file not found / Fichier roadmap introuvable.</div>"
 
     try:
         content = roadmap_file.read_text(encoding="utf-8")
