@@ -1563,8 +1563,8 @@
 
         async function renderCodeBrowser(container) {
             container.innerHTML = `
-                <div class="journal-container" style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; min-height: 580px;">
-                    <div class="sidebar-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; max-height: 600px;">
+                <div class="journal-container" style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; min-height: calc(100vh - 180px);">
+                    <div class="sidebar-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; min-height: calc(100vh - 180px);">
                         <h4 style="font-family: var(--font-outfit); font-size: 0.95rem; font-weight: bold; color: #ffffff; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                             <span>📁</span> Fichiers sources
                         </h4>
@@ -1572,7 +1572,7 @@
                             <div class="spinner" style="margin: 20px auto;"></div>
                         </div>
                     </div>
-                    <div class="content-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; max-height: 600px; position: relative;">
+                    <div class="content-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; min-height: calc(100vh - 180px); position: relative;">
                         <div id="code-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; gap: 10px;">
                             <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; max-width: 65%;">
                                 <button id="btn-goto-intro" onclick="openCodeIntro()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: var(--transition);">
