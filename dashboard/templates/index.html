@@ -1583,7 +1583,8 @@
                             <span id="code-language-badge" style="font-size: 0.68rem; background: rgba(139, 92, 246, 0.15); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(139, 92, 246, 0.2);">Code</span>
                         </div>
                         <div id="code-viewer-container" style="flex: 1; overflow: auto; position: relative; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: #1d1f21;">
-                            <pre style="margin: 0; padding: 15px; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.45; overflow: auto; min-height: 400px; height: 100%;"><code id="code-block" class="language-python"># En attente de sélection d'un fichier...</code></pre>
+                            <pre id="code-pre-block" style="margin: 0; padding: 15px; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.45; overflow: auto; min-height: 400px; height: 100%;"><code id="code-block" class="language-python"># En attente de sélection d'un fichier...</code></pre>
+                            <div id="markdown-rendered-view" style="display: none; padding: 20px; color: #e2e8f0; font-size: 0.92rem; line-height: 1.6; overflow: auto; height: 100%;"></div>
                         </div>
                     </div>
                 </div>
@@ -1750,17 +1751,114 @@
                 const response = await fetch(`/api/code/file?path=${encodeURIComponent(path)}`);
                 const data = await response.json();
 
+                const preBlock = document.getElementById('code-pre-block');
+                const mdView = document.getElementById('markdown-rendered-view');
+
                 if (data.status === 'success') {
-                    codeBlock.textContent = data.content;
-                    if (window.Prism) {
-                        Prism.highlightElement(codeBlock);
+                    if (path.endsWith('.md')) {
+                        if (preBlock) preBlock.style.display = 'none';
+                        if (mdView) {
+                            mdView.style.display = 'block';
+                            mdView.innerHTML = renderSimpleMarkdown(data.content);
+                        }
+                    } else {
+                        if (mdView) mdView.style.display = 'none';
+                        if (preBlock) preBlock.style.display = 'block';
+                        codeBlock.textContent = data.content;
+                        if (window.Prism) {
+                            Prism.highlightElement(codeBlock);
+                        }
                     }
                 } else {
+                    if (mdView) mdView.style.display = 'none';
+                    if (preBlock) preBlock.style.display = 'block';
                     codeBlock.textContent = `# Erreur : ${data.message}`;
                 }
             } catch (err) {
+                const preBlock = document.getElementById('code-pre-block');
+                const mdView = document.getElementById('markdown-rendered-view');
+                if (mdView) mdView.style.display = 'none';
+                if (preBlock) preBlock.style.display = 'block';
                 codeBlock.textContent = `# Erreur de chargement : ${err.message}`;
             }
+        }
+
+        function renderSimpleMarkdown(mdText) {
+            if (!mdText) return '';
+            let lines = mdText.split('\n');
+            let out = [];
+            let inList = false;
+            let inCode = false;
+            let codeLines = [];
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+
+                if (trimmed.startsWith('```')) {
+                    if (inCode) {
+                        inCode = false;
+                        out.push(`<pre style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 6px; color: #d8b4fe; font-family: monospace; font-size: 0.82rem; overflow-x: auto; margin: 10px 0;"><code>${htmlEscape(codeLines.join('\n'))}</code></pre>`);
+                        codeLines = [];
+                    } else {
+                        if (inList) { out.push('</ul>'); inList = false; }
+                        inCode = true;
+                        codeLines = [];
+                    }
+                    return;
+                }
+
+                if (inCode) {
+                    codeLines.push(line);
+                    return;
+                }
+
+                if (trimmed.startsWith('---') || trimmed.startsWith('***')) {
+                    if (inList) { out.push('</ul>'); inList = false; }
+                    out.push('<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">');
+                    return;
+                }
+
+                if (trimmed.startsWith('# ')) {
+                    if (inList) { out.push('</ul>'); inList = false; }
+                    out.push(`<h1 style="color: #ffffff; font-size: 1.45rem; font-family: var(--font-outfit); margin-top: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px;">${htmlEscape(trimmed.substring(2))}</h1>`);
+                    return;
+                }
+                if (trimmed.startsWith('## ')) {
+                    if (inList) { out.push('</ul>'); inList = false; }
+                    out.push(`<h2 style="color: var(--secondary); font-size: 1.2rem; font-family: var(--font-outfit); margin-top: 18px; margin-bottom: 8px; border-bottom: 1px solid rgba(139, 92, 246, 0.2); padding-bottom: 4px;">${htmlEscape(trimmed.substring(3))}</h2>`);
+                    return;
+                }
+                if (trimmed.startsWith('### ')) {
+                    if (inList) { out.push('</ul>'); inList = false; }
+                    out.push(`<h3 style="color: #ffffff; font-size: 1.02rem; font-family: var(--font-outfit); margin-top: 14px; margin-bottom: 6px;">${htmlEscape(trimmed.substring(4))}</h3>`);
+                    return;
+                }
+
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                    if (!inList) {
+                        out.push('<ul style="padding-left: 20px; margin: 8px 0; color: #cbd5e1;">');
+                        inList = true;
+                    }
+                    out.push(`<li style="margin-bottom: 4px;">${htmlEscape(trimmed.substring(2))}</li>`);
+                    return;
+                } else if (inList) {
+                    out.push('</ul>');
+                    inList = false;
+                }
+
+                if (trimmed) {
+                    out.push(`<p style="margin: 6px 0; color: #e2e8f0; line-height: 1.5;">${htmlEscape(trimmed)}</p>`);
+                }
+            });
+
+            if (inList) out.push('</ul>');
+
+            let htmlContent = out.join('\n');
+            htmlContent = htmlContent.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #ffffff;">$1</strong>');
+            htmlContent = htmlContent.replace(/`(.*?)`/g, '<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #d8b4fe; font-family: monospace; font-size: 0.82rem;">$1</code>');
+            htmlContent = htmlContent.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: var(--secondary); text-decoration: underline;" target="_blank">$1</a>');
+
+            return htmlContent;
         }
 
         function htmlEscape(str) {
