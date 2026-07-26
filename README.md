@@ -1,4 +1,4 @@
-# 🚀 Blueprint AI Product Engineering (AIPE_Framework) — Cadre Industriel & Productivité
+# 🚀 AI Product Engineering Blueprint (AIPE_Framework) — Industrial Framework & Productivity
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Poetry](https://img.shields.io/badge/poetry-1.7+-60A5FA?style=flat-square&logo=poetry&logoColor=white)](https://python-poetry.org/)
@@ -7,75 +7,78 @@
 [![Ruff](https://img.shields.io/badge/linter-Ruff-009688?style=flat-square)](https://github.com/astral-sh/ruff)
 [![Mypy strict](https://img.shields.io/badge/typing-Mypy%20strict-blue?style=flat-square)](https://mypy-lang.org/)
 
-AIPE_Framework (Blueprint AI Product Engineering) est un socle technique et industriel standardisé conçu pour accélérer et sécuriser le développement de projets basés sur l'intelligence artificielle (LLMs, RAG, agents). Il résout les problèmes de dette technique initiale en imposant de bonnes pratiques dès le premier jour (contrôle qualité pré-commit, typage strict, conteneurisation optimisée).
+[🇫🇷 Version Française disponible ici](README_fr.md)
+
+**AIPE_Framework** (AI Product Engineering Blueprint) is a standardized industrial and technical foundation designed to accelerate and secure the development of AI-based applications (LLMs, RAG, autonomous agents). It eliminates initial technical debt by enforcing production-grade best practices from day one (pre-commit quality gates, 100% strict typing, non-root hardened containerization).
 
 ---
 
-## 🎯 Objectifs & KPI Métier
+## 🎯 Business Goals & Key Performance Indicators (KPIs)
 
-* **Zero-Setup Friction :** Onboarding d'un développeur en moins de 5 minutes grâce à un ensemble d'outils unifiés (`git clone` $\to$ `make install` $\to$ prêt pour coder).
-* **Isolation Native :** Séparation étanche entre l'expérimentation (`notebooks/`) et le code prêt pour la production (`src/`).
-* **Qualité & Rigueur Système :** Couverture de typage statique Mypy strict à 100% dans `src/` et formatage/linting ultrarapide via Ruff en moins de 2 secondes localement.
-* **Sécurité Passive :** Blocage automatique au niveau local de toute fuite de secret (ex: clés d'API OpenAI/Gemini) lors du commit via `detect-secrets`.
-* **Conteneurisation Optimisée :** Build d'image Docker multi-stage pour un runtime minimaliste (< 250 MB).
+* **Zero-Setup Friction:** Developer onboarding in under 5 minutes flat via a unified toolchain (`git clone` $\to$ `make install` $\to$ ready to code).
+* **Native Code Isolation:** Strict separation between exploratory experimentation (`notebooks/`) and production-ready code (`src/`).
+* **Systematic Code Quality:** 100% strict Mypy type annotation coverage in `src/` combined with sub-2-second local linting and formatting powered by Rust-based Ruff.
+* **Passive Secret Protection:** Local Git gatekeeping via `detect-secrets` pre-commit hooks to automatically block accidental leakages of private API keys (e.g., OpenAI, Gemini).
+* **Hardened Containerization:** Multi-stage Docker build producing an ultra-lightweight runtime container (< 250 MB) running under a non-privileged system user (`appuser` UID 1000).
 
 ---
 
-## 📂 Structure du Projet
+## 📂 Repository Structure
 
 ```text
 AIPE_Framework/
 │
-├── README.md                   # Présentation du blueprint et guide de démarrage rapide
+├── README.md                   # English main presentation & Quickstart guide
+├── README_fr.md                # French version of the blueprint presentation
 │
-├── dashboard/                  # Tableau de bord Flask de suivi et simulation d'entretien
-│   ├── app.py                  # Serveur Flask principal
+├── dashboard/                  # Interactive Flask learning & recruiter interview simulator
+│   ├── app.py                  # Main Flask application entrypoint
 │   └── templates/              # SPA HTML UI (index.html)
 │
-├── docs/                       # Spécifications et documentation d'architecture
-    ├── cahier_charges.md       # Cahier des charges fonctionnel et technique (CDCFT)
-    ├── roadmap_details.md      # Feuille de route chronologique par étapes
-    ├── glossaire.md            # Glossaire des concepts techniques clés du framework
-    ├── faq_entretien.md        # FAQ interactive pour la simulation d'entretien oral
-    └── journal_apprentissage.md # Journal de bord d'apprentissage et choix d'architecture
+├── docs/                       # Architectural specifications & technical documentation
+    ├── cahier_charges_en.md    # Functional & Technical Requirements Specification (FTRS)
+    ├── roadmap_details_en.md   # Chronological step-by-step 6-phase roadmap
+    ├── glossaire_en.md         # Technical glossary of key framework concepts
+    ├── faq_entretien_en.md     # Interactive technical interview FAQ (34 Q&A)
+    └── journal_apprentissage.md # Architecture Decision Records (ADR) & development logbook
 ```
 
 ---
 
-## 🛠️ Spécifications techniques principales
+## 🛠️ Main Technical Specifications
 
-| Composant | Fichier | Rôle & Règle métier |
+| Component | File | Technical Role & Rule |
 | :--- | :--- | :--- |
-| **Tableau de Bord** | [`dashboard/app.py`](file:///home/michael/Code/job/projets/AIPE_Framework/dashboard/app.py) | Serveur Flask local de suivi et d'apprentissage. |
-| **Interface Utilisateur** | [`dashboard/templates/index.html`](file:///home/michael/Code/job/projets/AIPE_Framework/dashboard/templates/index.html) | Single Page Application (SPA) avec design moderne glassmorphism. |
-| **Feuille de Route** | [`docs/roadmap_details.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/roadmap_details.md) | Feuille de route chronologique et linéaire de la Baseline AIPE. |
-| **Glossaire Technique** | [`docs/glossaire.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/glossaire.md) | Définitions approfondies des concepts clés (Ruff, Mypy, Poetry). |
-| **FAQ d'Entretien** | [`docs/faq_entretien.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/faq_entretien.md) | Questions/réponses ciblées pour la simulation d'entretien technique. |
-| **Journal d'Apprentissage** | [`docs/journal_apprentissage.md`](file:///home/michael/Code/job/projets/AIPE_Framework/docs/journal_apprentissage.md) | Suivi de bord et analyses de décisions techniques. |
+| **Tracking Dashboard** | [`dashboard/app.py`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/app.py) | Local Flask server for interactive learning and roadmap tracking. |
+| **User Interface** | [`dashboard/templates/index.html`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/templates/index.html) | Single Page Application (SPA) with modern glassmorphism aesthetic. |
+| **Roadmap Spec** | [`docs/roadmap_details_en.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/roadmap_details_en.md) | Chronological 6-phase linear specification of the AIPE baseline. |
+| **Technical Glossary** | [`docs/glossaire_en.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/glossaire_en.md) | In-depth definitions of DevOps, Quality, and IDE concepts (Ruff, Mypy, Poetry). |
+| **Interview FAQ** | [`docs/faq_entretien_en.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/faq_entretien_en.md) | 34 targeted recruiter Q&As covering architecture design choices. |
+| **Development Log** | [`docs/journal_apprentissage.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/journal_apprentissage.md) | Architectural decision record (ADR) and learning logbook. |
 
 ---
 
-## 🚀 Démarrage Rapide
+## 🚀 Quickstart Guide
 
-### 1. Initialiser le projet (onboarding)
-Installe toutes les dépendances via Poetry et configure physiquement les hooks de commit locaux.
+### 1. Initialize project (Onboarding)
+Installs all dependencies via Poetry and configures local pre-commit Git hooks.
 ```bash
 make install
 ```
 
-### 2. Démarrer le Dashboard de suivi interactif
-Lance le serveur de suivi Flask local.
+### 2. Launch Interactive Dashboard
+Starts the local Flask tracking dashboard.
 ```bash
 make dashboard
 ```
-Le tableau de bord de suivi interactif sera accessible sur [http://localhost:5001](http://localhost:5001).
+Access the interactive dashboard UI at [http://localhost:5001](http://localhost:5001).
 
-### 3. Exécuter la suite de tests unitaires & QA
+### 3. Run Automated Test Suite (64 PASSED)
 ```bash
 make test
 ```
 
-### 4. Lancer l'analyse statique de qualité (Ruff + Mypy)
+### 4. Execute Code Quality & Linting (Ruff + Strict Mypy)
 ```bash
 make lint
 ```
