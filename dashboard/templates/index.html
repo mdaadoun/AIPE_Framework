@@ -1601,7 +1601,10 @@
                     const files = data.files;
                     const renderedDirs = new Set();
 
-                    files.forEach(file => {
+                    // Filter out docs/ files from the tree display (only accessible via top Intro button)
+                    const visibleFiles = files.filter(file => !file.path.startsWith('docs/'));
+
+                    visibleFiles.forEach(file => {
                         const parts = file.path.split('/');
 
                         // Rendu des dossiers intermédiaires dans la hiérarchie
@@ -1664,22 +1667,9 @@
                         listPanel.appendChild(btn);
                     });
 
-                    // Auto-load code_en.md or code_fr.md matching current language, fallback to first file
+                    // Auto-load code_en.md or code_fr.md matching current language
                     const defaultPath = currentLang === 'fr' ? 'docs/code_fr.md' : 'docs/code_en.md';
-                    let targetBtn = null;
-                    const allBtns = listPanel.querySelectorAll('.question-item');
-
-                    files.forEach((file, index) => {
-                        if (file.path === defaultPath) {
-                            targetBtn = allBtns[index];
-                        }
-                    });
-
-                    if (targetBtn) {
-                        selectCodeFile(defaultPath, targetBtn);
-                    } else if (allBtns.length > 0 && files.length > 0) {
-                        selectCodeFile(files[0].path, allBtns[0]);
-                    }
+                    selectCodeFile(defaultPath, null);
                 } else {
                     document.getElementById('code-file-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Erreur : ${data.message}</div>`;
                 }
@@ -1690,19 +1680,7 @@
 
         function openCodeIntro() {
             const defaultPath = currentLang === 'fr' ? 'docs/code_fr.md' : 'docs/code_en.md';
-            const listPanel = document.getElementById('code-file-list');
-            if (!listPanel) return;
-
-            const allBtns = listPanel.querySelectorAll('.question-item');
-            let targetBtn = null;
-
-            allBtns.forEach(btn => {
-                if (btn.textContent.includes(defaultPath.split('/')[1])) {
-                    targetBtn = btn;
-                }
-            });
-
-            selectCodeFile(defaultPath, targetBtn);
+            selectCodeFile(defaultPath, null);
         }
 
         async function selectCodeFile(path, btnElement) {
