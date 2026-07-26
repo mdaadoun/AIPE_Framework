@@ -34,11 +34,11 @@ AIPE_Framework/
 │   └── templates/              # SPA HTML UI (index.html)
 │
 ├── docs/                       # Spécifications et documentation d'architecture
-    ├── cahier_charges_fr.md    # Cahier des charges fonctionnel et technique (CDCFT)
-    ├── roadmap_details_fr.md   # Feuille de route chronologique par étapes
-    ├── glossaire_fr.md         # Glossaire des concepts techniques clés du framework
-    ├── faq_entretien_fr.md     # FAQ interactive pour la simulation d'entretien oral
-    └── journal_apprentissage.md # Journal de bord d'apprentissage et choix d'architecture
+    ├── specifications_fr.md    # Cahier des charges fonctionnel et technique (CDCFT)
+    ├── roadmap_fr.md           # Feuille de route chronologique par étapes
+    ├── glossary_fr.md          # Glossaire des concepts techniques clés du framework
+    ├── questions_fr.md         # FAQ interactive pour la simulation d'entretien oral
+    └── journal_fr.md           # Journal de bord d'apprentissage et choix d'architecture
 ```
 
 ---
@@ -49,10 +49,10 @@ AIPE_Framework/
 | :--- | :--- | :--- |
 | **Tableau de Bord** | [`dashboard/app.py`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/app.py) | Serveur Flask local de suivi et d'apprentissage. |
 | **Interface Utilisateur** | [`dashboard/templates/index.html`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/templates/index.html) | Single Page Application (SPA) avec design moderne glassmorphism. |
-| **Feuille de Route** | [`docs/roadmap_details_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/roadmap_details_fr.md) | Feuille de route chronologique et linéaire de la Baseline AIPE. |
-| **Glossaire Technique** | [`docs/glossaire_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/glossaire_fr.md) | Définitions approfondies des concepts clés (Ruff, Mypy, Poetry). |
-| **FAQ d'Entretien** | [`docs/faq_entretien_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/faq_entretien_fr.md) | Questions/réponses ciblées pour la simulation d'entretien technique. |
-| **Journal d'Apprentissage** | [`docs/journal_apprentissage.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/journal_apprentissage.md) | Suivi de bord et analyses de décisions techniques. |
+| **Feuille de Route** | [`docs/roadmap_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/roadmap_fr.md) | Feuille de route chronologique et linéaire de la Baseline AIPE. |
+| **Glossaire Technique** | [`docs/glossary_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/glossary_fr.md) | Définitions approfondies des concepts clés (Ruff, Mypy, Poetry). |
+| **FAQ d'Entretien** | [`docs/questions_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/questions_fr.md) | Questions/réponses ciblées pour la simulation d'entretien technique. |
+| **Journal d'Apprentissage** | [`docs/journal_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/journal_fr.md) | Suivi de bord et analyses de décisions techniques. |
 
 ---
 
