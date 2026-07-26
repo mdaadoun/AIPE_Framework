@@ -1575,7 +1575,7 @@
                     <div class="content-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; max-height: 600px; position: relative;">
                         <div id="code-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; gap: 10px;">
                             <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; max-width: 65%;">
-                                <button id="btn-goto-intro" onclick="openCodeIntro()" style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: #ffffff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: var(--transition);" onmouseover="this.style.background='rgba(139, 92, 246, 0.3)'" onmouseout="this.style.background='rgba(139, 92, 246, 0.15)'">
+                                <button id="btn-goto-intro" onclick="openCodeIntro()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: var(--transition);">
                                     📖 <span data-i18n="btn_code_intro">Intro (code.md)</span>
                                 </button>
                                 <h4 id="code-filepath" style="margin: 0; font-family: var(--font-outfit); color: var(--secondary); font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sélectionnez un fichier</h4>
@@ -1709,6 +1709,23 @@
                 item.classList.remove('active');
             });
             if (btnElement) btnElement.classList.add('active');
+
+            // Dynamic styling of Intro button based on active page selection
+            const introBtn = document.getElementById('btn-goto-intro');
+            const isIntroPage = path.endsWith('code_en.md') || path.endsWith('code_fr.md');
+            if (introBtn) {
+                if (isIntroPage) {
+                    introBtn.style.background = 'rgba(139, 92, 246, 0.25)';
+                    introBtn.style.borderColor = 'rgba(139, 92, 246, 0.5)';
+                    introBtn.style.color = '#ffffff';
+                    introBtn.style.boxShadow = '0 0 10px rgba(139, 92, 246, 0.2)';
+                } else {
+                    introBtn.style.background = 'rgba(255, 255, 255, 0.04)';
+                    introBtn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    introBtn.style.color = 'var(--text-muted)';
+                    introBtn.style.boxShadow = 'none';
+                }
+            }
 
             const filepathEl = document.getElementById('code-filepath');
             const badgeEl = document.getElementById('code-language-badge');
