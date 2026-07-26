@@ -88,3 +88,12 @@ This document provides a detailed breakdown of every module, class, schema, and 
 ## 📊 10. Interactive Dashboard Backend: `dashboard/app.py`
 
 - **Purpose:** Flask backend service hosting the interactive project dashboard UI, API documentation viewer, dynamic AST-based unit test runner (`/api/run-tests`), and secure source code browser (`/api/code/file`).
+
+---
+
+## ⚙️ 11. IDE Workspace & Extension Recommendations: `.vscode/`
+
+- **Purpose:** Configures workspace settings (`.vscode/settings.json`) and extension recommendations (`.vscode/extensions.json`).
+- **Key Concepts:**
+  - **`extensions.json`:** Automatically prompts developers opening the workspace to install `charliermarsh.ruff` (linter/formatter) and `ms-python.python` (interpreter & debugging).
+  - **`settings.json`:** Aligns local IDE behavior with CI/CD checks by enabling format-on-save via Ruff (`editor.formatOnSave`: `true`), auto-fixing lint errors and imports on save (`source.fixAll`, `source.organizeImports`), and setting `files.insertFinalNewline` & `files.trimTrailingWhitespace`.

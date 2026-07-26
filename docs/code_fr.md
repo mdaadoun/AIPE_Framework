@@ -88,3 +88,12 @@ Ce document présente une explication détaillée de chaque module, classe, sch�
 ## 📊 10. Backend du Dashboard Interactif : `dashboard/app.py`
 
 - **Rôle :** Service backend Flask alimentant le dashboard interactif, la visualisation des spécifications, le lanceur de tests basé sur l'analyse AST Python (`/api/run-tests`) et le navigateur de code source sécurisé (`/api/code/file`).
+
+---
+
+## ⚙️ 11. Configuration de l'Espace de Travail IDE : `.vscode/`
+
+- **Rôle :** Configure l'espace de travail VSCode (`.vscode/settings.json`) et les recommandations d'extensions (`.vscode/extensions.json`).
+- **Concepts Clés :**
+  - **`extensions.json` :** Propose automatiquement l'installation des extensions officielles `charliermarsh.ruff` (linter/formateur) et `ms-python.python` dès l'ouverture du projet.
+  - **`settings.json` :** Aligne le comportement de l'IDE local sur la CI/CD en activant le formatage automatique à la sauvegarde via Ruff (`editor.formatOnSave`: `true`), la correction automatique des erreurs et imports (`source.fixAll`, `source.organizeImports`) et les règles de nettoyage de fin de ligne.
