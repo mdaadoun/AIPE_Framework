@@ -1573,8 +1573,13 @@
                         </div>
                     </div>
                     <div class="content-panel" style="background: rgba(15, 12, 30, 0.45); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; max-height: 600px; position: relative;">
-                        <div id="code-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px;">
-                            <h4 id="code-filepath" style="margin: 0; font-family: var(--font-outfit); color: var(--secondary); font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%;">Sélectionnez un fichier</h4>
+                        <div id="code-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; max-width: 65%;">
+                                <button id="btn-goto-intro" onclick="openCodeIntro()" style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: #ffffff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: var(--transition);" onmouseover="this.style.background='rgba(139, 92, 246, 0.3)'" onmouseout="this.style.background='rgba(139, 92, 246, 0.15)'">
+                                    📖 <span data-i18n="btn_code_intro">Intro (code.md)</span>
+                                </button>
+                                <h4 id="code-filepath" style="margin: 0; font-family: var(--font-outfit); color: var(--secondary); font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sélectionnez un fichier</h4>
+                            </div>
                             <span id="code-language-badge" style="font-size: 0.68rem; background: rgba(139, 92, 246, 0.15); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(139, 92, 246, 0.2);">Code</span>
                         </div>
                         <div id="code-viewer-container" style="flex: 1; overflow: auto; position: relative; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: #1d1f21;">
@@ -1680,6 +1685,23 @@
             } catch (err) {
                 document.getElementById('code-file-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Erreur : ${err.message}</div>`;
             }
+        }
+
+        function openCodeIntro() {
+            const defaultPath = currentLang === 'fr' ? 'docs/code_fr.md' : 'docs/code_en.md';
+            const listPanel = document.getElementById('code-file-list');
+            if (!listPanel) return;
+
+            const allBtns = listPanel.querySelectorAll('.question-item');
+            let targetBtn = null;
+
+            allBtns.forEach(btn => {
+                if (btn.textContent.includes(defaultPath.split('/')[1])) {
+                    targetBtn = btn;
+                }
+            });
+
+            selectCodeFile(defaultPath, targetBtn);
         }
 
         async function selectCodeFile(path, btnElement) {
