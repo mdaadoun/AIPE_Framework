@@ -1647,6 +1647,7 @@
                         else if (file.name.endsWith('.py')) icon = '🐍';
                         else if (file.name.endsWith('.json')) icon = '⚙️';
                         else if (file.name.endsWith('.html')) icon = '🌐';
+                        else if (file.name.endsWith('.md')) icon = '📖';
                         else if (file.name.startsWith('.')) icon = '⚙️';
 
                         const nestingLevel = parts.length - 1;
@@ -1657,10 +1658,21 @@
                         listPanel.appendChild(btn);
                     });
 
-                    // Auto-charger le premier fichier réel
-                    const firstBtn = listPanel.querySelector('.question-item');
-                    if (firstBtn && files.length > 0) {
-                        selectCodeFile(files[0].path, firstBtn);
+                    // Auto-load code_en.md or code_fr.md matching current language, fallback to first file
+                    const defaultPath = currentLang === 'fr' ? 'docs/code_fr.md' : 'docs/code_en.md';
+                    let targetBtn = null;
+                    const allBtns = listPanel.querySelectorAll('.question-item');
+
+                    files.forEach((file, index) => {
+                        if (file.path === defaultPath) {
+                            targetBtn = allBtns[index];
+                        }
+                    });
+
+                    if (targetBtn) {
+                        selectCodeFile(defaultPath, targetBtn);
+                    } else if (allBtns.length > 0 && files.length > 0) {
+                        selectCodeFile(files[0].path, allBtns[0]);
                     }
                 } else {
                     document.getElementById('code-file-list').innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 10px;">Erreur : ${data.message}</div>`;
@@ -1689,6 +1701,7 @@
             else if (path.endsWith('.json')) lang = 'json';
             else if (path.endsWith('Makefile')) lang = 'makefile';
             else if (path.endsWith('.html')) lang = 'html';
+            else if (path.endsWith('.md')) lang = 'markdown';
             else if (path.endsWith('Dockerfile') || path.endsWith('.dockerignore')) lang = 'docker';
 
             badgeEl.textContent = lang;

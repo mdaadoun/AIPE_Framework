@@ -926,6 +926,8 @@ def list_code_files():
     """Returns list of eligible source files for code browser."""
     allowed_roots = ["src", "tests", "scripts"]
     allowed_files = [
+        "docs/code_en.md",
+        "docs/code_fr.md",
         "Makefile",
         "pyproject.toml",
         ".pre-commit-config.yaml",
