@@ -1,8 +1,8 @@
 # ==============================================================================
 # AIPE Framework - Tests - API Healthcheck Integration Tests
 # ==============================================================================
-# Ce module automatise les tests d'intégration de la route GET /health.
-# Il garantit que l'API renvoie le bon code HTTP et la structure JSON attendue.
+# Automates integration tests for GET /health endpoint.
+# Ensures API returns HTTP 200 and expected JSON payload structure.
 # ==============================================================================
 
 from fastapi.testclient import TestClient
@@ -10,34 +10,22 @@ from fastapi.testclient import TestClient
 from src.core.config import settings
 from src.main import app
 
-# Initialisation du client de test FastAPI.
-#
-# Le 'TestClient' simule de véritables appels HTTP (GET, POST, etc.) sur notre
-# application FastAPI sans avoir à lancer de serveur réseau réel (pas d'écoute sur le port 8000).
-# Cela permet d'exécuter nos tests en quelques millisecondes et de les intégrer
-# dans des boucles de validation automatique (CI/CD ou localement).
+# Initialize FastAPI TestClient (simulates HTTP requests without network overhead)
 client = TestClient(app)
 
 
 def test_health_check() -> None:
-    """
-    Vérifie le comportement et la conformité de la route GET /health.
-
-    Un test d'intégration s'assure du bon fonctionnement combiné de plusieurs composants :
-    le routeur, les schémas de données Pydantic, et la configuration globale.
-    """
-    # 1. Émettre une requête HTTP GET sur le chemin d'API /health
+    """Validate GET /health endpoint behavior and schema contract compliance."""
+    # 1. Issue HTTP GET request to /health endpoint
     response = client.get("/health")
 
-    # 2. Valider le code de statut HTTP (200 OK indique que le service fonctionne)
+    # 2. Validate HTTP 200 OK status code
     assert response.status_code == 200
 
-    # 3. Récupérer et valider le corps de la réponse au format JSON
+    # 3. Parse JSON response payload
     data = response.json()
 
-    # 4. Effectuer des assertions robustes en comparant le JSON reçu avec nos
-    #    valeurs de configuration issues de 'settings'. Ainsi, si les réglages changent,
-    #    les tests restent valides et dynamiques.
+    # 4. Assert response payload matches settings values
     assert data["status"] == settings.HEALTH_STATUS
     assert data["environment"] == settings.ENVIRONMENT
     assert data["version"] == settings.VERSION

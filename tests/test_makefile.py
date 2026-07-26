@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def test_make_help() -> None:
-    """Vérifie que la commande 'make help' s'exécute avec succès et présente les cibles."""
+    """Verify that 'make help' executes successfully and displays target rules."""
     project_dir = Path(__file__).parent.parent
     result = subprocess.run(
         ["make", "help"],
@@ -21,10 +21,10 @@ def test_make_help() -> None:
 
 
 def test_make_clean() -> None:
-    """Vérifie que la commande 'make clean' purge bien les dossiers de cache temporaires."""
+    """Verify that 'make clean' purges temporary cache directories."""
     project_dir = Path(__file__).parent.parent
 
-    # Création temporaire de dossiers imitant les caches pour tester la suppression
+    # Create temporary mock cache directories
     fake_pytest_cache = project_dir / ".pytest_cache"
     fake_mypy_cache = project_dir / ".mypy_cache"
 
@@ -39,17 +39,15 @@ def test_make_clean() -> None:
         check=True,
     )
 
-    # Les dossiers doivent avoir été supprimés
+    # Assert cache directories are deleted
     assert (
         not fake_pytest_cache.exists()
-    ), "Le dossier de cache .pytest_cache est toujours présent."
-    assert (
-        not fake_mypy_cache.exists()
-    ), "Le dossier de cache .mypy_cache est toujours présent."
+    ), "Cache directory .pytest_cache is still present."
+    assert not fake_mypy_cache.exists(), "Cache directory .mypy_cache is still present."
 
 
 def test_make_lint() -> None:
-    """Vérifie que la cible 'make lint' s'exécute sans erreur sur notre base de code propre."""
+    """Verify that 'make lint' executes without errors on clean codebase."""
     project_dir = Path(__file__).parent.parent
     result = subprocess.run(
         ["make", "lint"],
@@ -58,9 +56,9 @@ def test_make_lint() -> None:
         text=True,
     )
 
-    # Le code doit être conforme et renvoyer un code de retour 0
+    # Codebase must be clean and return status code 0
     assert (
         result.returncode == 0
-    ), f"make lint a échoué avec le code de sortie {result.returncode}. Sortie : {result.stdout}"
+    ), f"make lint failed with exit code {result.returncode}. Output: {result.stdout}"
     assert "Ruff Linter" in result.stdout or "Ruff" in result.stdout
     assert "Mypy" in result.stdout

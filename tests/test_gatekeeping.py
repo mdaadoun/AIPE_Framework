@@ -14,13 +14,13 @@ def get_cmd(tool_name: str) -> list[str]:
 
 
 def test_detect_secrets_behavior() -> None:
-    """Vérifie que detect-secrets détecte correctement un secret exposé dans un fichier."""
-    # Création d'un fichier temporaire sous tests/ pour que detect-secrets l'analyse dans le contexte du repo
+    """Verify that detect-secrets detects exposed secrets in source files."""
+    # Create temporary test file containing exposed mock secret
     secret_file = Path(__file__).parent / "exposed_secret_temp.py"
     secret_file.write_text('API_KEY = "sk-proj-12345"\n')  # pragma: allowlist secret
 
     try:
-        # Exécution de detect-secrets scan sur ce fichier
+        # Run detect-secrets scan on target file
         cmd = get_cmd("detect-secrets") + ["scan", str(secret_file)]
         result = subprocess.run(
             cmd,
@@ -29,27 +29,27 @@ def test_detect_secrets_behavior() -> None:
             check=True,
         )
 
-        # Vérification que le secret est détecté dans la sortie JSON
+        # Assert secret detection in JSON output
         assert "exposed_secret_temp.py" in result.stdout
         assert "Secret Keyword" in result.stdout
     finally:
-        # Nettoyage du fichier temporaire pour ne pas polluer le dépôt
+        # Clean up temporary test file
         if secret_file.exists():
             secret_file.unlink()
 
 
 def test_ruff_lint_behavior(tmp_path: Path) -> None:
-    """Vérifie que Ruff détecte les erreurs d'imports inutilisés ou de style."""
-    # Fichier contenant un import inutilisé (Règle F401)
+    """Verify that Ruff detects unused imports and lint violations."""
+    # File containing an unused import (rule F401)
     dirty_file = tmp_path / "dirty_code.py"
     dirty_code = (
-        "import os\n"  # Import inutilisé
-        "def calcul(x: int) -> int:\n"
+        "import os\n"  # Unused import
+        "def compute(x: int) -> int:\n"
         "    return x + 1\n"
     )
     dirty_file.write_text(dirty_code)
 
-    # Exécution de Ruff check
+    # Run Ruff check
     cmd = get_cmd("ruff") + ["check", str(dirty_file)]
     result = subprocess.run(
         cmd,
@@ -57,22 +57,22 @@ def test_ruff_lint_behavior(tmp_path: Path) -> None:
         text=True,
     )
 
-    # Doit détecter l'import inutilisé (F401)
+    # Must detect unused import (F401)
     assert "F401" in result.stdout
     assert result.returncode != 0
 
 
 def test_mypy_strict_behavior(tmp_path: Path) -> None:
-    """Vérifie que Mypy en mode strict rejette le code non annoté."""
-    # Fichier avec une signature non annotée
+    """Verify that strict Mypy rejects unannotated functions."""
+    # File with unannotated signature
     untyped_file = tmp_path / "untyped_code.py"
     untyped_code = (
-        "def saluer(nom):\n"  # Manque d'annotation de type (strict interdit)
-        "    return 'Bonjour ' + nom\n"
+        "def greet(name):\n"  # Missing type annotations (forbidden in strict mode)
+        "    return 'Hello ' + name\n"
     )
     untyped_file.write_text(untyped_code)
 
-    # Exécution de Mypy en mode strict
+    # Run Mypy in strict mode
     cmd = get_cmd("mypy") + ["--strict", str(untyped_file)]
     result = subprocess.run(
         cmd,
@@ -80,6 +80,6 @@ def test_mypy_strict_behavior(tmp_path: Path) -> None:
         text=True,
     )
 
-    # Mypy doit échouer et signaler le manque d'annotation
+    # Assert Mypy failure on unannotated function signature
     assert result.returncode != 0
     assert "Function is missing a type annotation" in result.stdout
