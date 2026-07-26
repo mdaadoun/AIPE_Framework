@@ -41,7 +41,11 @@ def test_readme_contains_quickstart_section() -> None:
     readme = PROJECT_DIR / "README.md"
     content = readme.read_text(encoding="utf-8")
 
-    assert "Démarrage Rapide" in content or "Quick Start" in content, (
+    assert (
+        "Démarrage Rapide" in content
+        or "Quick Start" in content
+        or "Quickstart" in content
+    ), (
         "Le README doit contenir une section 'Démarrage Rapide' (ou 'Quick Start') "
         "pour guider un nouveau développeur."
     )

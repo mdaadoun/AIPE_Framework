@@ -1,6 +1,8 @@
 # ==============================================================================
-# AIPE Framework - Pydantic Schemas - Health
+# AIPE Framework - Pydantic Schemas - Health / Schémas Pydantic Santé
 # ==============================================================================
+# This module defines data validation and serialization for the Health endpoint using Pydantic.
+#
 # Ce module définit la validation et la sérialisation des données pour l'endpoint
 # de santé de l'application à l'aide de Pydantic.
 # ==============================================================================
@@ -10,15 +12,17 @@ from pydantic import BaseModel, Field
 
 class HealthCheckResponse(BaseModel):
     """
-    Schéma de validation Pydantic pour la réponse de l'endpoint Healthcheck.
+    Pydantic validation schema for Healthcheck response / Schéma de validation Pydantic pour la réponse Healthcheck.
 
-    - Un "schema" ou "model" définit la structure attendue des données (leurs clés et leurs types).
-    - Pydantic effectue deux tâches majeures à l'exécution :
-      1. Validation : Si les types ne correspondent pas (ex: un int là où on attend un str),
-         il lève une erreur automatiquement avant que l'API ne renvoie du code erroné.
-      2. Sérialisation (parsing) : Il convertit les objets Python complexes en formats
-         standards de transit comme le JSON.
-      3. Documentation : Ce schéma est lu par FastAPI pour générer la documentation Swagger (/docs).
+    EN:
+    1. Validation: Ensures returned types match expected types (e.g. str).
+    2. Serialization: Parses Python objects into JSON data structures.
+    3. Documentation: Automatically generates Swagger OpenAPI docs (/docs).
+
+    FR:
+    1. Validation : Vérifie que les types correspondent aux attentes (ex: str).
+    2. Sérialisation : Convertit les objets Python en JSON.
+    3. Documentation : Génère la doc Swagger (/docs).
     """
 
     status: str = Field(
