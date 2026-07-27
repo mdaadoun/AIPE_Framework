@@ -2,7 +2,7 @@
 # Makefile - Unified Command Interface for AIPE_Framework
 # ==============================================================================
 
-.PHONY: install clean lint test dev dashboard docker-build onboarding-check help
+.PHONY: install clean lint test dev run dashboard docker-build onboarding-check help
 
 help:
 	@echo "======================================================================"
@@ -12,8 +12,9 @@ help:
 	@echo "  make clean        - Maintenance: Purge cache & temporary artifacts."
 	@echo "  make lint         - Quality: Run Ruff linter/formatter & strict Mypy."
 	@echo "  make test         - QA: Run full pytest test suite."
+	@echo "  make dev          - Web Server: Start FastAPI server (reload)."
+	@echo "  make run          - Executable: Run python main module with ARGS."
 	@echo "  make dashboard    - Interface: Start Flask interactive dashboard."
-	@echo "  make dev          - Run: Start production FastAPI server (reload)."
 	@echo "  make docker-build - Docker: Build multi-stage image (< 250 MB target)."
 	@echo "  make onboarding-check - Simulation: Validate < 5 min zero-setup onboarding."
 	@echo "======================================================================"
@@ -40,7 +41,10 @@ test:
 	poetry run python -m pytest
 
 dev:
-	poetry run uvicorn src.main:app --reload --port 8000
+	poetry run uvicorn src.main:app --reload --port 8000 $(ARGS)
+
+run:
+	poetry run python -m src.main $(ARGS)
 
 dashboard:
 	poetry run python dashboard/app.py
