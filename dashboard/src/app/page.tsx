@@ -400,6 +400,17 @@ export default function DashboardPage() {
   const [selectedFilePath, setSelectedFilePath] = useState<string>("docs/code_en.md");
   const [codeContent, setCodeContent] = useState("");
 
+  // Switch doc language in Code browser when top language toggle changes
+  useEffect(() => {
+    if (selectedFilePath.endsWith("_en.md") && lang === "fr") {
+      const frPath = selectedFilePath.replace("_en.md", "_fr.md");
+      setSelectedFilePath(frPath);
+    } else if (selectedFilePath.endsWith("_fr.md") && lang === "en") {
+      const enPath = selectedFilePath.replace("_fr.md", "_en.md");
+      setSelectedFilePath(enPath);
+    }
+  }, [lang, selectedFilePath]);
+
   // Presentation tab
   useEffect(() => {
     if (activeTab === "presentation") {
