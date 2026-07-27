@@ -212,7 +212,7 @@ main {
   font-size: 0.92rem;
 }
 
-/* Interview & Sidebar Grid - Dynamic Natural Height */
+/* Interview & Sidebar Grid - Sticky Independent Navigation Scrollbar */
 .interview-grid {
   display: grid;
   grid-template-columns: 350px 1fr;
@@ -229,6 +229,10 @@ main {
   gap: 10px;
   position: sticky;
   top: 100px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
 }
 
 .question-item {
@@ -295,7 +299,7 @@ main {
   padding-bottom: 8px;
 }
 
-/* Test Launcher & Code Terminal - Natural Height Expansion */
+/* Test Launcher & Code Terminal */
 .test-launcher-panel {
   display: flex;
   flex-direction: column;
@@ -504,6 +508,7 @@ footer {
     padding-right: 0;
     padding-bottom: 16px;
     position: static;
+    max-height: 280px;
   }
   .test-controls {
     flex-direction: column;
