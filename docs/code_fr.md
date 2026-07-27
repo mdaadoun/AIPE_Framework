@@ -85,9 +85,9 @@ Ce document présente une explication détaillée de chaque module, classe, sch�
 
 ---
 
-## 📊 10. Backend du Dashboard Interactif : `dashboard/app.py`
+## 📊 10. Dashboard Interactif : `dashboard-next/`
 
-- **Rôle :** Service backend Flask alimentant le dashboard interactif, la visualisation des spécifications, le lanceur de tests basé sur l'analyse AST Python (`/api/run-tests`) et le navigateur de code source sécurisé (`/api/code/file`).
+- **Rôle :** Application Next.js 16 + React 19 + TypeScript alimentant le dashboard interactif, la feuille de route, le glossaire, le simulateur FAQ d'entretien, le lanceur de tests basé sur l'analyse AST Python (`/api/run-tests`) et le navigateur de code source sécurisé (`/api/code/file`).
 
 ---
 

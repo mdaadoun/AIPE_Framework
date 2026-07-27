@@ -19,7 +19,7 @@ coverage.xml
 .gitignore
 
 # Local tracking dashboard
-dashboard/
+dashboard-next/
 
 # Documentation & tests
 docs/

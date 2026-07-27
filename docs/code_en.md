@@ -85,9 +85,9 @@ This document provides a detailed breakdown of every module, class, schema, and 
 
 ---
 
-## 📊 10. Interactive Dashboard Backend: `dashboard/app.py`
+## 📊 10. Interactive Dashboard: `dashboard-next/`
 
-- **Purpose:** Flask backend service hosting the interactive project dashboard UI, API documentation viewer, dynamic AST-based unit test runner (`/api/run-tests`), and secure source code browser (`/api/code/file`).
+- **Purpose:** Next.js 16 + React 19 + TypeScript dashboard hosting the interactive project UI, roadmap tracker, technical glossary, interview FAQ simulator, dynamic AST-based unit test runner (`/api/run-tests`), and secure source code browser (`/api/code/file`).
 
 ---
 

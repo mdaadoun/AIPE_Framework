@@ -1,149 +1,58 @@
-"""Unit tests for Dashboard API endpoints (Flask & Next.js backend logic)."""
+"""Unit tests for Dashboard documentation integrity and Next.js static build."""
 
 import json
+import subprocess
 from pathlib import Path
 
-from dashboard.app import (
-    app as flask_app,
-)
-from dashboard.app import (
-    get_doc_file,
-    markdown_to_html,
-    parse_faq_questions,
-    parse_glossary_concepts,
-)
-
 PROJECT_DIR = Path(__file__).resolve().parent.parent
+DOCS_DIR = PROJECT_DIR / "docs"
 
 
-def test_markdown_to_html_formatting() -> None:
-    """Verify markdown to HTML converter handles headers, lists, and bold text."""
-    md = "# Title\n\n- Item 1\n- Item 2\n\n**Bold text**"
-    html_out = markdown_to_html(md)
+def test_documentation_files_exist() -> None:
+    """Verify essential documentation markdown files exist in English and French."""
+    required_docs = [
+        "presentation_en.md",
+        "presentation_fr.md",
+        "roadmap_en.md",
+        "roadmap_fr.md",
+        "glossary_en.md",
+        "glossary_fr.md",
+        "journal_en.md",
+        "journal_fr.md",
+        "questions_en.md",
+        "questions_fr.md",
+        "code_en.md",
+        "code_fr.md",
+    ]
 
-    assert "Title" in html_out
-    assert "Item 1" in html_out
-    assert "Bold text" in html_out
-
-
-def test_get_doc_file_language_resolution() -> None:
-    """Verify get_doc_file resolves language suffixes (_en.md and _fr.md)."""
-    file_en = get_doc_file("presentation", "en")
-    file_fr = get_doc_file("presentation", "fr")
-
-    assert file_en.name == "presentation_en.md"
-    assert file_fr.name == "presentation_fr.md"
-
-
-def test_parse_faq_questions_structure() -> None:
-    """Verify FAQ parser returns structured list of questions."""
-    questions_en = parse_faq_questions("en")
-    questions_fr = parse_faq_questions("fr")
-
-    assert len(questions_en) > 0
-    assert len(questions_fr) > 0
-    assert "question" in questions_en[0]
-    assert "answer_html" in questions_en[0]
+    for doc_name in required_docs:
+        doc_path = DOCS_DIR / doc_name
+        assert doc_path.exists(), f"Missing required doc file: {doc_name}"
+        assert doc_path.stat().st_size > 0, f"Doc file is empty: {doc_name}"
 
 
-def test_parse_glossary_concepts_structure() -> None:
-    """Verify glossary parser extracts concepts and definitions."""
-    concepts = parse_glossary_concepts("fr")
+def test_nextjs_dashboard_package_json() -> None:
+    """Verify Next.js dashboard project configuration exists and contains required scripts."""
+    pkg_path = PROJECT_DIR / "dashboard" / "package.json"
+    assert pkg_path.exists(), "dashboard/package.json missing"
 
-    assert len(concepts) > 0
-    assert "concept" in concepts[0]
-    assert "definition_html" in concepts[0]
-
-
-def test_flask_presentation_endpoint() -> None:
-    """Verify presentation markdown API returns rendered HTML."""
-    client = flask_app.test_client()
-    response = client.get("/api/presentation?lang=en")
-
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert data["status"] == "success"
-    assert "html" in data
+    content = json.loads(pkg_path.read_text(encoding="utf-8"))
+    assert "scripts" in content
+    assert "dev" in content["scripts"]
+    assert "build" in content["scripts"]
 
 
-def test_flask_roadmap_endpoint() -> None:
-    """Verify roadmap markdown API returns rendered HTML."""
-    client = flask_app.test_client()
-    response = client.get("/api/roadmap?lang=en")
+def test_nextjs_dashboard_build() -> None:
+    """Verify Next.js dashboard compiles cleanly without build errors."""
+    next_dir = PROJECT_DIR / "dashboard"
+    result = subprocess.run(
+        ["npm", "run", "build"],
+        cwd=str(next_dir),
+        capture_output=True,
+        text=True,
+    )
 
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert data["status"] == "success"
-    assert "html" in data
-
-
-def test_flask_glossary_endpoints() -> None:
-    """Verify glossary list and single concept detail API endpoints."""
-    client = flask_app.test_client()
-
-    list_res = client.get("/api/glossaire?lang=fr")
-    assert list_res.status_code == 200
-    list_data = json.loads(list_res.data)
-    assert list_data["status"] == "success"
-
-    detail_res = client.get("/api/glossaire/0?lang=fr")
-    assert detail_res.status_code == 200
-    detail_data = json.loads(detail_res.data)
-    assert detail_data["status"] == "success"
-
-
-def test_flask_journal_endpoints() -> None:
-    """Verify journal list and article content endpoints."""
-    client = flask_app.test_client()
-
-    list_res = client.get("/api/journal?lang=fr")
-    assert list_res.status_code == 200
-    list_data = json.loads(list_res.data)
-    assert list_data["status"] == "success"
-
-    detail_res = client.get("/api/journal/intro?lang=fr")
-    assert detail_res.status_code == 200
-    detail_data = json.loads(detail_res.data)
-    assert detail_data["status"] == "success"
-
-
-def test_flask_entretien_endpoints() -> None:
-    """Verify interview FAQ list and answer detail endpoints."""
-    client = flask_app.test_client()
-
-    list_res = client.get("/api/entretien?lang=fr")
-    assert list_res.status_code == 200
-    list_data = json.loads(list_res.data)
-    assert list_data["status"] == "success"
-
-    detail_res = client.get("/api/entretien/0?lang=fr")
-    assert detail_res.status_code == 200
-    detail_data = json.loads(detail_res.data)
-    assert detail_data["status"] == "success"
-
-
-def test_flask_tests_list_endpoint() -> None:
-    """Verify tests scanner API returns pytest targets."""
-    client = flask_app.test_client()
-    response = client.get("/api/tests/list")
-
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert data["status"] == "success"
-    assert len(data["tests"]) > 0
-
-
-def test_flask_code_browser_endpoints() -> None:
-    """Verify repository code file index and raw content API endpoints."""
-    client = flask_app.test_client()
-
-    list_res = client.get("/api/code/list")
-    assert list_res.status_code == 200
-    list_data = json.loads(list_res.data)
-    assert list_data["status"] == "success"
-
-    file_res = client.get("/api/code/file?path=pyproject.toml")
-    assert file_res.status_code == 200
-    file_data = json.loads(file_res.data)
-    assert file_data["status"] == "success"
-    assert "poetry" in file_data["content"]
+    assert result.returncode == 0, (
+        f"Next.js build failed with code {result.returncode}. Output:"
+        f" {result.stdout} {result.stderr}"
+    )

@@ -81,7 +81,7 @@ def test_dockerignore_excludes_dev_artifacts() -> None:
     dockerignore = PROJECT_DIR / ".dockerignore"
     content = dockerignore.read_text(encoding="utf-8")
 
-    expected_exclusions = [".venv", ".git", "tests/", "dashboard/", "__pycache__"]
+    expected_exclusions = [".venv", ".git", "tests/", "dashboard-next/", "__pycache__"]
     for exclusion in expected_exclusions:
         assert exclusion in content, f".dockerignore must exclude '{exclusion}'."
 

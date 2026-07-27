@@ -1,83 +1,71 @@
-# 🚀 Blueprint AI Product Engineering (AIPE_Framework) — Cadre Industriel & Productivité
+# 🚀 Standard d'Ingénierie Produit IA (AIPE_Framework) — Framework Industriel & Productivité
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.2+-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Poetry](https://img.shields.io/badge/poetry-1.7+-60A5FA?style=flat-square&logo=poetry&logoColor=white)](https://python-poetry.org/)
 [![FastAPI 0.110+](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Docker Multi-Stage](https://img.shields.io/badge/docker-Multi--Stage-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Ruff](https://img.shields.io/badge/linter-Ruff-009688?style=flat-square)](https://github.com/astral-sh/ruff)
 [![Mypy strict](https://img.shields.io/badge/typing-Mypy%20strict-blue?style=flat-square)](https://mypy-lang.org/)
 
-AIPE_Framework (Blueprint AI Product Engineering) est un socle technique et industriel standardisé conçu pour accélérer et sécuriser le développement de projets basés sur l'intelligence artificielle (LLMs, RAG, agents). Il résout les problèmes de dette technique initiale en imposant de bonnes pratiques dès le premier jour (contrôle qualité pré-commit, typage strict, conteneurisation optimisée).
+[🇬🇧 English version available here](README.md)
+
+**AIPE_Framework** est un socle d'ingénierie logicielle industrielle conçu pour accélérer et sécuriser le développement de projets d'IA appliquée (LLMs, RAG, agents autonomes). Il élimine la dette technique initiale en imposant les meilleures pratiques dès le premier jour (qualité pre-commit, typage strict 100%, conteneurisation sécurisée non-root).
 
 ---
 
-## 🎯 Objectifs & KPI Métier
+## 🎯 Objectifs Métiers & KPIs
 
-* **Zero-Setup Friction :** Onboarding d'un développeur en moins de 5 minutes grâce à un ensemble d'outils unifiés (`git clone` $\to$ `make install` $\to$ prêt pour coder).
-* **Isolation Native :** Séparation étanche entre l'expérimentation (`notebooks/`) et le code prêt pour la production (`src/`).
-* **Qualité & Rigueur Système :** Couverture de typage statique Mypy strict à 100% dans `src/` et formatage/linting ultrarapide via Ruff en moins de 2 secondes localement.
-* **Sécurité Passive :** Blocage automatique au niveau local de toute fuite de secret (ex: clés d'API OpenAI/Gemini) lors du commit via `detect-secrets`.
-* **Conteneurisation Optimisée :** Build d'image Docker multi-stage pour un runtime minimaliste (< 250 MB).
+* **Onboarding Ultra-Rapide (< 5 min) :** Prise en main zéro-friction (`git clone` $\to$ `make install` $\to$ opérationnel).
+* **Isolation du Code :** Séparation stricte entre les expérimentations (`notebooks/`) et le code de production (`src/`).
+* **Qualité de Code Systématique :** 100% de couverture de types Mypy dans `src/` couplée à un linting ultra-rapide (< 2s) avec Ruff.
+* **Protection des Clés API :** Interception automatique des secrets en clair via des hooks `detect-secrets`.
+* **Conteneurisation Optimisée :** Image Docker multi-stage légère (< 250 Mo) sous utilisateur non-root (`appuser` UID 1000).
 
 ---
 
-## 📂 Structure du Projet
+## 📂 Structure du Répertoire
 
 ```text
 AIPE_Framework/
 │
-├── README.md                   # English main presentation & Quickstart guide
-├── README_fr.md                # Version française de la présentation du blueprint
+├── README.md                   # Présentation principale en Anglais
+├── README_fr.md                # Présentation du framework en Français
 │
-├── dashboard/                  # Tableau de bord Flask de suivi et simulation d'entretien
-│   ├── app.py                  # Serveur Flask principal
-│   └── templates/              # SPA HTML UI (index.html)
+├── dashboard-next/             # Dashboard interactif Next.js TypeScript & simulateur QA
+│   ├── src/app/                # Routes App Router (Présentation, Roadmap, Glossaire, FAQ, Code)
+│   └── src/lib/                # Analyseur AST de tests & parser Markdown
 │
-├── docs/                       # Spécifications et documentation d'architecture
-    ├── specifications_fr.md    # Cahier des charges fonctionnel et technique (CDCFT)
-    ├── roadmap_fr.md           # Feuille de route chronologique par étapes
-    ├── glossary_fr.md          # Glossaire des concepts techniques clés du framework
-    ├── questions_fr.md         # FAQ interactive pour la simulation d'entretien oral
-    ├── code_fr.md              # Guide d'architecture et référence du code source
-    └── journal_fr.md           # Journal de bord d'apprentissage et choix d'architecture
+├── docs/                       # Spécifications et documentation technique
+    ├── specifications_fr.md   # Cahier des charges fonctionnel et technique
+    ├── roadmap_fr.md          # Feuille de route chronologique en 6 phases
+    ├── glossary_fr.md         # Glossaire technique des concepts du framework
+    ├── questions_fr.md        # FAQ interactive d'entretien (34 Q&R)
+    ├── code_fr.md             # Guide d'architecture du code source
+    └── journal_fr.md          # Journal de bord et décisions d'architecture (ADR)
 ```
-
----
-
-## 🛠️ Spécifications techniques principales
-
-| Composant | Fichier | Rôle & Règle métier |
-| :--- | :--- | :--- |
-| **Tableau de Bord** | [`dashboard/app.py`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/app.py) | Serveur Flask local de suivi et d'apprentissage. |
-| **Interface Utilisateur** | [`dashboard/templates/index.html`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/templates/index.html) | Single Page Application (SPA) avec design moderne glassmorphism. |
-| **Feuille de Route** | [`docs/roadmap_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/roadmap_fr.md) | Feuille de route chronologique et linéaire de la Baseline AIPE. |
-| **Glossaire Technique** | [`docs/glossary_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/glossary_fr.md) | Définitions approfondies des concepts clés (Ruff, Mypy, Poetry). |
-| **FAQ d'Entretien** | [`docs/questions_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/questions_fr.md) | Questions/réponses ciblées pour la simulation d'entretien technique. |
-| **Journal d'Apprentissage** | [`docs/journal_fr.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/journal_fr.md) | Suivi de bord et analyses de décisions techniques. |
 
 ---
 
 ## 🚀 Démarrage Rapide
 
-### 1. Initialiser le projet (onboarding)
-Installe toutes les dépendances via Poetry et configure physiquement les hooks de commit locaux.
+### 1. Initialiser le projet
 ```bash
 make install
 ```
 
-### 2. Démarrer le Dashboard de suivi interactif
-Lance le serveur de suivi Flask local.
+### 2. Lancer le Dashboard Interactif Next.js
 ```bash
 make dashboard
 ```
-Le tableau de bord de suivi interactif sera accessible sur [http://localhost:5001](http://localhost:5001).
+Accédez au dashboard sur [http://localhost:3000](http://localhost:3000).
 
-### 3. Exécuter la suite de tests unitaires & QA
+### 3. Exécuter la suite de tests
 ```bash
 make test
 ```
 
-### 4. Lancer l'analyse statique de qualité (Ruff + Mypy)
+### 4. Valider le style et les types (Ruff + Mypy)
 ```bash
 make lint
 ```

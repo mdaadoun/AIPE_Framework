@@ -1,6 +1,7 @@
 # 🚀 AI Product Engineering Blueprint (AIPE_Framework) — Industrial Framework & Productivity
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.2+-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Poetry](https://img.shields.io/badge/poetry-1.7+-60A5FA?style=flat-square&logo=poetry&logoColor=white)](https://python-poetry.org/)
 [![FastAPI 0.110+](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Docker Multi-Stage](https://img.shields.io/badge/docker-Multi--Stage-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -31,9 +32,9 @@ AIPE_Framework/
 ├── README.md                   # English main presentation & Quickstart guide
 ├── README_fr.md                # French version of the blueprint presentation
 │
-├── dashboard/                  # Interactive Flask learning & recruiter interview simulator
-│   ├── app.py                  # Main Flask application entrypoint
-│   └── templates/              # SPA HTML UI (index.html)
+├── dashboard-next/             # Modern Next.js TypeScript interactive learning & QA simulator
+│   ├── src/app/                # App Router routes (Presentation, Roadmap, Glossary, FAQ, Code browser)
+│   └── src/lib/                # Dynamic AST test scanner & Markdown parser
 │
 ├── docs/                       # Architectural specifications & technical documentation
     ├── specifications_en.md   # Functional & Technical Requirements Specification (FTRS)
@@ -50,8 +51,8 @@ AIPE_Framework/
 
 | Component | File | Technical Role & Rule |
 | :--- | :--- | :--- |
-| **Tracking Dashboard** | [`dashboard/app.py`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/app.py) | Local Flask server for interactive learning and roadmap tracking. |
-| **User Interface** | [`dashboard/templates/index.html`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard/templates/index.html) | Single Page Application (SPA) with modern glassmorphism aesthetic. |
+| **Tracking Dashboard** | [`dashboard-next/src/app/page.tsx`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard-next/src/app/page.tsx) | Next.js TypeScript dashboard for interactive learning and roadmap tracking. |
+| **User Interface** | [`dashboard-next/src/app/globals.css`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/dashboard-next/src/app/globals.css) | Single Page Application (SPA) with modern glassmorphism aesthetic & sticky scroll sidebar. |
 | **Roadmap Spec** | [`docs/roadmap_en.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/roadmap_en.md) | Chronological 6-phase linear specification of the AIPE baseline. |
 | **Technical Glossary** | [`docs/glossary_en.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/glossary_en.md) | In-depth definitions of DevOps, Quality, and IDE concepts (Ruff, Mypy, Poetry). |
 | **Interview FAQ** | [`docs/questions_en.md`](file:///home/michael/Code/ai-engineering/projets/2_AIPE_Framework/docs/questions_en.md) | 34 targeted recruiter Q&As covering architecture design choices. |
@@ -68,13 +69,13 @@ make install
 ```
 
 ### 2. Launch Interactive Dashboard
-Starts the local Flask tracking dashboard.
+Starts the local Next.js tracking dashboard.
 ```bash
 make dashboard
 ```
-Access the interactive dashboard UI at [http://localhost:5001](http://localhost:5001).
+Access the interactive dashboard UI at [http://localhost:3000](http://localhost:3000).
 
-### 3. Run Automated Test Suite (64 PASSED)
+### 3. Run Automated Test Suite
 ```bash
 make test
 ```
