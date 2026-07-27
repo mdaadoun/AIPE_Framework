@@ -2,7 +2,7 @@
 # Makefile - Unified Command Interface for AIPE_Framework
 # ==============================================================================
 
-.PHONY: install clean lint test dev run dashboard docker-build onboarding-check help
+.PHONY: install clean lint test dev run dashboard dashboard-next docker-build onboarding-check help
 
 help:
 	@echo "======================================================================"
@@ -15,6 +15,7 @@ help:
 	@echo "  make dev          - Web Server: Start FastAPI server (reload)."
 	@echo "  make run          - Executable: Run python main module with ARGS."
 	@echo "  make dashboard    - Interface: Start Flask interactive dashboard."
+	@echo "  make dashboard-next - Interface: Start Next.js TypeScript interactive dashboard."
 	@echo "  make docker-build - Docker: Build multi-stage image (< 250 MB target)."
 	@echo "  make onboarding-check - Simulation: Validate < 5 min zero-setup onboarding."
 	@echo "======================================================================"
@@ -48,6 +49,9 @@ run:
 
 dashboard:
 	poetry run python dashboard/app.py
+
+dashboard-next:
+	npm --prefix dashboard-next run dev
 
 docker-build:
 	@echo "--- Building production multi-stage Docker image ---"
