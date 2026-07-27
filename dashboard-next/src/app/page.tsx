@@ -10,11 +10,10 @@ import {
   Play,
   Code,
   ExternalLink,
-  CheckCircle,
-  XCircle,
   Loader2,
   Terminal as TerminalIcon,
   Layers,
+  Folder,
 } from "lucide-react";
 
 type TabType =
@@ -101,6 +100,19 @@ const TEST_DESCRIPTIONS: Record<
     concept: "DX & Automatisation",
   },
 };
+
+function getFileIcon(name: string): string {
+  if (name === "Makefile") return "⚙️";
+  if (name === "Dockerfile" || name === ".dockerignore") return "🐳";
+  if (name.endsWith(".toml")) return "📦";
+  if (name.endsWith(".yaml") || name.endsWith(".yml")) return "🛡️";
+  if (name.endsWith(".py")) return "🐍";
+  if (name.endsWith(".json")) return "⚙️";
+  if (name.endsWith(".html")) return "🌐";
+  if (name.endsWith(".md")) return "📖";
+  if (name.startsWith(".")) return "⚙️";
+  return "📄";
+}
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>("presentation");
@@ -290,6 +302,13 @@ export default function DashboardPage() {
     c.concept.toLowerCase().includes(conceptSearch.toLowerCase())
   );
 
+  // Render tree structure for Code Browser
+  const visibleCodeFiles = codeFiles.filter((f) => !f.path.startsWith("docs/"));
+  const renderedDirs = new Set<string>();
+
+  const isIntroSelected =
+    selectedFilePath === "docs/code_en.md" || selectedFilePath === "docs/code_fr.md";
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -420,7 +439,7 @@ export default function DashboardPage() {
                     background: "rgba(0,0,0,0.3)",
                     color: "var(--text-main)",
                     fontFamily: "var(--font-inter)",
-                    fontSize: "0.88rem",
+                    fontSize: "0.95rem",
                     marginBottom: "6px",
                   }}
                 />
@@ -452,7 +471,7 @@ export default function DashboardPage() {
                     className={`question-item ${selectedJournalId === item.id ? "active" : ""}`}
                   >
                     <div style={{ fontWeight: 600, color: "#ffffff" }}>{item.title}</div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "4px" }}>
+                    <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "4px" }}>
                       📅 {item.date}
                     </div>
                   </button>
@@ -497,10 +516,10 @@ export default function DashboardPage() {
             <div className="test-launcher-panel">
               <div className="test-controls">
                 <div>
-                  <h3 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.15rem", fontWeight: 600, color: "#ffffff" }}>
+                  <h3 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.25rem", fontWeight: 600, color: "#ffffff" }}>
                     {lang === "en" ? "Live QA Test Launcher" : "Lanceur de Tests Live (QA)"}
                   </h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
+                  <p style={{ fontSize: "0.9rem", color: "var(--text-muted)", marginTop: "4px" }}>
                     {lang === "en"
                       ? "Execute global pytest suite or target a specific test function."
                       : "Exécutez la suite globale ou ciblez précisément une fonction de test."}
@@ -544,37 +563,37 @@ export default function DashboardPage() {
                   background: "rgba(15, 23, 42, 0.45)",
                   border: "1px solid var(--border)",
                   borderRadius: "10px",
-                  padding: "16px 20px",
+                  padding: "18px 22px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "10px",
+                  gap: "12px",
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "8px" }}>
-                  <h4 style={{ margin: 0, fontFamily: "var(--font-outfit)", color: "var(--secondary)", fontSize: "0.98rem", fontWeight: 600 }}>
+                  <h4 style={{ margin: 0, fontFamily: "var(--font-outfit)", color: "var(--secondary)", fontSize: "1.05rem", fontWeight: 600 }}>
                     📌 {currentTestInfo.title}
                   </h4>
-                  <span style={{ fontSize: "0.7rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "3px 8px", borderRadius: "4px", fontWeight: 600, border: "1px solid rgba(139, 92, 246, 0.2)" }}>
+                  <span style={{ fontSize: "0.75rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "3px 8px", borderRadius: "4px", fontWeight: 600, border: "1px solid rgba(139, 92, 246, 0.2)" }}>
                     {currentTestInfo.concept}
                   </span>
                 </div>
-                <p style={{ fontSize: "0.85rem", color: "#f8fafc", margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontSize: "0.92rem", color: "#f8fafc", margin: 0, lineHeight: 1.55 }}>
                   <strong>Description &amp; Scénario :</strong> {currentTestInfo.objective}
                 </p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "4px" }}>
-                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px", padding: "10px" }}>
-                    <div style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#cbd5e1", marginBottom: "4px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginTop: "4px" }}>
+                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px", padding: "12px" }}>
+                    <div style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#cbd5e1", marginBottom: "4px" }}>
                       📥 Entrée attendue (INPUT) :
                     </div>
-                    <div style={{ fontSize: "0.78rem", fontFamily: "var(--font-fira)", color: "#a5f3fc" }}>
+                    <div style={{ fontSize: "0.88rem", fontFamily: "var(--font-fira)", color: "#a5f3fc" }}>
                       {currentTestInfo.input}
                     </div>
                   </div>
-                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px", padding: "10px" }}>
-                    <div style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#cbd5e1", marginBottom: "4px" }}>
+                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px", padding: "12px" }}>
+                    <div style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#cbd5e1", marginBottom: "4px" }}>
                       📤 Sortie attendue (OUTPUT) :
                     </div>
-                    <div style={{ fontSize: "0.78rem", fontFamily: "var(--font-fira)", color: "#86efac" }}>
+                    <div style={{ fontSize: "0.88rem", fontFamily: "var(--font-fira)", color: "#86efac" }}>
                       {currentTestInfo.output}
                     </div>
                   </div>
@@ -616,12 +635,12 @@ export default function DashboardPage() {
                 <TerminalIcon size={48} style={{ color: "var(--secondary)" }} />
               </div>
               <div>
-                <h2 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.6rem", fontWeight: 700 }}>
+                <h2 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.75rem", fontWeight: 700 }}>
                   {lang === "en"
                     ? "Interactive OpenAPI Documentation (Swagger UI)"
                     : "Documentation interactive de l'API (Swagger UI)"}
                 </h2>
-                <p style={{ maxWidth: "600px", margin: "10px auto", color: "var(--text-muted)" }}>
+                <p style={{ maxWidth: "600px", margin: "12px auto", color: "var(--text-muted)", fontSize: "1rem" }}>
                   {lang === "en"
                     ? "OpenAPI documentation allows live testing of production endpoints (including /health probe)."
                     : "La documentation interactive OpenAPI permet de visualiser et de tester en temps réel les endpoints du microservice."}
@@ -643,37 +662,116 @@ export default function DashboardPage() {
           {activeTab === "code" && (
             <div className="interview-grid">
               <div className="question-list-panel">
-                <button
-                  onClick={() => setSelectedFilePath(lang === "fr" ? "docs/code_fr.md" : "docs/code_en.md")}
-                  className="question-item"
-                  style={{ background: "rgba(139, 92, 246, 0.15)", border: "1px solid var(--primary)", color: "#ffffff" }}
-                >
-                  📖 Intro (code.md)
-                </button>
+                <h4 style={{ fontFamily: "var(--font-outfit)", fontSize: "1rem", fontWeight: "bold", color: "#ffffff", marginBottom: "8px", borderBottom: "1px solid var(--border)", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Folder size={16} /> Fichiers sources
+                </h4>
 
-                {codeFiles.map((file) => (
-                  <button
-                    key={file.path}
-                    onClick={() => setSelectedFilePath(file.path)}
-                    className={`question-item ${selectedFilePath === file.path ? "active" : ""}`}
-                    style={{ fontSize: "0.82rem", fontFamily: "var(--font-fira)" }}
-                  >
-                    📄 {file.path}
-                  </button>
-                ))}
+                {visibleCodeFiles.map((file) => {
+                  const parts = file.path.split("/");
+                  const elements: React.ReactNode[] = [];
+
+                  // Render parent directory headers if not rendered yet
+                  let currentDirPath = "";
+                  for (let i = 0; i < parts.length - 1; i++) {
+                    const part = parts[i];
+                    currentDirPath = currentDirPath ? `${currentDirPath}/${part}` : part;
+
+                    if (!renderedDirs.has(currentDirPath)) {
+                      renderedDirs.add(currentDirPath);
+                      elements.push(
+                        <div
+                          key={`dir-${currentDirPath}`}
+                          style={{
+                            paddingLeft: `${10 + i * 14}px`,
+                            paddingTop: "6px",
+                            paddingBottom: "2px",
+                            fontSize: "0.88rem",
+                            fontWeight: "bold",
+                            color: "var(--secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            fontFamily: "var(--font-outfit)",
+                          }}
+                        >
+                          📁 {part}
+                        </div>
+                      );
+                    }
+                  }
+
+                  const icon = getFileIcon(file.name);
+                  const nestingLevel = parts.length - 1;
+
+                  elements.push(
+                    <button
+                      key={file.path}
+                      onClick={() => setSelectedFilePath(file.path)}
+                      className={`question-item ${selectedFilePath === file.path ? "active" : ""}`}
+                      style={{
+                        paddingLeft: `${12 + nestingLevel * 14}px`,
+                        paddingTop: "8px",
+                        paddingBottom: "8px",
+                        fontSize: "0.92rem",
+                        fontFamily: "var(--font-fira)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>{icon}</span>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {file.name}
+                      </span>
+                    </button>
+                  );
+
+                  return <React.Fragment key={file.path}>{elements}</React.Fragment>;
+                })}
               </div>
 
               <div className="workspace-panel">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "10px" }}>
-                  <span style={{ fontFamily: "var(--font-fira)", color: "var(--secondary)", fontSize: "0.9rem" }}>
-                    {selectedFilePath}
-                  </span>
-                  <span style={{ fontSize: "0.7rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "2px 8px", borderRadius: "4px", fontFamily: "var(--font-fira)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "12px", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <button
+                      onClick={() =>
+                        setSelectedFilePath(lang === "fr" ? "docs/code_fr.md" : "docs/code_en.md")
+                      }
+                      style={{
+                        background: isIntroSelected
+                          ? "rgba(139, 92, 246, 0.25)"
+                          : "rgba(255, 255, 255, 0.04)",
+                        border: isIntroSelected
+                          ? "1px solid rgba(139, 92, 246, 0.5)"
+                          : "1px solid rgba(255, 255, 255, 0.1)",
+                        color: isIntroSelected ? "#ffffff" : "var(--text-muted)",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        transition: "var(--transition)",
+                      }}
+                    >
+                      📖 Intro (code.md)
+                    </button>
+                    <span style={{ fontFamily: "var(--font-fira)", color: "var(--secondary)", fontSize: "0.95rem", fontWeight: 600 }}>
+                      {selectedFilePath}
+                    </span>
+                  </div>
+
+                  <span style={{ fontSize: "0.75rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "3px 10px", borderRadius: "4px", fontFamily: "var(--font-fira)", fontWeight: "bold" }}>
                     CODE
                   </span>
                 </div>
+
                 <div className="terminal" style={{ minHeight: "450px" }}>
-                  <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{codeContent}</pre>
+                  <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: "0.92rem", fontFamily: "var(--font-fira)", lineHeight: 1.55 }}>
+                    {codeContent}
+                  </pre>
                 </div>
               </div>
             </div>
