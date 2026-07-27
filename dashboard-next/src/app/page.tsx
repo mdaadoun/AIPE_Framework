@@ -77,91 +77,234 @@ const TEST_DESCRIPTIONS: Record<
 > = {
   all: {
     title: "🧪 Suite de Tests Complète (pytest)",
-    objective:
-      "Exécuter l'intégralité des tests unitaires et d'intégration du framework AIPE en une seule commande.",
+    objective: "Exécuter l'intégralité des tests unitaires et d'intégration du framework AIPE en une seule commande.",
     input: "Tous les fichiers de test du répertoire tests/.",
     output: "Rapport d'exécution global pytest (PASS/FAIL) avec taux de réussite.",
-    concept: "CI/CD & Non-régression",
-  },
-  "tests/test_dockerfile.py": {
-    title: "🐳 test_dockerfile.py (Docker OCI)",
-    objective:
-      "Valider la conformité du Dockerfile aux normes de conteneurisation sécurisées (multi-stage build, utilisateur non-root).",
-    input: "Analyse AST et inspection des instructions du Dockerfile.",
-    output: "Validation OCI & Sécurité conteneurs.",
-    concept: "Conteneurisation & Production",
-  },
-  "tests/test_exceptions.py": {
-    title: "⚠️ test_exceptions.py (Hiérarchie d'exceptions)",
-    objective:
-      "Vérifier l'héritage et la manipulation d'erreurs typées (AIPEError, ConfigurationError, ValidationError, LLMClientError).",
-    input: "Instanciation et levée de toutes les exceptions personnalisées.",
-    output: "Couverture 100% du module src/core/exceptions.py.",
-    concept: "Résilience & Clean Code",
+    concept: "Intégration Continue (CI/CD) & Non-régression",
   },
   "tests/test_gatekeeping.py": {
-    title: "📁 test_gatekeeping.py (Qualité Code)",
-    objective:
-      "Valider l'efficacité des barrières de qualité de code (lint ruff, types mypy, secrets detect-secrets).",
+    title: "📁 test_gatekeeping.py (Tout le fichier)",
+    objective: "Valider l'efficacité des barrières de qualité de code (lint, types, secrets) configurées dans le framework.",
     input: "Exécute la suite complète des vérificateurs ruff, mypy et detect-secrets.",
     output: "Vérifications de sécurité et de style réussies à 100%.",
-    concept: "Gatekeeping & Qualité",
+    concept: "Gatekeeping & Qualité de code",
+  },
+  "tests/test_gatekeeping.py::test_detect_secrets_behavior": {
+    title: "🔑 Détection de secrets en clair",
+    objective: "Vérifier que detect-secrets intercepte correctement les clés privées (comme sk-proj-...) insérées dans le code.",
+    input: "Fichier temporaire contenant une variable d'API key fictive.",
+    output: "Sortie JSON de detect-secrets signalant un secret identifié.",
+    concept: "Prévention des fuites d'identifiants et de clés API",
+  },
+  "tests/test_gatekeeping.py::test_ruff_lint_behavior": {
+    title: "🧹 Analyse de style & imports avec Ruff",
+    objective: "S'assurer que Ruff intercepte les imports inutilisés ou le code mal formaté.",
+    input: "Fichier temporaire avec un import inutilisé.",
+    output: "Ruff check renvoie un code de sortie non nul et signale la règle F401.",
+    concept: "Linting automatisé & Homogénéisation",
+  },
+  "tests/test_gatekeeping.py::test_mypy_strict_behavior": {
+    title: "🏷️ Typage strict avec Mypy",
+    objective: "Garantir que Mypy rejette les fonctions dépourvues d'annotations de types.",
+    input: "Fichier avec des déclarations de fonctions sans types.",
+    output: "Mypy échoue et signale l'absence d'annotations de types.",
+    concept: "Typage statique strict",
   },
   "tests/test_main.py": {
-    title: "📁 test_main.py (FastAPI Server)",
-    objective:
-      "Valider la conformité de l'endpoint /health et le bon démarrage du serveur FastAPI.",
+    title: "📁 test_main.py (Tout le fichier)",
+    objective: "Valider la conformité de l'endpoint /health et le bon démarrage du serveur FastAPI.",
     input: "Requêtes de test HTTP GET transmises via TestClient.",
-    output: "Payload JSON conforme renvoyant status, environment, version.",
-    concept: "Observabilité & Healthcheck",
+    output: "Payload JSON conforme renvoyant status, environment, version avec un code 200.",
+    concept: "Contrat d'interface, observabilité minimale & Test d'intégration",
+  },
+  "tests/test_main.py::test_health_check": {
+    title: "🩺 Conformité de l'endpoint Healthcheck",
+    objective: "Vérifier la validité structurelle de la réponse JSON de santé.",
+    input: "Requête GET /health.",
+    output: "Assertions conformes aux variables de configuration de l'application.",
+    concept: "Observabilité & Sonde de santé de conteneurs",
   },
   "tests/test_makefile.py": {
-    title: "📁 test_makefile.py (Makefile Automation)",
-    objective:
-      "S'assurer que les raccourcis de commande make help, clean, dev et lint du Makefile fonctionnent.",
+    title: "📁 test_makefile.py (Tout le fichier)",
+    objective: "S'assurer que les raccourcis de commande make help, clean et lint du Makefile fonctionnent sans erreur.",
     input: "Exécution des commandes make dans des sous-processus.",
-    output: "Code de retour 0 confirmant la propreté du code.",
-    concept: "DX & Automatisation",
+    output: "Suppression physique des caches pour clean, code de retour 0 pour lint et help.",
+    concept: "Automatisation locale & Expérience Développeur (DX)",
   },
-  "tests/test_onboarding.py": {
-    title: "🚀 test_onboarding.py (Zéro-Friction Setup)",
-    objective:
-      "Valider que les prérequis d'onboarding (< 5 min) et scripts de simulation fonctionnent sans friction.",
-    input: "Vérification README, Makefile, pyproject.toml et script simulate_onboarding.sh.",
-    output: "Onboarding fluide validé.",
-    concept: "Developer Experience (DX)",
+  "tests/test_makefile.py::test_makefile_help": {
+    title: "⚙️ Commande : make help",
+    objective: "Valider que la cible par défaut du Makefile affiche correctement l'aide descriptive.",
+    input: "make help",
+    output: "Code de sortie 0 et présence des mots clés 'Commandes Disponibles'.",
+    concept: "Auto-documentation des commandes",
+  },
+  "tests/test_makefile.py::test_makefile_clean": {
+    title: "⚙️ Commande : make clean",
+    objective: "Vérifier que la cible clean purge correctement tous les caches Python, ruff, mypy et pytest.",
+    input: "Création de fichiers temporaires dans .pytest_cache et .mypy_cache, puis make clean",
+    output: "Purge physique complète vérifiée des dossiers de cache.",
+    concept: "Nettoyage d'environnement de build",
+  },
+  "tests/test_makefile.py::test_make_lint": {
+    title: "⚙️ Commande : make lint",
+    objective: "Vérifier que le validateur make lint (Ruff + Mypy) s'exécute correctement.",
+    input: "make lint",
+    output: "Code de sortie 0 confirmant la conformité du code.",
+    concept: "Exécution des validations statiques unifiées",
   },
   "tests/test_poetry.py": {
-    title: "📦 test_poetry.py (Gestion de dépendances)",
-    objective:
-      "Contrôler la cohérence du fichier poetry.lock et la gestion des environnements virtuels.",
-    input: "Vérification de pyproject.toml et poetry.lock.",
-    output: "Arbre de dépendances verrouillé et valide.",
-    concept: "Gestion des Dépendances",
+    title: "📁 test_poetry.py (Tout le fichier)",
+    objective: "Valider la configuration Poetry, l'isolation de l'environnement virtuel local et les exclusions Git.",
+    input: "Vérification des fichiers pyproject.toml, poetry.lock, dossier .venv et .gitignore.",
+    output: "Structure de projet saine et configurée.",
+    concept: "Environnement reproductible & Reproductibilité",
+  },
+  "tests/test_poetry.py::test_python_version": {
+    title: "🐍 Version de Python",
+    objective: "S'assurer que la version locale de Python est compatible avec les requis (>= 3.10).",
+    input: "sys.version_info",
+    output: "Version >= 3.10 confirmée.",
+    concept: "Validation des prérequis système",
+  },
+  "tests/test_poetry.py::test_poetry_configuration_files_exist": {
+    title: "📦 Manifestes de Dépendances",
+    objective: "Valider la présence physique des fichiers pyproject.toml et poetry.lock à la racine.",
+    input: "Fichiers pyproject.toml et poetry.lock",
+    output: "Existence et taille > 0 validées.",
+    concept: "Gestion déterministe des dépendances",
+  },
+  "tests/test_poetry.py::test_dependencies_are_importable": {
+    title: "📦 Dépendances de Production (Import)",
+    objective: "Vérifier que les packages requis en production (fastapi, pydantic, uvicorn) sont bien importables.",
+    input: "Imports Python de fastapi, pydantic, uvicorn",
+    output: "Pas d'ImportError lors des appels d'import.",
+    concept: "Disponibilité des dépendances de production",
+  },
+  "tests/test_poetry.py::test_dev_dependencies_are_importable": {
+    title: "📦 Dépendances de Développement (Import)",
+    objective: "Vérifier que les packages requis pour le dev (pytest, ruff, mypy) sont bien installés localement.",
+    input: "Imports Python de pytest, ruff, mypy",
+    output: "Imports réussis dans le contexte virtuel.",
+    concept: "Disponibilité des outils de qualité",
+  },
+  "tests/test_poetry.py::test_venv_directory_exists": {
+    title: "📦 Isolation : Dossier .venv",
+    objective: "S'assurer que l'environnement virtuel local .venv est bien initialisé à la racine du projet.",
+    input: "Dossier .venv à la racine",
+    output: "Existence et type dossier validés.",
+    concept: "Isolation locale hermétique (in-project venv)",
+  },
+  "tests/test_poetry.py::test_gitignore_ignores_venv": {
+    title: "📦 Isolation : .gitignore",
+    objective: "S'assurer que le fichier .gitignore contient la règle d'exclusion de .venv/.",
+    input: "Fichier .gitignore",
+    output: "Chaîne '.venv' présente dans le contenu.",
+    concept: "Prévention de commit d'environnement virtuel",
   },
   "tests/test_pre_commit.py": {
-    title: "🛡️ test_pre_commit.py (Hooks Git)",
-    objective:
-      "S'assurer que la configuration .pre-commit-config.yaml contient toutes les barrières exigées.",
-    input: "Inspection des hooks ruff, mypy et detect-secrets.",
-    output: "Hooks Git configurés et opérationnels.",
-    concept: "CI/CD Gatekeeping",
+    title: "📁 test_pre_commit.py (Tout le fichier)",
+    objective: "Vérifier l'existence et la configuration correcte des hooks de pre-commit Git.",
+    input: "Fichier .pre-commit-config.yaml",
+    output: "Hooks de nettoyage et de détection de secrets déclarés.",
+    concept: "Gatekeeping local automatique",
+  },
+  "tests/test_pre_commit.py::test_pre_commit_config_exists": {
+    title: "🛡️ Configuration Pre-commit",
+    objective: "S'assurer que le fichier .pre-commit-config.yaml est bien présent.",
+    input: "Fichier .pre-commit-config.yaml",
+    output: "Existence validée.",
+    concept: "Gestion de configuration de hooks",
+  },
+  "tests/test_pre_commit.py::test_pre_commit_hooks_declared": {
+    title: "🛡️ Hooks Git Déclarés",
+    objective: "Vérifier la déclaration des hooks indispensables (detect-secrets, trailing-whitespace, end-of-file-fixer).",
+    input: "Contenu YAML de .pre-commit-config.yaml",
+    output: "Présence validée des 3 hooks de sécurité et qualité de base.",
+    concept: "Sécurité passive et propreté de code",
+  },
+  "tests/test_dockerfile.py": {
+    title: "📁 test_dockerfile.py (Tout le fichier)",
+    objective: "Valider la structure et la conformité du Dockerfile multi-stage et du fichier .dockerignore.",
+    input: "Analyse structurelle du Dockerfile et de .dockerignore.",
+    output: "Présence des deux stages, dépendances de production uniquement, variables d'environnement Python configurées.",
+    concept: "Conteneurisation de production & Multi-Stage Build",
+  },
+  "tests/test_dockerfile.py::test_dockerfile_exists": {
+    title: "🐳 Présence du Dockerfile",
+    objective: "Vérifier que le fichier Dockerfile existe physiquement à la racine du projet.",
+    input: "Fichier Dockerfile",
+    output: "Existence et taille > 0 validées.",
+    concept: "Conteneurisation",
+  },
+  "tests/test_dockerfile.py::test_dockerfile_has_multi_stage_build": {
+    title: "🐳 Build Multi-Stage (builder + runtime)",
+    objective: "S'assurer que le Dockerfile contient bien deux stages distincts nommés 'builder' et 'runtime' avec une copie inter-stages.",
+    input: "Contenu du Dockerfile",
+    output: "Présence de 'AS builder', 'AS runtime' et '--from=builder'.",
+    concept: "Docker Multi-Stage Build",
+  },
+  "tests/test_dockerfile.py::test_dockerfile_installs_only_production_deps": {
+    title: "🐳 Dépendances de production uniquement",
+    objective: "Vérifier que Poetry n'installe que les dépendances de production (--only main).",
+    input: "Instruction poetry install dans le Dockerfile",
+    output: "Présence de '--only main' dans la commande d'installation.",
+    concept: "Réduction de surface d'attaque",
+  },
+  "tests/test_dockerfile.py::test_dockerfile_exposes_port_8000": {
+    title: "🐳 Exposition du port 8000",
+    objective: "Vérifier que le Dockerfile expose le port 8000 (port standard Uvicorn).",
+    input: "Instruction EXPOSE dans le Dockerfile",
+    output: "EXPOSE 8000 présent.",
+    concept: "Documentation de port réseau",
+  },
+  "tests/test_dockerfile.py::test_dockerfile_uses_uvicorn_cmd": {
+    title: "🐳 Commande de démarrage Uvicorn",
+    objective: "Vérifier que le conteneur lance bien Uvicorn ciblant src.main:app.",
+    input: "Instruction CMD dans le Dockerfile",
+    output: "Présence de 'uvicorn' et 'src.main:app' dans CMD.",
+    concept: "Point d'entrée ASGI",
+  },
+  "tests/test_dockerfile.py::test_dockerfile_sets_python_env_vars": {
+    title: "🐳 Variables d'environnement Python",
+    objective: "Vérifier la présence de PYTHONDONTWRITEBYTECODE et PYTHONUNBUFFERED pour la production.",
+    input: "Instructions ENV dans le Dockerfile",
+    output: "Variables de production Python correctement déclarées.",
+    concept: "Configuration de production Python",
+  },
+  "tests/test_dockerfile.py::test_dockerignore_exists": {
+    title: "🐳 Présence du .dockerignore",
+    objective: "Vérifier que le fichier .dockerignore existe pour optimiser le contexte de build.",
+    input: "Fichier .dockerignore",
+    output: "Existence validée.",
+    concept: "Optimisation du contexte de build",
+  },
+  "tests/test_dockerfile.py::test_dockerignore_excludes_dev_artifacts": {
+    title: "🐳 Exclusions du .dockerignore",
+    objective: "S'assurer que .dockerignore exclut .venv, .git, tests/, dashboard/ et __pycache__.",
+    input: "Contenu de .dockerignore",
+    output: "Toutes les exclusions critiques sont déclarées.",
+    concept: "Réduction du contexte de build Docker",
+  },
+  "tests/test_onboarding.py": {
+    title: "📁 test_onboarding.py (Tout le fichier)",
+    objective: "S'assurer que le kit d'onboarding complet (< 5 min setup) et les scripts de simulation s'exécutent sans accroc.",
+    input: "README.md, Makefile, pyproject.toml, scripts/simulate_onboarding.sh",
+    output: "Assertions de démarrage rapide validées.",
+    concept: "Expérience Développeur (DX) & Zero-Friction",
   },
   "tests/test_vscode_settings.py": {
-    title: "⚙️ test_vscode_settings.py (Configuration IDE)",
-    objective:
-      "Vérifier que la configuration .vscode/settings.json et extensions recommandées sont présentes.",
-    input: "Fichiers de configuration .vscode/.",
-    output: "Standards IDE appliqués pour l'équipe.",
-    concept: "Standardisation d'Équipe",
+    title: "📁 test_vscode_settings.py (Tout le fichier)",
+    objective: "Garantir que les fichiers .vscode/settings.json et extensions.json sont standardisés pour toute l'équipe.",
+    input: "Dossier .vscode/",
+    output: "Formateur Ruff, mypy, auto-fix on save configurés.",
+    concept: "Standardisation d'Environnement de Développement",
   },
   "tests/test_dashboard.py": {
-    title: "📊 test_dashboard.py (API Dashboard)",
-    objective:
-      "Tester tous les endpoints REST des dashboards (Presentation, Roadmap, Glossary, Journal, Code list, File view).",
-    input: "Requêtes Flask TestClient et handlers REST.",
-    output: "Données JSON conformes et statut 200 OK.",
-    concept: "Tests de Dashboard",
+    title: "📁 test_dashboard.py (Tout le fichier)",
+    objective: "Vérifier l'intégralité des endpoints REST API du dashboard Flask et Next.js.",
+    input: "Requêtes de test HTTP client sur /api/presentation, /api/roadmap, /api/glossaire, /api/journal, /api/entretien, /api/code.",
+    output: "Réponses 200 OK avec structure JSON conforme.",
+    concept: "Tests d'API Web & Monitoring",
   },
 };
 
@@ -653,10 +796,22 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
-              <div
-                className="workspace-panel markdown-body"
-                dangerouslySetInnerHTML={{ __html: conceptHtml }}
-              />
+              <div className="workspace-panel">
+                {selectedConceptId !== null && (
+                  <>
+                    <div className="question-title">
+                      {concepts.find((c) => c.id === selectedConceptId)?.concept}
+                    </div>
+                    <div className="results-box">
+                      <div className="results-header">Définition &amp; Contexte</div>
+                      <div
+                        className="markdown-body"
+                        dangerouslySetInnerHTML={{ __html: conceptHtml }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -669,18 +824,22 @@ export default function DashboardPage() {
                     key={item.id}
                     onClick={() => setSelectedJournalId(item.id)}
                     className={`question-item ${selectedJournalId === item.id ? "active" : ""}`}
+                    style={{ display: "flex", flexDirection: "column", gap: "4px" }}
                   >
                     <div style={{ fontWeight: 600, color: "#ffffff" }}>{item.title}</div>
-                    <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "4px" }}>
+                    <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", fontFamily: "var(--font-inter)" }}>
                       📅 {item.date}
                     </div>
                   </button>
                 ))}
               </div>
-              <div
-                className="workspace-panel markdown-body"
-                dangerouslySetInnerHTML={{ __html: journalHtml }}
-              />
+              <div className="workspace-panel">
+                <div
+                  className="markdown-body"
+                  style={{ animation: "fadeIn 0.3s ease-out" }}
+                  dangerouslySetInnerHTML={{ __html: journalHtml }}
+                />
+              </div>
             </div>
           )}
 
@@ -702,10 +861,20 @@ export default function DashboardPage() {
                 {loadingAnswer ? (
                   <div className="spinner" />
                 ) : (
-                  <div
-                    className="markdown-body"
-                    dangerouslySetInnerHTML={{ __html: answerHtml }}
-                  />
+                  selectedQuestionId !== null && (
+                    <>
+                      <div className="question-title">
+                        {questions.find((q) => q.id === selectedQuestionId)?.question}
+                      </div>
+                      <div className="results-box">
+                        <div className="results-header">Explications Techniques &amp; Architecture</div>
+                        <div
+                          className="markdown-body"
+                          dangerouslySetInnerHTML={{ __html: answerHtml }}
+                        />
+                      </div>
+                    </>
+                  )
                 )}
               </div>
             </div>
