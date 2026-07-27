@@ -402,13 +402,36 @@ export default function DashboardPage() {
 
   const selectedTestObj = testList.find((t) => t.id === selectedTestId);
 
-  const currentTestInfo = TEST_DESCRIPTIONS[selectedTestId] || {
-    title: selectedTestObj ? selectedTestObj.name : `🧪 Test : ${selectedTestId}`,
-    objective: selectedTestObj?.docstring || "Exécute le test d'assertion configuré dans la suite pytest.",
-    input: `Cible de test: ${selectedTestId}`,
-    output: "Assertions pytest (PASS)",
-    concept: selectedTestId.includes("::") ? "Test Fonctionnel Unique" : "Validation Unitaire",
-  };
+  let currentTestInfo = TEST_DESCRIPTIONS[selectedTestId];
+
+  if (!currentTestInfo && selectedTestObj) {
+    const isFunc = selectedTestObj.type === "function";
+    const parts = selectedTestId.split("::");
+    const funcName = parts[1] || selectedTestObj.name;
+    const fileName = parts[0] || selectedTestId;
+
+    currentTestInfo = {
+      title: isFunc ? `⚡ ${funcName}()` : `📁 ${fileName}`,
+      objective:
+        selectedTestObj.docstring ||
+        "Exécute le test d'assertion configuré dans la suite pytest.",
+      input: isFunc
+        ? `Exécution ciblée : ${selectedTestId}`
+        : `Ensemble des assertions de ${fileName}`,
+      output: isFunc
+        ? `Assertion pytest ${funcName}() -> PASS (Exit code 0)`
+        : `Rapport de couverture et assertions -> PASS`,
+      concept: isFunc ? "Test Fonctionnel Unique" : "Validation de Module",
+    };
+  } else if (!currentTestInfo) {
+    currentTestInfo = {
+      title: `🧪 Test : ${selectedTestId}`,
+      objective: "Exécute le test d'assertion configuré dans la suite pytest.",
+      input: `Cible de test: ${selectedTestId}`,
+      output: "Assertions pytest (PASS)",
+      concept: "Validation Unitaire",
+    };
+  }
 
   const filteredConcepts = concepts.filter((c) =>
     c.concept.toLowerCase().includes(conceptSearch.toLowerCase())

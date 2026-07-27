@@ -15,7 +15,7 @@ export async function GET() {
         id: "all",
         name: "🧪 Full Test Suite (pytest)",
         file: "all",
-        docstring: "Executes full unit and integration test suite.",
+        docstring: "Executes full unit and integration test suite across all 10 test modules.",
         type: "suite",
       },
     ];
@@ -42,19 +42,47 @@ export async function GET() {
         type: "file",
       });
 
-      const funcRegex = /def\s+(test_[a-zA-Z0-9_]+)\s*\([^)]*\)\s*:/g;
-      let match: RegExpExecArray | null;
-      while ((match = funcRegex.exec(fileContent)) !== null) {
-        const funcName = match[1];
-        const testId = `${relPath}::${funcName}`;
+      const lines = fileContent.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const funcMatch = line.match(/^def\s+(test_[a-zA-Z0-9_]+)\s*\([^)]*\)\s*->?\s*[^:]*:/);
+        if (funcMatch) {
+          const funcName = funcMatch[1];
+          const testId = `${relPath}::${funcName}`;
 
-        testList.push({
-          id: testId,
-          name: `   └─ ${funcName}`,
-          file: relPath,
-          docstring: "Unit test function.",
-          type: "function",
-        });
+          // Extract docstring from subsequent lines
+          let funcDoc = "";
+          for (let j = i + 1; j < Math.min(i + 10, lines.length); j++) {
+            const nextLine = lines[j].trim();
+            if (nextLine.startsWith('"""') || nextLine.startsWith("'''")) {
+              const quote = nextLine.substring(0, 3);
+              const rest = nextLine.substring(3);
+              if (rest.endsWith(quote) && rest.length > 3) {
+                funcDoc = rest.substring(0, rest.length - 3).trim();
+              } else {
+                let docAcc = [rest];
+                for (let k = j + 1; k < Math.min(j + 10, lines.length); k++) {
+                  const endLine = lines[k].trim();
+                  if (endLine.endsWith(quote) || endLine.includes(quote)) {
+                    docAcc.push(endLine.replace(quote, "").trim());
+                    break;
+                  }
+                  docAcc.push(endLine);
+                }
+                funcDoc = docAcc.join(" ").trim();
+              }
+              break;
+            }
+          }
+
+          testList.push({
+            id: testId,
+            name: `   └─ ${funcName}`,
+            file: relPath,
+            docstring: funcDoc || `Executes targeted unit test function ${funcName}().`,
+            type: "function",
+          });
+        }
       }
     }
 
