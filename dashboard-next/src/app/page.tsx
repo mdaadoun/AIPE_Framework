@@ -15,6 +15,15 @@ import {
   Layers,
   Folder,
 } from "lucide-react";
+import Prism from "prismjs";
+import "prismjs/components/prism-python";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-yaml";
+import "prismjs/components/prism-makefile";
+import "prismjs/components/prism-docker";
+import "prismjs/components/prism-bash";
+import "prismjs/themes/prism-tomorrow.css";
+import { markdownToHtml } from "@/lib/markdown";
 
 type TabType =
   | "presentation"
@@ -53,6 +62,13 @@ interface TestItem {
 interface CodeFileItem {
   name: string;
   path: string;
+}
+
+interface TreeNode {
+  name: string;
+  path?: string;
+  isDir: boolean;
+  children: TreeNode[];
 }
 
 const TEST_DESCRIPTIONS: Record<
@@ -112,6 +128,43 @@ function getFileIcon(name: string): string {
   if (name.endsWith(".md")) return "📖";
   if (name.startsWith(".")) return "⚙️";
   return "📄";
+}
+
+function buildTree(files: CodeFileItem[]): TreeNode[] {
+  const rootNodes: TreeNode[] = [];
+  const map: Record<string, TreeNode> = {};
+
+  const sortedFiles = [...files].sort((a, b) => a.path.localeCompare(b.path));
+
+  for (const file of sortedFiles) {
+    const parts = file.path.split("/");
+    let currentPath = "";
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      const isLast = i === parts.length - 1;
+      const parentPath = currentPath;
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+      if (!map[currentPath]) {
+        const newNode: TreeNode = {
+          name: part,
+          path: isLast ? file.path : undefined,
+          isDir: !isLast,
+          children: [],
+        };
+        map[currentPath] = newNode;
+
+        if (parentPath && map[parentPath]) {
+          map[parentPath].children.push(newNode);
+        } else {
+          rootNodes.push(newNode);
+        }
+      }
+    }
+  }
+
+  return rootNodes;
 }
 
 export default function DashboardPage() {
@@ -267,6 +320,15 @@ export default function DashboardPage() {
     }
   }, [selectedFilePath, activeTab]);
 
+  // Trigger Prism syntax highlighting when code content changes
+  useEffect(() => {
+    if (activeTab === "code" && !selectedFilePath.endsWith(".md")) {
+      setTimeout(() => {
+        Prism.highlightAll();
+      }, 50);
+    }
+  }, [codeContent, selectedFilePath, activeTab]);
+
   const handleRunTest = async () => {
     setRunningTest(true);
     setTestResult(null);
@@ -302,12 +364,78 @@ export default function DashboardPage() {
     c.concept.toLowerCase().includes(conceptSearch.toLowerCase())
   );
 
-  // Render tree structure for Code Browser
+  // Filter docs/ files out of the tree sidebar
   const visibleCodeFiles = codeFiles.filter((f) => !f.path.startsWith("docs/"));
-  const renderedDirs = new Set<string>();
+  const treeNodes = buildTree(visibleCodeFiles);
 
   const isIntroSelected =
     selectedFilePath === "docs/code_en.md" || selectedFilePath === "docs/code_fr.md";
+
+  let codeLang = "python";
+  if (selectedFilePath.endsWith(".toml")) codeLang = "toml";
+  else if (selectedFilePath.endsWith(".yaml") || selectedFilePath.endsWith(".yml")) codeLang = "yaml";
+  else if (selectedFilePath.endsWith(".json")) codeLang = "json";
+  else if (selectedFilePath.endsWith("Makefile")) codeLang = "makefile";
+  else if (selectedFilePath.endsWith(".html")) codeLang = "html";
+  else if (selectedFilePath.endsWith("Dockerfile") || selectedFilePath.endsWith(".dockerignore")) codeLang = "docker";
+  else if (selectedFilePath.endsWith(".md")) codeLang = "markdown";
+
+  // Recursive Tree Node Renderer
+  const renderTreeNode = (node: TreeNode, depth: number = 0) => {
+    if (node.isDir) {
+      return (
+        <div key={`dir-${node.name}-${depth}`} style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              paddingLeft: `${8 + depth * 16}px`,
+              paddingTop: "6px",
+              paddingBottom: "4px",
+              fontSize: "0.92rem",
+              fontWeight: "bold",
+              color: "var(--secondary)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontFamily: "var(--font-outfit)",
+            }}
+          >
+            📁 {node.name}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {node.children.map((child) => renderTreeNode(child, depth + 1))}
+          </div>
+        </div>
+      );
+    }
+
+    const icon = getFileIcon(node.name);
+    const isSelected = selectedFilePath === node.path;
+
+    return (
+      <button
+        key={node.path}
+        onClick={() => node.path && setSelectedFilePath(node.path)}
+        className={`question-item ${isSelected ? "active" : ""}`}
+        style={{
+          marginLeft: `${8 + depth * 16}px`,
+          width: `calc(100% - ${8 + depth * 16}px)`,
+          paddingTop: "7px",
+          paddingBottom: "7px",
+          paddingLeft: "10px",
+          fontSize: "0.92rem",
+          fontFamily: "var(--font-fira)",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span>{icon}</span>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {node.name}
+        </span>
+      </button>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -666,68 +794,9 @@ export default function DashboardPage() {
                   <Folder size={16} /> Fichiers sources
                 </h4>
 
-                {visibleCodeFiles.map((file) => {
-                  const parts = file.path.split("/");
-                  const elements: React.ReactNode[] = [];
-
-                  // Render parent directory headers if not rendered yet
-                  let currentDirPath = "";
-                  for (let i = 0; i < parts.length - 1; i++) {
-                    const part = parts[i];
-                    currentDirPath = currentDirPath ? `${currentDirPath}/${part}` : part;
-
-                    if (!renderedDirs.has(currentDirPath)) {
-                      renderedDirs.add(currentDirPath);
-                      elements.push(
-                        <div
-                          key={`dir-${currentDirPath}`}
-                          style={{
-                            paddingLeft: `${10 + i * 14}px`,
-                            paddingTop: "6px",
-                            paddingBottom: "2px",
-                            fontSize: "0.88rem",
-                            fontWeight: "bold",
-                            color: "var(--secondary)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontFamily: "var(--font-outfit)",
-                          }}
-                        >
-                          📁 {part}
-                        </div>
-                      );
-                    }
-                  }
-
-                  const icon = getFileIcon(file.name);
-                  const nestingLevel = parts.length - 1;
-
-                  elements.push(
-                    <button
-                      key={file.path}
-                      onClick={() => setSelectedFilePath(file.path)}
-                      className={`question-item ${selectedFilePath === file.path ? "active" : ""}`}
-                      style={{
-                        paddingLeft: `${12 + nestingLevel * 14}px`,
-                        paddingTop: "8px",
-                        paddingBottom: "8px",
-                        fontSize: "0.92rem",
-                        fontFamily: "var(--font-fira)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span>{icon}</span>
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {file.name}
-                      </span>
-                    </button>
-                  );
-
-                  return <React.Fragment key={file.path}>{elements}</React.Fragment>;
-                })}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  {treeNodes.map((node) => renderTreeNode(node, 0))}
+                </div>
               </div>
 
               <div className="workspace-panel">
@@ -764,15 +833,35 @@ export default function DashboardPage() {
                   </div>
 
                   <span style={{ fontSize: "0.75rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "3px 10px", borderRadius: "4px", fontFamily: "var(--font-fira)", fontWeight: "bold" }}>
-                    CODE
+                    {codeLang.toUpperCase()}
                   </span>
                 </div>
 
-                <div className="terminal" style={{ minHeight: "450px" }}>
-                  <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: "0.92rem", fontFamily: "var(--font-fira)", lineHeight: 1.55 }}>
-                    {codeContent}
-                  </pre>
-                </div>
+                {/* View Panel: Render Markdown HTML if .md file, otherwise Syntax Highlighted Code block */}
+                {selectedFilePath.endsWith(".md") ? (
+                  <div
+                    className="markdown-body"
+                    style={{
+                      background: "rgba(10, 15, 30, 0.75)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "12px",
+                      padding: "24px",
+                      minHeight: "450px",
+                      maxHeight: "600px",
+                      overflowY: "auto",
+                    }}
+                    dangerouslySetInnerHTML={{ __html: markdownToHtml(codeContent) }}
+                  />
+                ) : (
+                  <div
+                    className="terminal"
+                    style={{ minHeight: "450px", background: "#1d1f21", padding: "16px" }}
+                  >
+                    <pre style={{ margin: 0, overflow: "auto" }}>
+                      <code className={`language-${codeLang}`}>{codeContent}</code>
+                    </pre>
+                  </div>
+                )}
               </div>
             </div>
           )}
