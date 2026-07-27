@@ -83,24 +83,32 @@ const TEST_DESCRIPTIONS: Record<
     output: "Rapport d'exécution global pytest (PASS/FAIL) avec taux de réussite.",
     concept: "CI/CD & Non-régression",
   },
-  "tests/test_gatekeeping.py": {
-    title: "📁 test_gatekeeping.py (Tout le fichier)",
+  "tests/test_dockerfile.py": {
+    title: "🐳 test_dockerfile.py (Docker OCI)",
     objective:
-      "Valider l'efficacité des barrières de qualité de code (lint, types, secrets) configurées dans le framework.",
+      "Valider la conformité du Dockerfile aux normes de conteneurisation sécurisées (multi-stage build, utilisateur non-root).",
+    input: "Analyse AST et inspection des instructions du Dockerfile.",
+    output: "Validation OCI & Sécurité conteneurs.",
+    concept: "Conteneurisation & Production",
+  },
+  "tests/test_exceptions.py": {
+    title: "⚠️ test_exceptions.py (Hiérarchie d'exceptions)",
+    objective:
+      "Vérifier l'héritage et la manipulation d'erreurs typées (AIPEError, ConfigurationError, ValidationError, LLMClientError).",
+    input: "Instanciation et levée de toutes les exceptions personnalisées.",
+    output: "Couverture 100% du module src/core/exceptions.py.",
+    concept: "Résilience & Clean Code",
+  },
+  "tests/test_gatekeeping.py": {
+    title: "📁 test_gatekeeping.py (Qualité Code)",
+    objective:
+      "Valider l'efficacité des barrières de qualité de code (lint ruff, types mypy, secrets detect-secrets).",
     input: "Exécute la suite complète des vérificateurs ruff, mypy et detect-secrets.",
     output: "Vérifications de sécurité et de style réussies à 100%.",
     concept: "Gatekeeping & Qualité",
   },
-  "tests/test_gatekeeping.py::test_detect_secrets_behavior": {
-    title: "🔑 Détection de secrets en clair",
-    objective:
-      "Vérifier que detect-secrets intercepte correctement les clés privées insérées dans le code.",
-    input: "Fichier temporaire contenant une variable d'API key fictive.",
-    output: "Sortie JSON de detect-secrets signalant un secret identifié.",
-    concept: "Prévention fuites API",
-  },
   "tests/test_main.py": {
-    title: "📁 test_main.py (Tout le fichier)",
+    title: "📁 test_main.py (FastAPI Server)",
     objective:
       "Valider la conformité de l'endpoint /health et le bon démarrage du serveur FastAPI.",
     input: "Requêtes de test HTTP GET transmises via TestClient.",
@@ -108,12 +116,52 @@ const TEST_DESCRIPTIONS: Record<
     concept: "Observabilité & Healthcheck",
   },
   "tests/test_makefile.py": {
-    title: "📁 test_makefile.py (Tout le fichier)",
+    title: "📁 test_makefile.py (Makefile Automation)",
     objective:
-      "S'assurer que les raccourcis de commande make help, clean et lint du Makefile fonctionnent.",
+      "S'assurer que les raccourcis de commande make help, clean, dev et lint du Makefile fonctionnent.",
     input: "Exécution des commandes make dans des sous-processus.",
     output: "Code de retour 0 confirmant la propreté du code.",
     concept: "DX & Automatisation",
+  },
+  "tests/test_onboarding.py": {
+    title: "🚀 test_onboarding.py (Zéro-Friction Setup)",
+    objective:
+      "Valider que les prérequis d'onboarding (< 5 min) et scripts de simulation fonctionnent sans friction.",
+    input: "Vérification README, Makefile, pyproject.toml et script simulate_onboarding.sh.",
+    output: "Onboarding fluide validé.",
+    concept: "Developer Experience (DX)",
+  },
+  "tests/test_poetry.py": {
+    title: "📦 test_poetry.py (Gestion de dépendances)",
+    objective:
+      "Contrôler la cohérence du fichier poetry.lock et la gestion des environnements virtuels.",
+    input: "Vérification de pyproject.toml et poetry.lock.",
+    output: "Arbre de dépendances verrouillé et valide.",
+    concept: "Gestion des Dépendances",
+  },
+  "tests/test_pre_commit.py": {
+    title: "🛡️ test_pre_commit.py (Hooks Git)",
+    objective:
+      "S'assurer que la configuration .pre-commit-config.yaml contient toutes les barrières exigées.",
+    input: "Inspection des hooks ruff, mypy et detect-secrets.",
+    output: "Hooks Git configurés et opérationnels.",
+    concept: "CI/CD Gatekeeping",
+  },
+  "tests/test_vscode_settings.py": {
+    title: "⚙️ test_vscode_settings.py (Configuration IDE)",
+    objective:
+      "Vérifier que la configuration .vscode/settings.json et extensions recommandées sont présentes.",
+    input: "Fichiers de configuration .vscode/.",
+    output: "Standards IDE appliqués pour l'équipe.",
+    concept: "Standardisation d'Équipe",
+  },
+  "tests/test_dashboard.py": {
+    title: "📊 test_dashboard.py (API Dashboard)",
+    objective:
+      "Tester tous les endpoints REST des dashboards (Presentation, Roadmap, Glossary, Journal, Code list, File view).",
+    input: "Requêtes Flask TestClient et handlers REST.",
+    output: "Données JSON conformes et statut 200 OK.",
+    concept: "Tests de Dashboard",
   },
 };
 
@@ -352,12 +400,14 @@ export default function DashboardPage() {
     }
   };
 
+  const selectedTestObj = testList.find((t) => t.id === selectedTestId);
+
   const currentTestInfo = TEST_DESCRIPTIONS[selectedTestId] || {
-    title: `🧪 Test : ${selectedTestId}`,
-    objective: "Exécute le test d'assertion configuré dans la suite pytest.",
+    title: selectedTestObj ? selectedTestObj.name : `🧪 Test : ${selectedTestId}`,
+    objective: selectedTestObj?.docstring || "Exécute le test d'assertion configuré dans la suite pytest.",
     input: `Cible de test: ${selectedTestId}`,
     output: "Assertions pytest (PASS)",
-    concept: "Validation Unitaire",
+    concept: selectedTestId.includes("::") ? "Test Fonctionnel Unique" : "Validation Unitaire",
   };
 
   const filteredConcepts = concepts.filter((c) =>
@@ -727,7 +777,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Terminal Window - Dynamic Height */}
+              {/* Terminal Window */}
               <div className="terminal">
                 <div className="terminal-header">
                   <div className="terminal-dots">
@@ -836,7 +886,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                {/* View Panel: Dynamic Natural Height */}
+                {/* View Panel */}
                 {selectedFilePath.endsWith(".md") ? (
                   <div
                     className="markdown-body"
