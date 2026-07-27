@@ -9,7 +9,7 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):  # type: ignore[misc]
+class Settings(BaseSettings):
     """Centralized application settings for AIPE Blueprint."""
 
     model_config = SettingsConfigDict(
