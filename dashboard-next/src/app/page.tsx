@@ -364,7 +364,6 @@ export default function DashboardPage() {
     c.concept.toLowerCase().includes(conceptSearch.toLowerCase())
   );
 
-  // Filter docs/ files out of the tree sidebar
   const visibleCodeFiles = codeFiles.filter((f) => !f.path.startsWith("docs/"));
   const treeNodes = buildTree(visibleCodeFiles);
 
@@ -728,7 +727,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Terminal Window */}
+              {/* Terminal Window - Dynamic Height */}
               <div className="terminal">
                 <div className="terminal-header">
                   <div className="terminal-dots">
@@ -837,7 +836,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                {/* View Panel: Render Markdown HTML if .md file, otherwise Syntax Highlighted Code block */}
+                {/* View Panel: Dynamic Natural Height */}
                 {selectedFilePath.endsWith(".md") ? (
                   <div
                     className="markdown-body"
@@ -847,8 +846,6 @@ export default function DashboardPage() {
                       borderRadius: "12px",
                       padding: "24px",
                       minHeight: "450px",
-                      maxHeight: "600px",
-                      overflowY: "auto",
                     }}
                     dangerouslySetInnerHTML={{ __html: markdownToHtml(codeContent) }}
                   />
@@ -857,7 +854,7 @@ export default function DashboardPage() {
                     className="terminal"
                     style={{ minHeight: "450px", background: "#1d1f21", padding: "16px" }}
                   >
-                    <pre style={{ margin: 0, overflow: "auto" }}>
+                    <pre style={{ margin: 0, overflowX: "auto" }}>
                       <code className={`language-${codeLang}`}>{codeContent}</code>
                     </pre>
                   </div>
