@@ -9,11 +9,12 @@ import {
   HelpCircle,
   Play,
   Code,
-  Globe,
+  ExternalLink,
   CheckCircle,
   XCircle,
   Loader2,
-  Terminal,
+  Terminal as TerminalIcon,
+  Layers,
 } from "lucide-react";
 
 type TabType =
@@ -23,6 +24,7 @@ type TabType =
   | "journal"
   | "entretien"
   | "tests"
+  | "docs_api"
   | "code";
 
 interface QuestionItem {
@@ -54,11 +56,57 @@ interface CodeFileItem {
   path: string;
 }
 
+const TEST_DESCRIPTIONS: Record<
+  string,
+  { title: string; objective: string; input: string; output: string; concept: string }
+> = {
+  all: {
+    title: "🧪 Suite de Tests Complète (pytest)",
+    objective:
+      "Exécuter l'intégralité des tests unitaires et d'intégration du framework AIPE en une seule commande.",
+    input: "Tous les fichiers de test du répertoire tests/.",
+    output: "Rapport d'exécution global pytest (PASS/FAIL) avec taux de réussite.",
+    concept: "CI/CD & Non-régression",
+  },
+  "tests/test_gatekeeping.py": {
+    title: "📁 test_gatekeeping.py (Tout le fichier)",
+    objective:
+      "Valider l'efficacité des barrières de qualité de code (lint, types, secrets) configurées dans le framework.",
+    input: "Exécute la suite complète des vérificateurs ruff, mypy et detect-secrets.",
+    output: "Vérifications de sécurité et de style réussies à 100%.",
+    concept: "Gatekeeping & Qualité",
+  },
+  "tests/test_gatekeeping.py::test_detect_secrets_behavior": {
+    title: "🔑 Détection de secrets en clair",
+    objective:
+      "Vérifier que detect-secrets intercepte correctement les clés privées insérées dans le code.",
+    input: "Fichier temporaire contenant une variable d'API key fictive.",
+    output: "Sortie JSON de detect-secrets signalant un secret identifié.",
+    concept: "Prévention fuites API",
+  },
+  "tests/test_main.py": {
+    title: "📁 test_main.py (Tout le fichier)",
+    objective:
+      "Valider la conformité de l'endpoint /health et le bon démarrage du serveur FastAPI.",
+    input: "Requêtes de test HTTP GET transmises via TestClient.",
+    output: "Payload JSON conforme renvoyant status, environment, version.",
+    concept: "Observabilité & Healthcheck",
+  },
+  "tests/test_makefile.py": {
+    title: "📁 test_makefile.py (Tout le fichier)",
+    objective:
+      "S'assurer que les raccourcis de commande make help, clean et lint du Makefile fonctionnent.",
+    input: "Exécution des commandes make dans des sous-processus.",
+    output: "Code de retour 0 confirmant la propreté du code.",
+    concept: "DX & Automatisation",
+  },
+};
+
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("roadmap");
+  const [activeTab, setActiveTab] = useState<TabType>("presentation");
   const [lang, setLang] = useState<"en" | "fr">("en");
 
-  // Content states
+  // HTML content states
   const [presentationHtml, setPresentationHtml] = useState("");
   const [roadmapHtml, setRoadmapHtml] = useState("");
 
@@ -93,10 +141,10 @@ export default function DashboardPage() {
 
   // Code Browser state
   const [codeFiles, setCodeFiles] = useState<CodeFileItem[]>([]);
-  const [selectedFilePath, setSelectedFilePath] = useState<string>("Makefile");
+  const [selectedFilePath, setSelectedFilePath] = useState<string>("docs/code_en.md");
   const [codeContent, setCodeContent] = useState("");
 
-  // Fetch Presentation
+  // Presentation tab
   useEffect(() => {
     if (activeTab === "presentation") {
       fetch(`/api/presentation?lang=${lang}`)
@@ -105,7 +153,7 @@ export default function DashboardPage() {
     }
   }, [activeTab, lang]);
 
-  // Fetch Roadmap
+  // Roadmap tab
   useEffect(() => {
     if (activeTab === "roadmap") {
       fetch(`/api/roadmap?lang=${lang}`)
@@ -114,21 +162,20 @@ export default function DashboardPage() {
     }
   }, [activeTab, lang]);
 
-  // Fetch Interview Questions
+  // Interview tab
   useEffect(() => {
     if (activeTab === "entretien") {
       fetch(`/api/entretien?lang=${lang}`)
         .then((res) => res.json())
         .then((data) => {
           setQuestions(data.questions || []);
-          if (data.questions && data.questions.length > 0) {
+          if (data.questions && data.questions.length > 0 && selectedQuestionId === null) {
             setSelectedQuestionId(0);
           }
         });
     }
-  }, [activeTab, lang]);
+  }, [activeTab, lang, selectedQuestionId]);
 
-  // Fetch Interview Answer
   useEffect(() => {
     if (selectedQuestionId !== null && activeTab === "entretien") {
       setLoadingAnswer(true);
@@ -141,21 +188,20 @@ export default function DashboardPage() {
     }
   }, [selectedQuestionId, lang, activeTab]);
 
-  // Fetch Glossary Concepts
+  // Glossary tab
   useEffect(() => {
     if (activeTab === "glossary") {
       fetch(`/api/glossaire?lang=${lang}`)
         .then((res) => res.json())
         .then((data) => {
           setConcepts(data.concepts || []);
-          if (data.concepts && data.concepts.length > 0) {
+          if (data.concepts && data.concepts.length > 0 && selectedConceptId === null) {
             setSelectedConceptId(0);
           }
         });
     }
-  }, [activeTab, lang]);
+  }, [activeTab, lang, selectedConceptId]);
 
-  // Fetch Glossary Concept Detail
   useEffect(() => {
     if (selectedConceptId !== null && activeTab === "glossary") {
       fetch(`/api/glossaire/${selectedConceptId}?lang=${lang}`)
@@ -164,7 +210,7 @@ export default function DashboardPage() {
     }
   }, [selectedConceptId, lang, activeTab]);
 
-  // Fetch Journal List
+  // Journal tab
   useEffect(() => {
     if (activeTab === "journal") {
       fetch(`/api/journal?lang=${lang}`)
@@ -175,7 +221,6 @@ export default function DashboardPage() {
     }
   }, [activeTab, lang]);
 
-  // Fetch Journal Content
   useEffect(() => {
     if (activeTab === "journal" && selectedJournalId) {
       fetch(`/api/journal/${selectedJournalId}?lang=${lang}`)
@@ -184,7 +229,7 @@ export default function DashboardPage() {
     }
   }, [selectedJournalId, lang, activeTab]);
 
-  // Fetch Test List
+  // Tests tab
   useEffect(() => {
     if (activeTab === "tests") {
       fetch(`/api/tests/list`)
@@ -193,7 +238,7 @@ export default function DashboardPage() {
     }
   }, [activeTab]);
 
-  // Fetch Code File List
+  // Code Browser tab
   useEffect(() => {
     if (activeTab === "code") {
       fetch(`/api/code/list`)
@@ -202,7 +247,6 @@ export default function DashboardPage() {
     }
   }, [activeTab]);
 
-  // Fetch Code File Content
   useEffect(() => {
     if (activeTab === "code" && selectedFilePath) {
       fetch(`/api/code/file?path=${encodeURIComponent(selectedFilePath)}`)
@@ -211,7 +255,6 @@ export default function DashboardPage() {
     }
   }, [selectedFilePath, activeTab]);
 
-  // Run Test Action
   const handleRunTest = async () => {
     setRunningTest(true);
     setTestResult(null);
@@ -235,6 +278,14 @@ export default function DashboardPage() {
     }
   };
 
+  const currentTestInfo = TEST_DESCRIPTIONS[selectedTestId] || {
+    title: `🧪 Test : ${selectedTestId}`,
+    objective: "Exécute le test d'assertion configuré dans la suite pytest.",
+    input: `Cible de test: ${selectedTestId}`,
+    output: "Assertions pytest (PASS)",
+    concept: "Validation Unitaire",
+  };
+
   const filteredConcepts = concepts.filter((c) =>
     c.concept.toLowerCase().includes(conceptSearch.toLowerCase())
   );
@@ -245,15 +296,20 @@ export default function DashboardPage() {
       <header>
         <div className="header-container">
           <div className="logo">
-            <span>🚀 AIPE_Framework</span>
-            <span className="text-xs px-2 py-1 rounded bg-purple-900/50 text-purple-300 font-mono">
-              Next.js TypeScript
-            </span>
+            <Layers size={24} />
+            <span>AIPE_Framework</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Nav Tabs */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <nav className="nav-tabs">
+              <button
+                onClick={() => setActiveTab("presentation")}
+                className={`tab-btn ${activeTab === "presentation" ? "active" : ""}`}
+              >
+                <FileText size={15} />
+                <span>{lang === "en" ? "Presentation" : "Présentation"}</span>
+              </button>
+
               <button
                 onClick={() => setActiveTab("roadmap")}
                 className={`tab-btn ${activeTab === "roadmap" ? "active" : ""}`}
@@ -261,20 +317,15 @@ export default function DashboardPage() {
                 <Map size={15} />
                 <span>Roadmap</span>
               </button>
-              <button
-                onClick={() => setActiveTab("presentation")}
-                className={`tab-btn ${activeTab === "presentation" ? "active" : ""}`}
-              >
-                <FileText size={15} />
-                <span>Presentation</span>
-              </button>
+
               <button
                 onClick={() => setActiveTab("glossary")}
                 className={`tab-btn ${activeTab === "glossary" ? "active" : ""}`}
               >
                 <BookOpen size={15} />
-                <span>Glossary</span>
+                <span>{lang === "en" ? "Glossary" : "Glossaire"}</span>
               </button>
+
               <button
                 onClick={() => setActiveTab("journal")}
                 className={`tab-btn ${activeTab === "journal" ? "active" : ""}`}
@@ -282,60 +333,62 @@ export default function DashboardPage() {
                 <BookText size={15} />
                 <span>Journal</span>
               </button>
+
               <button
                 onClick={() => setActiveTab("entretien")}
                 className={`tab-btn ${activeTab === "entretien" ? "active" : ""}`}
               >
                 <HelpCircle size={15} />
-                <span>FAQ Interview</span>
+                <span>{lang === "en" ? "FAQ (Interview)" : "FAQ (Entretien)"}</span>
               </button>
+
               <button
                 onClick={() => setActiveTab("tests")}
                 className={`tab-btn ${activeTab === "tests" ? "active" : ""}`}
               >
                 <Play size={15} />
-                <span>Test Runner</span>
+                <span>{lang === "en" ? "Test Launcher" : "Lanceur Tests"}</span>
               </button>
+
+              <button
+                onClick={() => setActiveTab("docs_api")}
+                className={`tab-btn ${activeTab === "docs_api" ? "active" : ""}`}
+              >
+                <ExternalLink size={15} />
+                <span>Docs API</span>
+              </button>
+
               <button
                 onClick={() => setActiveTab("code")}
                 className={`tab-btn ${activeTab === "code" ? "active" : ""}`}
               >
                 <Code size={15} />
-                <span>Code Browser</span>
+                <span>Code</span>
               </button>
             </nav>
 
-            {/* Language Switcher */}
             <div className="lang-switch">
               <button
                 onClick={() => setLang("en")}
                 className={`lang-btn ${lang === "en" ? "active" : ""}`}
               >
-                EN
+                🇬🇧 EN
               </button>
               <button
                 onClick={() => setLang("fr")}
                 className={`lang-btn ${lang === "fr" ? "active" : ""}`}
               >
-                FR
+                🇫🇷 FR
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Container */}
       <main>
         <div className="content-card">
-          {/* TAB: ROADMAP */}
-          {activeTab === "roadmap" && (
-            <div
-              className="markdown-body"
-              dangerouslySetInnerHTML={{ __html: roadmapHtml }}
-            />
-          )}
-
-          {/* TAB: PRESENTATION */}
+          {/* PRESENTATION TAB */}
           {activeTab === "presentation" && (
             <div
               className="markdown-body"
@@ -343,23 +396,32 @@ export default function DashboardPage() {
             />
           )}
 
-          {/* TAB: GLOSSARY */}
+          {/* ROADMAP TAB */}
+          {activeTab === "roadmap" && (
+            <div
+              className="markdown-body"
+              dangerouslySetInnerHTML={{ __html: roadmapHtml }}
+            />
+          )}
+
+          {/* GLOSSARY TAB */}
           {activeTab === "glossary" && (
             <div className="interview-grid">
               <div className="question-list-panel">
                 <input
                   type="text"
-                  placeholder="Search concepts..."
+                  placeholder={lang === "en" ? "Search concepts..." : "Rechercher un concept..."}
                   value={conceptSearch}
                   onChange={(e) => setConceptSearch(e.target.value)}
                   style={{
-                    padding: "8px 12px",
-                    borderRadius: "6px",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
                     border: "1px solid var(--border)",
-                    background: "rgba(255,255,255,0.03)",
+                    background: "rgba(0,0,0,0.3)",
                     color: "var(--text-main)",
-                    fontFamily: "var(--font-outfit)",
-                    marginBottom: "8px",
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.88rem",
+                    marginBottom: "6px",
                   }}
                 />
                 {filteredConcepts.map((item) => (
@@ -373,13 +435,13 @@ export default function DashboardPage() {
                 ))}
               </div>
               <div
-                className="answer-panel markdown-body"
+                className="workspace-panel markdown-body"
                 dangerouslySetInnerHTML={{ __html: conceptHtml }}
               />
             </div>
           )}
 
-          {/* TAB: JOURNAL */}
+          {/* JOURNAL TAB */}
           {activeTab === "journal" && (
             <div className="interview-grid">
               <div className="question-list-panel">
@@ -389,7 +451,7 @@ export default function DashboardPage() {
                     onClick={() => setSelectedJournalId(item.id)}
                     className={`question-item ${selectedJournalId === item.id ? "active" : ""}`}
                   >
-                    <div style={{ fontWeight: 600 }}>{item.title}</div>
+                    <div style={{ fontWeight: 600, color: "#ffffff" }}>{item.title}</div>
                     <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "4px" }}>
                       📅 {item.date}
                     </div>
@@ -397,13 +459,13 @@ export default function DashboardPage() {
                 ))}
               </div>
               <div
-                className="answer-panel markdown-body"
+                className="workspace-panel markdown-body"
                 dangerouslySetInnerHTML={{ __html: journalHtml }}
               />
             </div>
           )}
 
-          {/* TAB: FAQ INTERVIEW */}
+          {/* FAQ INTERVIEW TAB */}
           {activeTab === "entretien" && (
             <div className="interview-grid">
               <div className="question-list-panel">
@@ -417,12 +479,9 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
-              <div className="answer-panel">
+              <div className="workspace-panel">
                 {loadingAnswer ? (
-                  <div className="flex items-center gap-2 text-purple-400">
-                    <Loader2 className="animate-spin" size={18} />
-                    <span>Loading response...</span>
-                  </div>
+                  <div className="spinner" />
                 ) : (
                   <div
                     className="markdown-body"
@@ -433,100 +492,189 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* TAB: TEST RUNNER */}
+          {/* TEST LAUNCHER TAB */}
           {activeTab === "tests" && (
-            <div className="grid-two-col">
-              <div className="file-list-sidebar">
-                <h4 style={{ fontFamily: "var(--font-outfit)", marginBottom: "8px", color: "var(--secondary)" }}>
-                  Dynamic Test Suite
-                </h4>
-                {testList.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setSelectedTestId(item.id)}
-                    className={`file-item ${selectedTestId === item.id ? "active" : ""}`}
+            <div className="test-launcher-panel">
+              <div className="test-controls">
+                <div>
+                  <h3 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.15rem", fontWeight: 600, color: "#ffffff" }}>
+                    {lang === "en" ? "Live QA Test Launcher" : "Lanceur de Tests Live (QA)"}
+                  </h3>
+                  <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
+                    {lang === "en"
+                      ? "Execute global pytest suite or target a specific test function."
+                      : "Exécutez la suite globale ou ciblez précisément une fonction de test."}
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <select
+                    value={selectedTestId}
+                    onChange={(e) => setSelectedTestId(e.target.value)}
+                    className="test-select"
                   >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <h3 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.1rem" }}>
-                      Target: <span style={{ color: "var(--secondary)" }}>{selectedTestId}</span>
-                    </h3>
-                  </div>
-
+                    {testList.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     onClick={handleRunTest}
                     disabled={runningTest}
-                    className="btn-run"
+                    className="btn"
                   >
                     {runningTest ? (
                       <>
                         <Loader2 className="animate-spin" size={16} />
-                        <span>Running pytest...</span>
+                        <span>{lang === "en" ? "Running..." : "Exécution..."}</span>
                       </>
                     ) : (
                       <>
                         <Play size={16} />
-                        <span>Run Selected Test</span>
+                        <span>{lang === "en" ? "Run Tests" : "Lancer les Tests"}</span>
                       </>
                     )}
                   </button>
                 </div>
+              </div>
 
-                {/* Execution Result Output */}
-                {testResult && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div className={`badge ${testResult.status === "success" ? "badge-completed" : "badge-pending"}`}>
-                      {testResult.status === "success" ? (
-                        <span className="flex items-center gap-1">
-                          <CheckCircle size={14} /> Passed (Exit 0)
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1" style={{ color: "var(--danger)" }}>
-                          <XCircle size={14} /> Failed (Exit {testResult.exit_code || 1})
-                        </span>
-                      )}
+              {/* Rich Test Explanation Box */}
+              <div
+                style={{
+                  background: "rgba(15, 23, 42, 0.45)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "10px",
+                  padding: "16px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "8px" }}>
+                  <h4 style={{ margin: 0, fontFamily: "var(--font-outfit)", color: "var(--secondary)", fontSize: "0.98rem", fontWeight: 600 }}>
+                    📌 {currentTestInfo.title}
+                  </h4>
+                  <span style={{ fontSize: "0.7rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "3px 8px", borderRadius: "4px", fontWeight: 600, border: "1px solid rgba(139, 92, 246, 0.2)" }}>
+                    {currentTestInfo.concept}
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.85rem", color: "#f8fafc", margin: 0, lineHeight: 1.5 }}>
+                  <strong>Description &amp; Scénario :</strong> {currentTestInfo.objective}
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "4px" }}>
+                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px", padding: "10px" }}>
+                    <div style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#cbd5e1", marginBottom: "4px" }}>
+                      📥 Entrée attendue (INPUT) :
                     </div>
-
-                    <div className="code-viewer-container">
-                      <pre className="code-block">
-                        {testResult.stdout || testResult.stderr || testResult.message}
-                      </pre>
+                    <div style={{ fontSize: "0.78rem", fontFamily: "var(--font-fira)", color: "#a5f3fc" }}>
+                      {currentTestInfo.input}
                     </div>
                   </div>
-                )}
+                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px", padding: "10px" }}>
+                    <div style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#cbd5e1", marginBottom: "4px" }}>
+                      📤 Sortie attendue (OUTPUT) :
+                    </div>
+                    <div style={{ fontSize: "0.78rem", fontFamily: "var(--font-fira)", color: "#86efac" }}>
+                      {currentTestInfo.output}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Terminal Window */}
+              <div className="terminal">
+                <div className="terminal-header">
+                  <div className="terminal-dots">
+                    <div className="terminal-dot" style={{ background: "var(--danger)" }} />
+                    <div className="terminal-dot" style={{ background: "var(--warning)" }} />
+                    <div className="terminal-dot" style={{ background: "var(--success)" }} />
+                  </div>
+                  <div className="terminal-title">bash - pytest qa_runner</div>
+                </div>
+                <div className="terminal-body">
+                  {testResult ? (
+                    <div>
+                      <div style={{ color: testResult.status === "success" ? "#34d399" : "#f87171", fontWeight: "bold", marginBottom: "8px" }}>
+                        {testResult.status === "success"
+                          ? `[PASS] ${testResult.message}`
+                          : `[FAIL] ${testResult.message}`}
+                      </div>
+                      <div>{testResult.stdout || testResult.stderr}</div>
+                    </div>
+                  ) : (
+                    <div>user@aipe-framework:~$ pytest {selectedTestId}</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB: CODE BROWSER */}
+          {/* DOCS API TAB */}
+          {activeTab === "docs_api" && (
+            <div className="api-docs-panel">
+              <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "24px", borderRadius: "50%", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
+                <TerminalIcon size={48} style={{ color: "var(--secondary)" }} />
+              </div>
+              <div>
+                <h2 style={{ fontFamily: "var(--font-outfit)", fontSize: "1.6rem", fontWeight: 700 }}>
+                  {lang === "en"
+                    ? "Interactive OpenAPI Documentation (Swagger UI)"
+                    : "Documentation interactive de l'API (Swagger UI)"}
+                </h2>
+                <p style={{ maxWidth: "600px", margin: "10px auto", color: "var(--text-muted)" }}>
+                  {lang === "en"
+                    ? "OpenAPI documentation allows live testing of production endpoints (including /health probe)."
+                    : "La documentation interactive OpenAPI permet de visualiser et de tester en temps réel les endpoints du microservice."}
+                </p>
+              </div>
+              <a
+                href="http://127.0.0.1:8000/docs"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-reveal"
+              >
+                <ExternalLink size={18} />
+                <span>{lang === "en" ? "Open Swagger UI (Port 8000)" : "Ouvrir Swagger UI (Port 8000)"}</span>
+              </a>
+            </div>
+          )}
+
+          {/* CODE BROWSER TAB */}
           {activeTab === "code" && (
-            <div className="grid-two-col">
-              <div className="file-list-sidebar">
-                <h4 style={{ fontFamily: "var(--font-outfit)", marginBottom: "8px", color: "var(--secondary)" }}>
-                  Project Repository Files
-                </h4>
+            <div className="interview-grid">
+              <div className="question-list-panel">
+                <button
+                  onClick={() => setSelectedFilePath(lang === "fr" ? "docs/code_fr.md" : "docs/code_en.md")}
+                  className="question-item"
+                  style={{ background: "rgba(139, 92, 246, 0.15)", border: "1px solid var(--primary)", color: "#ffffff" }}
+                >
+                  📖 Intro (code.md)
+                </button>
+
                 {codeFiles.map((file) => (
                   <button
                     key={file.path}
                     onClick={() => setSelectedFilePath(file.path)}
-                    className={`file-item ${selectedFilePath === file.path ? "active" : ""}`}
+                    className={`question-item ${selectedFilePath === file.path ? "active" : ""}`}
+                    style={{ fontSize: "0.82rem", fontFamily: "var(--font-fira)" }}
                   >
                     📄 {file.path}
                   </button>
                 ))}
               </div>
 
-              <div className="code-viewer-container">
-                <div style={{ paddingBottom: "8px", borderBottom: "1px solid var(--border)", marginBottom: "12px", fontFamily: "var(--font-fira)", fontSize: "0.8rem", color: "var(--secondary)" }}>
-                  {selectedFilePath}
+              <div className="workspace-panel">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "10px" }}>
+                  <span style={{ fontFamily: "var(--font-fira)", color: "var(--secondary)", fontSize: "0.9rem" }}>
+                    {selectedFilePath}
+                  </span>
+                  <span style={{ fontSize: "0.7rem", background: "rgba(139, 92, 246, 0.15)", color: "var(--secondary)", padding: "2px 8px", borderRadius: "4px", fontFamily: "var(--font-fira)" }}>
+                    CODE
+                  </span>
                 </div>
-                <pre className="code-block">{codeContent}</pre>
+                <div className="terminal" style={{ minHeight: "450px" }}>
+                  <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{codeContent}</pre>
+                </div>
               </div>
             </div>
           )}
@@ -534,8 +682,8 @@ export default function DashboardPage() {
       </main>
 
       {/* Footer */}
-      <footer style={{ marginTop: "auto", padding: "20px 40px", borderTop: "1px solid var(--border)", textAlign: "center", fontSize: "0.75rem", color: "var(--text-muted)" }}>
-        AIPE_Framework Next.js TypeScript Industrial Dashboard — Antigravity Pair Programming
+      <footer>
+        © 2026 AIPE_Framework — Conçu pour l'excellence opérationnelle des produits d'IA
       </footer>
     </div>
   );
