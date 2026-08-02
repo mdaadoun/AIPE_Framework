@@ -47,10 +47,10 @@ run:
 	poetry run python -m src.main $(ARGS)
 
 dashboard:
-	npm --prefix dashboard-next run dev
+	npm --prefix dashboard run dev
 
 dashboard-next:
-	npm --prefix dashboard-next run dev
+	npm --prefix dashboard run dev
 
 docker-build:
 	@echo "--- Building production multi-stage Docker image ---"
